@@ -1,0 +1,565 @@
+<?php
+
+namespace App\Services;
+
+use App\Facades\Media;
+use App\HelperClasses\CmsHelpers;
+use App\Repositories\PageRepository;
+use App\Repositories\SectionModelRepository;
+use App\Repositories\SectionRepository;
+use Illuminate\Validation\Rules\Enum;
+use App\Models\Page;
+use App\Models\SectionType;
+use App\Enums\SectionFieldEnum;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use App\Enums\SectionParentTypeEnum;
+use App\Models\CmsSection;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+use App\Enums\SectionButtonTypeEnum;
+use App\Enums\SectionModelTypeEnum;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Validation\Rule;
+// use Modules\Vehicle\Models\ExteriorColor;
+// use Modules\Vehicle\Models\InteriorColor;
+// use Modules\Vehicle\Models\Vehicle;
+// use Modules\Vehicle\Models\VehicleModel;
+// use Modules\Vehicle\Models\VehicleVariant;
+
+class SectionService
+{
+    public function __construct(
+        protected SectionRepository $repository,
+        protected PageRepository $pageRepository,
+        private SectionModelRepository $sectionModelRepository
+    ) {
+    }
+    public function getPageSections($page_id)
+    {
+        return $this->repository->findBy([
+            'parent_type' => Page::class,
+            'parent_id' => $page_id,
+        ]);
+    }
+
+    public function create($data)
+    {
+        $this->validateType($data)->validate();
+        $data = $this->prepareSectionData($data);
+        $this->validateSection($data)->validate();
+        DB::beginTransaction();
+        try {
+            $section = $this->repository->create($data);
+            $sectionType = SectionType::where('slug', $data['type'])->first();
+
+            if ($this->hasField($sectionType, SectionFieldEnum::image->value))
+                $this->addDesktopMobileImagesToSection(section: $section);
+
+            if ($this->hasField($sectionType, SectionFieldEnum::gallery->value))
+                $this->addMultipleMediaToSection(section: $section);
+
+            if ($this->hasField($sectionType, SectionFieldEnum::icon->value))
+                $this->uploadIcon(section: $section);
+
+            if ($this->hasField($sectionType, SectionFieldEnum::video->value))
+                $this->addDesktopMobileVideosToSection(section: $section);
+
+            if ($this->hasChildSection($data))
+                $this->addMultipleChildSection(sections: $data['sub_sections'], parent_id: $section->id);
+
+            if ($this->hasModel($data)) {
+                $section_model = ['section' => $section, 'model' => $data['model'], 'model_data' => $data['model_data']];
+                $this->addModelToSection($section_model);
+            }
+            DB::commit();
+            $section->refresh();
+
+            return $section;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+    public function getAll()
+    {
+        return $this->repository->getAll();
+    }
+    public function getById($id, $relations = [])
+    {
+        return $this->repository->findOne($id, $relations);
+    }
+    public function getModelSections()
+    {
+        return $this->repository->getSectionsWithoutParent()->groupBy('parent_type');
+    }
+    public function getPageSection($page_id, $section_name)
+    {
+        return $this->repository->getPageSection($page_id, $section_name);
+    }
+    public function getPageSectionByName($page_name, $section_name)
+    {
+        $page_id = $this->pageRepository->findOneBy(['name' => $page_name])->id;
+        return $this->repository->getPageSection($page_id, $section_name);
+    }
+    public function update($data, $id, $type = 'parent')
+    {
+        $oldSectionData = $this->repository->findOne($id);
+        if (!$oldSectionData)
+            throw new \InvalidArgumentException("Section with id [$id] not found");
+        $this->validateType($data)->validate();
+        $data['id'] = $id;
+        if ($type === 'parent')
+            $data['parent_id'] = $oldSectionData->parent_id;
+        elseif ($type === 'child')
+            $data['section_id'] = $oldSectionData->section_id;
+
+        $data = $this->prepareSectionData($data);
+        $this->validateSection($data, true)->validate();
+        $section = $this->repository->updateSection($data, $id);
+        $section->refresh();
+        if ($this->hasDeletedRelations($data))
+            $this->deleteSectionRelations($section->id, $data['deleted_models']);
+        else if ($this->deleteAllRelations($data))
+            $this->removeAllSectionRelations($section);
+        if ($this->hasModel($data))
+            $this->addModelToSection(['model' => $data['model'], 'model_data' => $data['model_data'], 'section' => $section]);
+        $sectionType = SectionType::where('slug', $data['type'])->first();
+
+        if ($this->hasField($sectionType, SectionFieldEnum::icon->value))
+            $this->uploadIcon(section: $section);
+
+        if ($this->hasField($sectionType, SectionFieldEnum::image->value))
+            $this->addDesktopMobileImagesToSection(section: $section);
+
+        if ($this->hasField($sectionType, SectionFieldEnum::gallery->value))
+            $this->addMultipleMediaToSection(section: $section);
+
+        if ($this->hasField($sectionType, SectionFieldEnum::video->value))
+            $this->addDesktopMobileVideosToSection(section: $section);
+        if ($this->hasChildSection($data))
+            $this->addMultipleChildSection(sections: $data['sub_sections'], parent_id: $section->id);
+        $section->refresh();
+        return $section;
+    }
+    public function delete($id)
+    {
+        $this->repository->delete($id);
+    }
+    public function deleteMany(array $sections_ids)
+    {
+        $this->repository->deleteMany($sections_ids);
+    }
+    protected function hasField(?SectionType $sectionType, string $field)
+    {
+        return $sectionType && in_array($field, $sectionType->fields ?? []);
+    }
+    protected function hasChildSection($data)
+    {
+        return isset($data['sub_sections']);
+    }
+    protected function addMultipleMediaToSection($section): void
+    {
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['images' => 'images']);
+    }
+    protected function addDesktopMobileImagesToSection($section)
+    {
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['image_desktop' => 'image_desktop']);
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['image_mobile' => 'image_mobile']);
+    }
+    protected function uploadIcon($section)
+    {
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['icon' => 'icon']);
+    }
+    protected function addDesktopMobileVideosToSection($section)
+    {
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['video_desktop' => 'video_desktop']);
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['video_mobile' => 'video_mobile']);
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['poster_desktop' => 'poster_desktop']);
+        Media::attachMediaFromRequest(model: $section, mediaMap: ['poster_mobile' => 'poster_mobile']);
+    }
+    protected function addMultipleChildSection($sections, $parent_id)
+    {
+        foreach ($sections as $child_section_data) {
+            $child_section_data['section_id'] = $parent_id;
+            if (isset($child_section_data['parent_id']))
+                unset($child_section_data['parent_id']);
+            if (isset($child_section_data['parent_type']))
+                unset($child_section_data['parent_type']);
+            if (!isset($child_section_data['id']))
+                $this->create($child_section_data);
+            else
+                $this->update($child_section_data, $child_section_data['id'], 'child');
+        }
+    }
+    private function hasModel($data)
+    {
+        return $data['has_relation'] ?? false;
+    }
+    private function hasButton($data)
+    {
+        return isset($data['has_button']) && $data['has_button'];
+    }
+    private function hasDeletedRelations($data)
+    {
+        return isset($data['deleted_models']) && count($data['deleted_models']);
+    }
+    private function deleteAllRelations($data)
+    {
+        return isset($data['delete_all_models']) && $data['delete_all_models'];
+    }
+    private function addModelToSection($data)
+    {
+        $model_data['model_type'] = $this->getSectionModel($data['model']);
+        $model_data['section_id'] = $data['section']->id;
+        $this->deleteRemovedModel($data, $model_data['model_type']);
+        foreach ($data['model_data'] as $model) {
+            $model_data['model_id'] = $model['model_id'];
+            $model_data['order'] = $model['order'];
+            $old_model = $this->getModel($data['section'], $model_data['model_id']);
+            if ($old_model)
+                $this->sectionModelRepository->update($old_model, ['order' => $model['order']]);
+            else
+                $this->sectionModelRepository->create($model_data);
+        }
+    }
+    private function deleteRemovedModel($data, $model_type)
+    {
+        $section = $data['section'];
+        $old_models = $section->models;
+        $ids = collect($data['model_data'])->pluck('model_id')->toArray();
+        $new_models = $model_type::whereIn('id', $ids)->pluck('id');
+        $removed_models = array_diff($old_models->pluck('model_id')->toArray(), $new_models->toArray());
+        if ($removed_models) {
+            $itemsToDelete = [];
+            foreach ($removed_models as $id) {
+                $itemsToDelete[] = ['model_type' => $model_type, 'model_id' => $id];
+            }
+            $this->sectionModelRepository->deleteRelation($section->id, $itemsToDelete);
+        }
+    }
+    private function deleteSectionRelations($section_id, $deleted_models)
+    {
+        $this->sectionModelRepository->deleteRelation($section_id, $this->getDeletedModels($deleted_models));
+    }
+    private function removeAllSectionRelations($section)
+    {
+        $section->models()->delete();
+    }
+    private function deleteObsoleteMedia(CmsSection $section, array $newData): void
+    {
+        $oldType = $section->type;
+        $newTypeSlug = $newData['type'];
+
+        if ($oldType === $newTypeSlug) {
+            return;
+        }
+
+        $newType = SectionType::where('slug', $newTypeSlug)->first();
+        $oldSectionType = SectionType::where('slug', $oldType)->first(); // Assuming type stored in DB is slug
+
+        // If we can't find types, we can't safely determine obsolescence, so we skip
+        if (!$newType)
+            return;
+
+        // Check if old type had images but new type doesn't
+        if ($this->hasField($oldSectionType, SectionFieldEnum::image->value) && !$this->hasField($newType, SectionFieldEnum::image->value)) {
+            $section->clearMediaCollection('image_desktop');
+            $section->clearMediaCollection('image_mobile');
+        }
+
+        if ($this->hasField($oldSectionType, SectionFieldEnum::gallery->value) && !$this->hasField($newType, SectionFieldEnum::gallery->value)) {
+            $section->clearMediaCollection('images');
+        }
+
+        if ($this->hasField($oldSectionType, SectionFieldEnum::video->value) && !$this->hasField($newType, SectionFieldEnum::video->value)) {
+            $section->clearMediaCollection('video_desktop');
+            $section->clearMediaCollection('video_mobile');
+            $section->clearMediaCollection('poster_desktop');
+            $section->clearMediaCollection('poster_mobile');
+        }
+
+        if ($this->hasField($oldSectionType, SectionFieldEnum::icon->value) && !$this->hasField($newType, SectionFieldEnum::icon->value)) {
+            $section->clearMediaCollection('icon');
+        }
+    }
+    private function getModel($section, $model_id)
+    {
+        return $section->models->where('model_id', $model_id)?->first();
+    }
+    private function getSectionModel($section)
+    {
+        return match ($section) {
+            // (new VehicleModel())->getTable() => VehicleModel::class,
+            // (new ExteriorColor())->getTable() => ExteriorColor::class,
+            // (new InteriorColor())->getTable() => InteriorColor::class,
+            // (new VehicleVariant())->getTable() => VehicleVariant::class,
+            // (Vehicle::class) => Vehicle::class,
+            default => null,
+        };
+    }
+    private function getDeletedModels($deletedModels)
+    {
+        return collect($deletedModels)->map(function ($deletedModel) {
+            return [
+                'model_type' => match ($deletedModel['model_type']) {
+                    // (new VehicleModel())->getTable() => VehicleModel::class,
+                    // (new ExteriorColor())->getTable() => ExteriorColor::class,
+                    // (new InteriorColor())->getTable() => InteriorColor::class,
+                    // (new VehicleVariant())->getTable() => VehicleVariant::class,
+                    // (new Vehicle())->getTable() => Vehicle::class,
+                    default => $deletedModel['model_type'],
+                },
+                'model_id' => $deletedModel['model_id'],
+            ];
+        })->values()->toArray();
+    }
+    public function getSectionModelTypeClass($model_type)
+    {
+        return SectionParentTypeEnum::fromKey($model_type);
+    }
+    private function prepareSectionData(array $data): array
+    {
+        $data['parent_id'] = $data['parent_id'] ?? request('page_id');
+        $data['parent_type'] = CmsHelpers::convertToClassName($data['parent_type'] ?? 'page', 'Cms');
+        $data['name'] = Str::slug($data['name']);
+        if ($this->hasButton($data)) {
+            foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
+                $data['button_text'][$locale] = $data["button_text"][$locale] ?? null;
+            }
+        } else {
+            foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
+                $data['button_text'][$locale] = null;
+            }
+            $data['button_type'] = null;
+        }
+
+        $content = $this->prepareSectionContent($data);
+        if ($content)
+            $data['content'] = $content;
+        return $data;
+    }
+    private function prepareSectionContent(array $data)
+    {
+        $content = null;
+        $sectionType = SectionType::where('slug', $data['type'])->first();
+
+        if ($this->hasField($sectionType, SectionFieldEnum::title->value)) {
+            $content['title'] = $this->prepareContentTranslator($data, 'title');
+        }
+        if ($this->hasField($sectionType, SectionFieldEnum::subtitle->value)) {
+            $content['subtitle'] = $this->prepareContentTranslator($data, 'subtitle');
+        }
+        if ($this->hasField($sectionType, SectionFieldEnum::description->value)) {
+            $content['description'] = $this->prepareContentTranslator($data, 'description');
+        }
+        if ($this->hasField($sectionType, SectionFieldEnum::short_description->value)) {
+            $content['short_description'] = $this->prepareContentTranslator($data, 'short_description');
+        }
+
+        if ($this->hasField($sectionType, SectionFieldEnum::buttons->value)) {
+            $buttons = $data['content']['buttons'] ?? [];
+            $processedButtons = [];
+            foreach ($buttons as $button) {
+                $processedButton = [
+                    'url' => $button['url'] ?? '#',
+                    'type' => $button['type'] ?? null,
+                    'label' => []
+                ];
+                foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
+                    $processedButton['label'][$locale] = $button['label'][$locale] ?? '';
+                }
+                $processedButtons[] = $processedButton;
+            }
+            $content['buttons'] = $processedButtons;
+        }
+
+        return $content;
+    }
+    private function prepareContentTranslator(array $data, string $key)
+    {
+        $translation = [];
+        foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
+            $translation[$locale] = $data['content'][$key][$locale] ?? '';
+        }
+        return $translation;
+    }
+    private function validateSection(array $data, bool $isUpdate = false)
+    {
+        $parentFormId = $data['parentFormId'] ?? null;
+        $formId = $data['formId'] ?? null;
+        $rules = [
+            'name' => 'required|string',
+            'content' => 'sometimes|array',
+            'parent_id' => 'sometimes|integer',
+            'parent_type' => 'sometimes|string',
+            'media' => 'sometimes|array',
+            'sub_sections' => 'sometimes|array',
+            'has_relation' => ['boolean', !$isUpdate ? 'required' : 'nullable'],
+            'model_data' => 'required_if:has_relation,1|array',
+            'model_data.*.model_id' => 'required_if:has_relation,1',
+            'model_data.*.order' => 'required_if:has_relation,1',
+            'model' => ['required_if:has_relation,1', 'nullable', Rule::in(SectionModelTypeEnum::getTablesNames())],
+            'has_button' => ['boolean', !$isUpdate ? 'required' : 'nullable'],
+            'button_data' => ['required_if:has_button,1'],
+            'button_type' => ['required_if:has_button,1', 'nullable', new Enum(SectionButtonTypeEnum::class)],
+            'type' => ['required', 'exists:section_types,slug'],
+            'order' => ['integer', !$isUpdate ? 'required' : 'nullable'],
+            'deleted_models' => 'nullable|array',
+            'deleted_models.*.model_type' => ['nullable', Rule::in(SectionModelTypeEnum::getTablesNames())],
+            'deleted_models.*.model_id' => ['nullable', 'integer', 'min:1'],
+            'delete_all_models' => 'nullable|boolean',
+            'media_deleted' => 'nullable|array',
+        ];
+        foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
+            $rules["button_text.{$locale}"] = 'required_if:has_button,1';
+        }
+
+        $messages = [];
+        $this->getUniqueOrderRule($rules, $messages, $data, $isUpdate);
+
+        $sectionType = SectionType::where('slug', $data['type'] ?? '')->first();
+        $this->applyTypeSpecificRules($rules, $sectionType, $data, $isUpdate);
+
+        $validator = Validator::make($data, $rules, $messages);
+        if ($validator->fails()) {
+            $this->formatAndThrowValidationException($validator, $parentFormId, $formId);
+        }
+        return $validator;
+    }
+    private function getUniqueOrderRule(array &$rules, &$messages, array $data, bool $isUpdate)
+    {
+        $id = $isUpdate ? (int) $data['id'] : 'NULL';
+
+        if (!isset($rules['order'])) {
+            $rules['order'] = [];
+        }
+
+        if (isset($data['order'])) {
+            if (isset($data['parent_id'])) {
+                $uniqueRule = "unique:cms_sections,order,$id,id,parent_id,{$data['parent_id']},parent_type,{$data['parent_type']}";
+                $rules['order'][] = $uniqueRule;
+
+                $messages['order.unique'] = $messages['order.unique'] ?? '';
+                $messages['order.unique'] .= 'A section with the same order: ' . $data['order'] . ' already exists for the parent with name: ' . ($data['name'] ?? '') . ', parent id: ' . $data['parent_id'] . ' parent type: ' . $data['parent_type'];
+            } elseif (isset($data['section_id'])) {
+                $uniqueRule = "unique:cms_sections,order,$id,id,section_id,{$data['section_id']}";
+                $rules['order'][] = $uniqueRule;
+
+                $messages['order.unique'] = $messages['order.unique'] ?? '';
+                $messages['order.unique'] .= 'A section with the same order: ' . $data['order'] . ' already exists for the parent section with name: ' . ($data['name'] ?? '') . '.';
+            }
+        }
+    }
+    private function applyTypeSpecificRules(array &$rules, ?SectionType $sectionType, $data, bool $isUpdate = false): void
+    {
+        if (!$sectionType || empty($sectionType->fields)) {
+            return;
+        }
+
+        foreach ($sectionType->fields as $field) {
+            switch ($field) {
+                case SectionFieldEnum::title->value:
+                    $rules['title'] = 'nullable|string|max:191';
+                    break;
+                case SectionFieldEnum::subtitle->value:
+                    $rules['subtitle'] = 'nullable|string|max:191';
+                    break;
+                case SectionFieldEnum::description->value:
+                    $rules['description'] = 'nullable|string|max:500';
+                    break;
+                case SectionFieldEnum::short_description->value:
+                    $rules['short_description'] = 'nullable|string|max:255';
+                    break;
+                case SectionFieldEnum::icon->value:
+                    $this->addFileRule($rules, $data, 'icon', 'required|image|max:900', $isUpdate);
+                    break;
+                case SectionFieldEnum::image->value:
+                    $this->addImageRules($rules, $data, ['image_desktop', 'image_mobile'], $isUpdate);
+                    break;
+                case SectionFieldEnum::gallery->value:
+                    $rules['images'] = $isUpdate ? 'nullable|array' : 'required|array';
+                    $this->addFileRule($rules, $data, 'images.*', 'required|image|max:900', $isUpdate);
+                    break;
+                case SectionFieldEnum::video->value:
+                    $this->addVideoRules($rules, $data, ['video_desktop', 'video_mobile'], ['poster_desktop', 'poster_mobile'], $isUpdate);
+                    break;
+                case SectionFieldEnum::buttons->value:
+                    $rules['content.buttons'] = 'nullable|array';
+                    $rules['content.buttons.*.label'] = 'required|array';
+                    $rules['content.buttons.*.url'] = 'required|string';
+                    foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
+                        $rules["content.buttons.*.label.{$locale}"] = 'required|string';
+                    }
+                    break;
+            }
+        }
+    }
+    private function addImageRules(array &$rules, $data, array $fields, bool $isUpdate = false): void
+    {
+        foreach ($fields as $field) {
+            $this->addFileRule($rules, $data, $field, 'required|image|max:900', $isUpdate);
+        }
+    }
+    private function addVideoRules(array &$rules, $data, array $videoFields, array $posterFields, bool $isUpdate = false): void
+    {
+        foreach ($videoFields as $field) {
+            $this->addFileRule($rules, $data, $field, 'required|file|mimes:mp4,mov,avi,flv,webm|max:10240', $isUpdate);
+        }
+
+        foreach ($posterFields as $field) {
+            $this->addFileRule($rules, $data, $field, 'required|image|max:900', $isUpdate);
+        }
+    }
+    protected function addFileRule(array &$rules, array &$data, string $key, string $baseRule, bool $isUpdate = false)
+    {
+        if (isset($data[$key]) && $data[$key] instanceof UploadedFile) {
+            $rules[$key] = $baseRule;
+        } elseif (isset($data[$key]) && is_array($data[$key])) {
+            foreach ($data[$key] as $index => $file) {
+                if ($file instanceof UploadedFile) {
+                    $rules["{$key}.{$index}"] = $baseRule;
+                } else
+                    $rules["{$key}.{$index}"] = 'required';
+            }
+        } else
+            $rules[$key] = $isUpdate ? 'nullable' : 'required';
+    }
+    private function validateType($data)
+    {
+        $parentFormId = $data['parentFormId'] ?? null;
+        $formId = $data['formId'] ?? null;
+
+        $validator = Validator::make($data, [
+            'type' => 'required|exists:section_types,slug',
+        ]);
+
+        if ($validator->fails()) {
+            $this->formatAndThrowValidationException($validator, $parentFormId, $formId);
+        }
+
+        return $validator;
+    }
+    private function formatAndThrowValidationException($validator, ?string $parentFormId, ?string $formId): void
+    {
+        $errors = $validator->errors()->toArray();
+        $formattedErrors = [];
+
+        foreach ($errors as $key => $messages) {
+            if ($formId && $parentFormId) {
+                $formattedErrors["{$parentFormId}**{$formId}*$key"] = $messages;
+            } else {
+                $formattedErrors[$key] = $messages;
+            }
+        }
+
+        throw new \Illuminate\Validation\ValidationException(
+            $validator,
+            response()->json(['errors' => $formattedErrors], 422)
+        );
+    }
+    public function getSectionTypes()
+    {
+        return \App\Models\SectionType::all();
+    }
+}

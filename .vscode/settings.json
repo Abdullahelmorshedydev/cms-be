@@ -1,0 +1,25 @@
+{
+    "editor.formatOnSave": true,
+    "[php]": {
+        "editor.defaultFormatter": "DEVSENSE.phptools-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "cSpell.words": [
+        "ALRAJHI",
+        "Colorables",
+        "conditionable",
+        "endforeach",
+        "KEYLOOP",
+        "Maatwebsite",
+        "Rajhi",
+        "Spatie",
+        "stockbook",
+        "tagable",
+        "trandata",
+        "UNIFONIC",
+        "Valuestore",
+        "WKHTML"
+    ]
+}
