@@ -1,0 +1,52 @@
+/* ============================================
+   SIDEBAR MENU ICON & TEXT SPACING
+   ============================================
+   Improved spacing between menu icons and text
+   for better readability and visual hierarchy
+   
+   This file provides enhanced spacing for the dashboard sidebar
+   to improve user experience and visual clarity.
+*/
+
+/* Main menu items - increased spacing between icon and text */
+.menu-vertical .menu-item .menu-link .menu-icon {
+    margin-right: 0.875rem !important; /* Increased from 0.5rem (8px) to 0.875rem (14px) - 75% more spacing */
+    margin-left: 0 !important;
+}
+
+/* RTL (Right-to-Left) support for main menu items */
+[dir=rtl] .menu-vertical .menu-item .menu-link .menu-icon {
+    margin-right: 0 !important;
+    margin-left: 0.875rem !important;
+}
+
+/* Submenu items - slightly less spacing for visual hierarchy */
+.menu-vertical .menu-sub .menu-item .menu-link .menu-icon {
+    margin-right: 0.75rem !important; /* 12px for submenu items - maintains hierarchy */
+    margin-left: 0 !important;
+}
+
+/* RTL support for submenu items */
+[dir=rtl] .menu-vertical .menu-sub .menu-item .menu-link .menu-icon {
+    margin-right: 0 !important;
+    margin-left: 0.75rem !important;
+}
+
+/* Ensure smooth transitions when spacing changes (for collapsed/expanded states) */
+.menu-vertical .menu-item .menu-link .menu-icon {
+    transition: margin-right 0.3s ease, margin-left 0.3s ease;
+}
+
+/* Ensure proper alignment with increased spacing */
+.menu-vertical .menu-item .menu-link {
+    align-items: center;
+    gap: 0;
+}
+
+/* Additional spacing for menu link content to prevent text from being too close */
+.menu-vertical .menu-item .menu-link > div:not(.badge) {
+    margin-left: 0;
+    padding-left: 0;
+    flex: 1;
+}
+
