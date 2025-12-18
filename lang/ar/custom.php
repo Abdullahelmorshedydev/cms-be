@@ -315,6 +315,9 @@ return [
         'hrms_analytics' => 'تحليلات الموارد البشرية',
         'erp_analytics' => 'تحليلات تخطيط الموارد',
         'attendance_this_month' => 'الحضور هذا الشهر',
+        'page' => 'صفحة',
+        'section' => 'قسم',
+        'type' => 'نوع',
     ],
     'inputs' => [
         'name' => 'الاسم',

@@ -315,6 +315,9 @@ return [
         'hrms_analytics' => 'HRMS Analytics',
         'erp_analytics' => 'ERP Analytics',
         'attendance_this_month' => 'Attendance This Month',
+        'page' => 'Page',
+        'section' => 'Section',
+        'type' => 'Type',
     ],
     'inputs' => [
         'name' => 'Name',
