@@ -218,20 +218,16 @@ class UserService extends BaseService
             );
         }
 
-        if ($adminUser->is_active !== StatusEnum::ACTIVE) {
-            return returnData(
-                [],
-                Response::HTTP_NOT_FOUND,
-                [],
-                __('custom.auth.not_active'),
-                []
-            );
-        }
+        // if ($adminUser->is_active !== StatusEnum::ACTIVE) {
+        //     return returnData(
+        //         [],
+        //         Response::HTTP_NOT_FOUND,
+        //         [],
+        //         __('custom.auth.not_active'),
+        //         []
+        //     );
+        // }
 
-        // Note: This method doesn't specify a guard - the calling controller should handle guard-specific login
-        // This allows flexibility for both dashboard and website authentication
-        // We don't actually login here - the controller will handle guard-specific login
-        // This is just for validation and user retrieval
         $permissions = $adminUser->getAllPermissions()->flatten()->pluck('name')->toArray();
 
         return returnData(

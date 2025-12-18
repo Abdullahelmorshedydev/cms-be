@@ -117,7 +117,9 @@
             <div
                 class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg position-relative py-sm-5 px-4 py-4">
                 <div class="w-px-400 mx-auto pt-5 pt-lg-0">
-                    <h4 class="mb-2">{{ __('custom.login.welcome') }}! 👋</h4>
+                    <h4 class="mb-2">
+                        {{ __('custom.login.welcome', ['site_name' => setting('site_name') ?? config('app.name')]) }}! 👋
+                    </h4>
                     <p class="mb-4">{{ __('custom.login.header') }}</p>
 
                     <form id="formAuthentication" class="mb-3" action="{{ '/' . app()->getLocale() . '/dashboard/login' }}"

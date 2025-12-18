@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.words.create_new') . ' ' . __('custom.page.page'))
 
@@ -17,14 +17,14 @@
                     @csrf
                     <div class="row mt-4">
                         {{-- ✅ Page Inputs --}}
-                        @include('dashboard.pages.pages.partials.__page_inputs')
+                        @include('admin.pages.pages.partials.__page_inputs')
 
                         {{-- ✅ Page Meta Data --}}
                         <x-meta-fields :locales="$data['locales']" />
 
                         {{-- ✅ Sections Accordion --}}
                         <div class="accordion mt-4" id="dynamicAccordion">
-                            @include('dashboard.pages.pages.partials.__accordion_item', ['index' => 0])
+                            @include('admin.pages.pages.partials.__accordion_item', ['index' => 0])
                         </div>
 
                         <div class="col-md-12 mt-3">
@@ -35,8 +35,8 @@
             </div>
         </div>
     </div>
-    @include('dashboard.pages.pages.partials.__accordion_template')
-    @include('dashboard.pages.pages.partials.__sub_accordion_template')
+    @include('admin.pages.pages.partials.__accordion_template')
+    @include('admin.pages.pages.partials.__sub_accordion_template')
 @endsection
 
 @section('js')

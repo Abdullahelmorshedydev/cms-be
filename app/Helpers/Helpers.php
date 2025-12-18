@@ -38,10 +38,20 @@ if (!function_exists('setting')) {
         });
 
         // Find setting by key
-        $settings = $settings->where('key', $key)->first();
+        $setting = $settings->where('key', $key)->first();
 
-        // Return image path for image settings, otherwise return value
-        return $settings?->type == SettingTypeEnum::IMAGE ? $settings?->image_path : $settings?->value;
+        if (!$setting) {
+            return null;
+        }
+
+        // Return image path for image settings
+        if ($setting->type == SettingTypeEnum::IMAGE) {
+            return $setting->image_path;
+        }
+
+        // Handle translatable values (arrays) - convert to string for current locale
+        $value = $setting->value;
+        return getTranslatedValue($value);
     }
 }
 

@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.titles.roles'))
 
@@ -57,13 +57,13 @@
             </div>
 
             <div class="table-responsive table-data" id="role-list">
-                @include('dashboard.pages.roles.table')
+                @include('admin.pages.roles.table')
             </div>
         </div>
     </div>
 
     @can('role.delete')
-        @include('dashboard.partials.__delete_modal')
+        @include('admin.partials.__delete_modal')
     @endcan
 @endsection
 

@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.words.form_details'))
 
@@ -173,7 +173,7 @@
                             @endif
 
                             <form action="{{ route('dashboard.forms.destroy', $form->id) }}" method="POST"
-                                  onsubmit="return confirm('{{ __('custom.messages.delete_sure') }}');">
+                                onsubmit="return confirm('{{ __('custom.messages.delete_sure') }}');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger w-100">
@@ -238,4 +238,3 @@
         </div>
     </div>
 @endsection
-

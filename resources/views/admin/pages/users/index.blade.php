@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.titles.users'))
 
@@ -75,14 +75,14 @@
             </div>
 
             <div class="table-responsive table-data" id="user-list">
-                @include('dashboard.pages.users.table')
+                @include('admin.pages.users.table')
             </div>
         </div>
     </div>
 
-    @include('dashboard.pages.users.partials.__filter_date_modal')
+    @include('admin.pages.users.partials.__filter_date_modal')
 
-    @include('dashboard.pages.users.partials.__import_modal')
+    @include('admin.pages.users.partials.__import_modal')
 
-    @include('dashboard.partials.__delete_modal')
+    @include('admin.partials.__delete_modal')
 @endsection

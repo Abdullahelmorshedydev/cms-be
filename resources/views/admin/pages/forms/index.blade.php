@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @php
     $pageTitle = isset($currentType) && $currentType

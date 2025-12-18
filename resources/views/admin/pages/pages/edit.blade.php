@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.words.edit') . ' ' . __('custom.page.page'))
 
@@ -55,7 +55,7 @@
 
                     <div class="row mt-4">
                         {{-- ✅ Page Inputs --}}
-                        @include('dashboard.pages.pages.partials.__page_inputs')
+                        @include('admin.pages.pages.partials.__page_inputs')
 
                         {{-- ✅ Page Meta Data --}}
                         <x-meta-fields :record="$data['record']" :locales="$data['locales']" />
@@ -70,13 +70,13 @@
                         <div class="accordion mt-4" id="dynamicAccordion">
                             @if (!empty($data['record']->sections))
                                 @foreach ($data['record']->sections as $index => $section)
-                                    @include('dashboard.pages.pages.partials.__accordion_item', [
+                                    @include('admin.pages.pages.partials.__accordion_item', [
                                         'index' => $index,
                                         'section' => $section,
                                     ])
                                 @endforeach
                             @else
-                                @include('dashboard.pages.pages.partials.__accordion_item', ['index' => 0])
+                                @include('admin.pages.pages.partials.__accordion_item', ['index' => 0])
                             @endif
                         </div>
 
@@ -88,8 +88,8 @@
             </div>
         </div>
     </div>
-    @include('dashboard.pages.pages.partials.__accordion_template')
-    @include('dashboard.pages.pages.partials.__sub_accordion_template')
+    @include('admin.pages.pages.partials.__accordion_template')
+    @include('admin.pages.pages.partials.__sub_accordion_template')
 @endsection
 
 @section('js')

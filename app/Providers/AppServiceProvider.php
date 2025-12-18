@@ -31,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Load global helper functions (e.g., setting(), isActiveRoute(), etc.)
+        $helpersPath = app_path('Helpers/Helpers.php');
+        if (file_exists($helpersPath)) {
+            require_once $helpersPath;
+        }
+
         Schema::defaultStringLength(191);
     }
 }

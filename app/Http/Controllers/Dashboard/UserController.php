@@ -16,7 +16,8 @@ class UserController extends BaseDashboardController
     public function __construct(
         protected UserRepository $userRepository,
         protected UserService $service
-    ) {}
+    ) {
+    }
 
     public function index(Request $request)
     {
@@ -39,7 +40,7 @@ class UserController extends BaseDashboardController
                 request()->get('limit', 10)
             );
 
-            return view('dashboard.pages.users.index', [
+            return view('admin.pages.users.index', [
                 'data' => $serviceResponse,
                 'users' => $this->extractPaginatedData($serviceResponse),
             ]);
@@ -59,7 +60,7 @@ class UserController extends BaseDashboardController
     public function create()
     {
         try {
-            return view('dashboard.pages.users.create', ['data' => $this->service->create()['data']]);
+            return view('admin.pages.users.create', ['data' => $this->service->create()['data']]);
         } catch (\Exception $e) {
             Log::error('Error loading user create page', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -92,7 +93,7 @@ class UserController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.users.edit', ['data' => $response['data']]);
+            return view('admin.pages.users.edit', ['data' => $response['data']]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
             throw $e;
@@ -179,7 +180,7 @@ class UserController extends BaseDashboardController
             $file = fopen($filePath, 'w');
 
             // Add BOM for UTF-8 (helps with Excel)
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             // Add CSV headers
             fputcsv($file, [

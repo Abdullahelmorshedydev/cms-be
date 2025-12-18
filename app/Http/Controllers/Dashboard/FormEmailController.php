@@ -15,7 +15,8 @@ class FormEmailController extends BaseDashboardController
 {
     public function __construct(
         protected FormEmailService $service
-    ) {}
+    ) {
+    }
 
     /**
      * Display all form email recipients
@@ -30,7 +31,7 @@ class FormEmailController extends BaseDashboardController
                 ? $formEmails
                 : $this->extractPaginatedData(['data' => ['data' => $formEmails ?? []]]);
 
-            return view('dashboard.pages.form-emails.index', [
+            return view('admin.pages.form-emails.index', [
                 'formEmails' => $formEmailsPaginated,
             ]);
         } catch (\Exception $e) {
@@ -51,7 +52,7 @@ class FormEmailController extends BaseDashboardController
     public function create()
     {
         try {
-            return view('dashboard.pages.form-emails.create', [
+            return view('admin.pages.form-emails.create', [
                 'types' => FormTypeEnum::toArray(),
                 'status' => StatusEnum::cases(),
             ]);
@@ -94,7 +95,7 @@ class FormEmailController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.form-emails.edit', [
+            return view('admin.pages.form-emails.edit', [
                 'formEmail' => $response['data']['record'],
                 'types' => FormTypeEnum::toArray(),
                 'status' => StatusEnum::cases(),

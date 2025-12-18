@@ -13,12 +13,13 @@ class PageController extends BaseDashboardController
 {
     public function __construct(
         protected PageService $service
-    ) {}
+    ) {
+    }
 
     public function create()
     {
         try {
-            return view('dashboard.pages.pages.create', ['data' => $this->service->create()['data']]);
+            return view('admin.pages.pages.create', ['data' => $this->service->create()['data']]);
         } catch (\Exception $e) {
             Log::error('Error loading page create page', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -55,7 +56,7 @@ class PageController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.pages.edit', ['data' => $response['data']]);
+            return view('admin.pages.pages.edit', ['data' => $response['data']]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
             throw $e;

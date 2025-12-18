@@ -18,7 +18,8 @@ class BlogController extends BaseDashboardController
     public function __construct(
         protected BlogService $blogService,
         protected BlogCommentService $commentService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of blogs
@@ -35,7 +36,7 @@ class BlogController extends BaseDashboardController
                 $request->get('limit', 10)
             );
 
-            return view('dashboard.pages.blogs.index', [
+            return view('admin.pages.blogs.index', [
                 'data' => $serviceResponse,
                 'blogs' => $this->extractPaginatedData($serviceResponse),
             ]);
@@ -58,7 +59,7 @@ class BlogController extends BaseDashboardController
     public function create()
     {
         try {
-            return view('dashboard.pages.blogs.create', [
+            return view('admin.pages.blogs.create', [
                 'data' => $this->blogService->create()['data']
             ]);
         } catch (\Exception $e) {
@@ -101,7 +102,7 @@ class BlogController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.blogs.show', [
+            return view('admin.pages.blogs.show', [
                 'blog' => $response['data']['record']
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -126,7 +127,7 @@ class BlogController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.blogs.edit', [
+            return view('admin.pages.blogs.edit', [
                 'data' => $response['data']
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

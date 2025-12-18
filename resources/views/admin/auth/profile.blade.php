@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.titles.profile'))
 
@@ -106,7 +106,8 @@
                                 <div class="col-md-6 mt-3">
                                     <div class="form-group">
                                         <label for="imageInput">{{ __('custom.inputs.image') }}</label>
-                                        <input id="imageInput" class="form-control" type="file" name="image" accept="image/*">
+                                        <input id="imageInput" class="form-control" type="file" name="image"
+                                            accept="image/*">
                                         @error('image')
                                             <div class="text-danger">{{ $message }}</div>
                                         @enderror
@@ -114,7 +115,7 @@
                                 </div>
 
                                 {{-- Admin Profile Fields --}}
-                                @include('dashboard.auth.partials.admin-profile-fields')
+                                @include('admin.auth.partials.admin-profile-fields')
 
                                 <div class="col-md-12 mt-3">
                                     <div class="form-group">
@@ -141,8 +142,7 @@
                                 <div class="col-md-6 mt-3">
                                     <div class="form-group">
                                         <label for="passwordENInput">{{ __('custom.inputs.password') }}</label>
-                                        <input id="passwordENInput" class="form-control" type="password"
-                                            name="password">
+                                        <input id="passwordENInput" class="form-control" type="password" name="password">
                                         @error('password')
                                             <div class="text-danger"> {{ $message }}</div>
                                         @enderror

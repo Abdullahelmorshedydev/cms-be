@@ -156,16 +156,47 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
             Route::delete('/{form_email}', 'destroy')->middleware('check.permission:form-email.delete')->name('destroy');
         });
 
-        // Pages
-        Route::resource('pages', CmsPageController::class);
+        // CMS (Pages, Section Types, Sections)
+        Route::prefix('/cms')->as('cms.')->group(function () {
+            // Pages
+            Route::controller(CmsPageController::class)->prefix('/pages')->as('pages.')->group(function () {
+                Route::get('/', 'index')->middleware('check.permission:page.show')->name('index');
+                Route::get('/create', 'create')->middleware('check.permission:page.create')->name('create');
+                Route::post('/', 'store')->middleware('check.permission:page.create')->name('store');
+                Route::get('/{page}', 'show')->middleware('check.permission:page.show')->name('show');
+                Route::get('/{page}/edit', 'edit')->middleware('check.permission:page.edit')->name('edit');
+                Route::put('/{page}', 'update')->middleware('check.permission:page.edit')->name('update');
+                Route::delete('/{page}', 'destroy')->middleware('check.permission:page.delete')->name('destroy');
+            });
 
-        // Section Types
-        Route::resource('section-types', CmsSectionTypeController::class);
+            // Section Types
+            Route::controller(CmsSectionTypeController::class)->prefix('/section-types')->as('section-types.')->group(function () {
+                Route::get('/', 'index')->middleware('check.permission:section-type.show')->name('index');
+                Route::get('/create', 'create')->middleware('check.permission:section-type.create')->name('create');
+                Route::post('/', 'store')->middleware('check.permission:section-type.create')->name('store');
+                Route::get('/{section_type}', 'show')->middleware('check.permission:section-type.show')->name('show');
+                Route::get('/{section_type}/edit', 'edit')->middleware('check.permission:section-type.edit')->name('edit');
+                Route::put('/{section_type}', 'update')->middleware('check.permission:section-type.edit')->name('update');
+                Route::delete('/{section_type}', 'destroy')->middleware('check.permission:section-type.delete')->name('destroy');
+            });
 
-        // Sections
-        Route::resource('sections', CmsSectionController::class);
-        Route::post('sections/group', [CmsSectionController::class, 'updateGroup'])->name('sections.group.update');
-        Route::post('{model}/{page_id}/sections', [CmsSectionController::class, 'store'])->name('sections.store');
+            // Sections
+            Route::controller(CmsSectionController::class)->prefix('/sections')->as('sections.')->group(function () {
+                Route::get('/', 'index')->middleware('check.permission:section.show')->name('index');
+                Route::get('/create', 'create')->middleware('check.permission:section.create')->name('create');
+                Route::post('/', 'store')->middleware('check.permission:section.create')->name('store');
+                Route::get('/{section}', 'show')->middleware('check.permission:section.show')->name('show');
+                Route::get('/{section}/edit', 'edit')->middleware('check.permission:section.edit')->name('edit');
+                Route::put('/{section}', 'update')->middleware('check.permission:section.edit')->name('update');
+                Route::delete('/{section}', 'destroy')->middleware('check.permission:section.delete')->name('destroy');
+
+                // Group update for ordered sections
+                Route::post('/group', 'updateGroup')->middleware('check.permission:section.edit')->name('group.update');
+
+                // Store section for specific model/page (reuses same store logic)
+                Route::post('/{model}/{page_id}', 'store')->middleware('check.permission:section.create')->name('store.for_page');
+            });
+        });
     });
 });
 

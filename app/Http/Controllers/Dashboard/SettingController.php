@@ -15,7 +15,9 @@ class SettingController extends BaseDashboardController
 {
     use MediaHandler;
 
-    public function __construct(protected SettingService $service) {}
+    public function __construct(protected SettingService $service)
+    {
+    }
 
     public function index()
     {
@@ -23,7 +25,7 @@ class SettingController extends BaseDashboardController
             $data = $this->service->index([], [], ['*'], ['id' => 'DESC'], 10)['data'];
             $settings = $data['settings'] ?? [];
             $settingGroups = $data['settingGroups'] ?? [];
-            return view('dashboard.pages.settings.index', compact('settings', 'settingGroups'));
+            return view('admin.pages.settings.index', compact('settings', 'settingGroups'));
         } catch (\Exception $e) {
             Log::error('Error loading settings', [
                 'error' => $e->getMessage(),

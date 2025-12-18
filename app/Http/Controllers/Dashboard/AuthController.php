@@ -26,11 +26,12 @@ class AuthController extends Controller
         protected UserRepository $userRepository,
         protected UserService $userService,
         protected ProfileService $profileService,
-    ) {}
+    ) {
+    }
 
     public function loginPage()
     {
-        return view('dashboard.auth.login');
+        return view('admin.auth.login');
     }
 
     /**
@@ -136,7 +137,7 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return to_route('dashboard.login')->with('message', [
             'content' => __('custom.auth.logged_out'),
-            'status'  => true,
+            'status' => true,
         ]);
     }
 
@@ -150,7 +151,7 @@ class AuthController extends Controller
         /** @var \App\Models\User $authUser */
         $authUser = auth()->user();
         $user = $authUser->load(['image']);
-        return view('dashboard.auth.profile', compact('user'));
+        return view('admin.auth.profile', compact('user'));
     }
 
     /**
@@ -166,13 +167,13 @@ class AuthController extends Controller
         $user = $authUser;
 
         $message = [
-            'status'  => false,
+            'status' => false,
             'content' => __('custom.messages.updated_failed')
         ];
 
         if ($this->profileService->updateAdminProfile($request->validated(), $user)) {
             $message = [
-                'status'  => true,
+                'status' => true,
                 'content' => __('custom.auth.profile_updated'),
             ];
         }
@@ -199,7 +200,7 @@ class AuthController extends Controller
 
     public function forgetPassword()
     {
-        return view('dashboard.auth.forget-password');
+        return view('admin.auth.forget-password');
     }
 
     public function sendResetCode(SendPasswordEmailRequest $request)
@@ -208,7 +209,7 @@ class AuthController extends Controller
         $email = $request->input('email');
         $user = User::where('email', $email)->first();
         $user->update([
-            'reset_code'            => collect(range(1, 6))->map(fn() => random_int(0, 9))->implode(''),
+            'reset_code' => collect(range(1, 6))->map(fn() => random_int(0, 9))->implode(''),
             'reset_code_expires_at' => Carbon::now()->addMinutes(2),
         ]);
 
@@ -220,7 +221,7 @@ class AuthController extends Controller
 
     public function resetCodePage($email)
     {
-        return view('dashboard.auth.reset-code', compact('email'));
+        return view('admin.auth.reset-code', compact('email'));
     }
 
     public function verifyCode(Request $request)
@@ -232,7 +233,7 @@ class AuthController extends Controller
         $user = User::where('email', $email)->where('reset_code', $code)->where('reset_code_expires_at', '>', Carbon::now())->first();
         if (!$user) {
             return back()->with('message', [
-                'status'  => false,
+                'status' => false,
                 'content' => __('custom.auth.invalid_code'),
             ]);
         }
@@ -241,7 +242,7 @@ class AuthController extends Controller
 
     public function resetPasswordPage($email)
     {
-        return view('dashboard.auth.reset-password', compact('email'));
+        return view('admin.auth.reset-password', compact('email'));
     }
 
     public function resetPassword(ResetPasswordRequest $request)
@@ -258,7 +259,7 @@ class AuthController extends Controller
         ]);
 
         return to_route('dashboard.login')->with('message', [
-            'status'  => true,
+            'status' => true,
             'content' => __('custom.auth.password_reset'),
         ]);
     }

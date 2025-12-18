@@ -15,7 +15,8 @@ class FormController extends BaseDashboardController
 {
     public function __construct(
         protected FormService $service
-    ) {}
+    ) {
+    }
 
     /**
      * Display all form submissions
@@ -37,7 +38,7 @@ class FormController extends BaseDashboardController
                 ? $forms
                 : $this->extractPaginatedData(['data' => ['data' => $forms ?? []]]);
 
-            return view('dashboard.pages.forms.index', [
+            return view('admin.pages.forms.index', [
                 'forms' => $formsPaginated,
                 'statistics' => $statistics ?? [],
                 'types' => FormTypeEnum::toArray(),
@@ -73,7 +74,7 @@ class FormController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.forms.show', [
+            return view('admin.pages.forms.show', [
                 'form' => $response['data']['form'],
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

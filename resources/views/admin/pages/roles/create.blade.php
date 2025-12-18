@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.words.create_new') . ' ' . __('custom.role.role'))
 
@@ -72,8 +72,7 @@
                                                     <input id="{{ $permission->id }}" type="checkbox" name="permissions[]"
                                                         value="{{ $permission->name }}"
                                                         class="permission-checkbox permission-{{ $groupPermissions['value'] }}">
-                                                    <label
-                                                        for="{{ $permission->id }}">{{ $permission->display_name }}</label>
+                                                    <label for="{{ $permission->id }}">{{ $permission->display_name }}</label>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -99,9 +98,9 @@
 
 @section('js')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const selectAll = document.getElementById('select-all');
-            selectAll.addEventListener('change', function() {
+            selectAll.addEventListener('change', function () {
                 const checkboxes = document.querySelectorAll('.permission-checkbox');
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = selectAll.checked;
@@ -115,7 +114,7 @@
 
             const sectionSelectAlls = document.querySelectorAll('.select-all-section');
             sectionSelectAlls.forEach(sectionSelectAll => {
-                sectionSelectAll.addEventListener('change', function() {
+                sectionSelectAll.addEventListener('change', function () {
                     const group = this.id.replace('select-all-', '');
                     const groupCheckboxes = document.querySelectorAll('.permission-' + group);
                     groupCheckboxes.forEach(checkbox => {
@@ -128,7 +127,7 @@
 
             const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
             permissionCheckboxes.forEach(permissionCheckbox => {
-                permissionCheckbox.addEventListener('change', function() {
+                permissionCheckbox.addEventListener('change', function () {
                     updateSectionSelectAll(this);
 
                     updateGlobalSelectAll();

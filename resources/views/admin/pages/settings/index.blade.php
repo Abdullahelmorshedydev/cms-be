@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.titles.settings'))
 
@@ -29,10 +29,10 @@
                 </div>
             </div>
             <div class="table-responsive table-data" id="lead-list">
-                @include('dashboard.pages.settings.table')
+                @include('admin.pages.settings.table')
             </div>
         </div>
     </div>
 
-    @include('dashboard.pages.settings.partials.__edit_modal')
+    @include('admin.pages.settings.partials.__edit_modal')
 @endsection

@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.titles.blogs'))
 
@@ -75,14 +75,14 @@
             </div>
 
             <div class="table-responsive table-data" id="user-list">
-                @include('dashboard.pages.blogs.table')
+                @include('admin.pages.blogs.table')
             </div>
         </div>
     </div>
 
-    @include('dashboard.pages.blogs.partials.__filter_date_modal')
+    @include('admin.pages.blogs.partials.__filter_date_modal')
 
-    @include('dashboard.pages.blogs.partials.__import_modal')
+    @include('admin.pages.blogs.partials.__import_modal')
 
-    @include('dashboard.partials.__delete_modal')
+    @include('admin.partials.__delete_modal')
 @endsection

@@ -16,7 +16,8 @@ class RoleController extends BaseDashboardController
     public function __construct(
         protected RoleRepository $roleRepository,
         protected RoleService $service
-    ) {}
+    ) {
+    }
 
     public function index(Request $request)
     {
@@ -34,7 +35,7 @@ class RoleController extends BaseDashboardController
                 request()->get('limit', 10)
             );
 
-            return view('dashboard.pages.roles.index', [
+            return view('admin.pages.roles.index', [
                 'data' => $serviceResponse,
                 'roles' => $this->extractPaginatedData($serviceResponse),
             ]);
@@ -54,7 +55,7 @@ class RoleController extends BaseDashboardController
     public function create()
     {
         try {
-            return view('dashboard.pages.roles.create', ['data' => $this->service->create()['data']]);
+            return view('admin.pages.roles.create', ['data' => $this->service->create()['data']]);
         } catch (\Exception $e) {
             Log::error('Error loading role create page', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -88,7 +89,7 @@ class RoleController extends BaseDashboardController
                 abort(404, __('custom.messages.not_found'));
             }
 
-            return view('dashboard.pages.roles.edit', ['data' => $response['data']]);
+            return view('admin.pages.roles.edit', ['data' => $response['data']]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
             throw $e;

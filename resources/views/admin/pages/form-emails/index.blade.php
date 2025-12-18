@@ -1,4 +1,4 @@
-@extends('dashboard.layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', __('custom.words.email_recipients'))
 
@@ -75,16 +75,18 @@
                                 <td>
                                     <div class="dropdown">
                                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                                data-bs-toggle="dropdown">
+                                            data-bs-toggle="dropdown">
                                             <i class="mdi mdi-dots-vertical"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('dashboard.form-emails.edit', $formEmail->id) }}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('dashboard.form-emails.edit', $formEmail->id) }}">
                                                 <i class="mdi mdi-pencil-outline me-1"></i>
                                                 {{ __('custom.words.edit') }}
                                             </a>
-                                            <form action="{{ route('dashboard.form-emails.destroy', $formEmail->id) }}" method="POST"
-                                                  onsubmit="return confirm('{{ __('custom.messages.delete_sure') }}');">
+                                            <form action="{{ route('dashboard.form-emails.destroy', $formEmail->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('{{ __('custom.messages.delete_sure') }}');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="dropdown-item text-danger">
@@ -134,4 +136,3 @@
         </div>
     </div>
 @endsection
-

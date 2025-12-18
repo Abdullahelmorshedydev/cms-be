@@ -35,7 +35,7 @@
     <div id="section-collapse-{{ $index }}" class="accordion-collapse collapse"
         aria-labelledby="section-header-{{ $index }}" data-bs-parent="#dynamicAccordion">
         <div class="accordion-body">
-            @include('dashboard.pages.pages.partials.__accordion_content', [
+            @include('admin.pages.pages.partials.__accordion_content', [
                 'index' => $index,
                 'section' => $section ?? null,
             ])
@@ -50,7 +50,7 @@
                 <div class="accordion mt-2 subsection-container" id="subsection-container-{{ $index }}">
                     @if (isset($section) && !empty($section->subsections))
                         @foreach ($section->subsections as $subIndex => $subSection)
-                            @include('dashboard.pages.pages.partials.__sub_accordion_item', [
+                            @include('admin.pages.pages.partials.__sub_accordion_item', [
                                 'parentIndex' => $index,
                                 'subIndex' => $subIndex,
                                 'section' => $subSection,

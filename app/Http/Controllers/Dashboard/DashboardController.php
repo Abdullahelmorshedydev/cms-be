@@ -11,7 +11,7 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            return view('dashboard.index' . [
+            return view('admin.index' . [
                 'analytics' => $this->getDefaultAnalytics()
             ]);
         } catch (\Exception $e) {
@@ -20,7 +20,7 @@ class DashboardController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return view('dashboard.index', [
+            return view('admin.index', [
                 'analytics' => $this->getDefaultAnalytics(),
                 'error' => __('custom.messages.retrieved_failed'),
             ]);

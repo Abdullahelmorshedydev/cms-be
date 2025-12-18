@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
 <html lang="{{ app()->getLocale() }}" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
-    dir="{{ app()->getLocale() == 'en' ? 'ltr' : 'rtl' }}" data-theme="theme-default" data-assets-path="/dashboard/assets/"
-    data-template="vertical-menu-template">
+    dir="{{ app()->getLocale() == 'en' ? 'ltr' : 'rtl' }}" data-theme="theme-default"
+    data-assets-path="/dashboard/assets/" data-template="vertical-menu-template">
 
 <head>
     <meta charset="utf-8" />
@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
-    @include('dashboard.partials.links')
+    @include('admin.partials.links')
     @yield('css')
 </head>
 
@@ -40,24 +40,24 @@
     <div class="layout-wrapper layout-content-navbar" role="main">
         <div class="layout-container">
 
-            @include('dashboard.partials.sidebar')
+            @include('admin.partials.sidebar')
 
             <!-- Layout container -->
             <div class="layout-page">
 
-                @include('dashboard.partials.nav')
+                @include('admin.partials.nav')
 
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
 
-                    @include('dashboard.partials.toaster')
-                    @include('dashboard.partials.__confirm_modal')
+                    @include('admin.partials.toaster')
+                    @include('admin.partials.__confirm_modal')
 
 
                     @yield('content')
 
-                    @include('dashboard.partials.footer')
+                    @include('admin.partials.footer')
 
                     <div class="content-backdrop fade"></div>
                 </div>
@@ -74,7 +74,7 @@
     </div>
     <!-- / Layout wrapper -->
 
-    @include('dashboard.partials.scripts')
+    @include('admin.partials.scripts')
 
     @yield('js')
 
