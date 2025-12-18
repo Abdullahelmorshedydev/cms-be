@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Dashboard\BaseDashboardController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Repositories\UserRepository;
@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserController extends BaseDashboardController
+class UserController extends Controller
 {
     public function __construct(
         protected UserRepository $userRepository,
@@ -23,16 +23,16 @@ class UserController extends BaseDashboardController
     {
         try {
             $data = $request->all();
-            if (!isset($data['filters'])) {
+            if (!isset($data['filters']) || !isset($data['filters']['emails'])) {
                 $data['filters']['email'] = [
                     'operator' => '!=',
-                    'value' => 'super-admin@hia.com'
+                    'value' => 'super-admin@tasweek.com'
                 ];
             }
             unset($data['_token']);
             unset($data['limit']);
 
-            $serviceResponse = $this->service->index(
+            $response = $this->service->index(
                 $data,
                 ['roles'],
                 ['*'],
@@ -41,8 +41,7 @@ class UserController extends BaseDashboardController
             );
 
             return view('admin.pages.users.index', [
-                'data' => $serviceResponse,
-                'users' => $this->extractPaginatedData($serviceResponse),
+                'data' => $response
             ]);
         } catch (\Exception $e) {
             Log::error('Error loading users', [
@@ -50,9 +49,13 @@ class UserController extends BaseDashboardController
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $this->handleError($e, 'dashboard.pages.users.index', [
-                'data' => ['data' => ['data' => []]],
-                'users' => $this->getEmptyPaginator(),
+            return handleError($e, 'admin.pages.users.index', [
+                'data' => [
+                    'data' => [
+                        'data' => []
+                    ]
+                ],
+                'meta' => [],
             ]);
         }
     }
@@ -86,17 +89,7 @@ class UserController extends BaseDashboardController
     public function edit($id)
     {
         try {
-            $response = $this->service->edit($id);
-
-            // ModelNotFoundException will be handled by exception handler, so if we get here, record exists
-            if (!isset($response['data']) || empty($response['data'])) {
-                abort(404, __('custom.messages.not_found'));
-            }
-
-            return view('admin.pages.users.edit', ['data' => $response['data']]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
-            throw $e;
+            return view('admin.pages.users.edit', ['data' => $this->service->edit($id)['data']]);
         } catch (\Exception $e) {
             Log::error('Error loading user for edit', ['id' => $id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);

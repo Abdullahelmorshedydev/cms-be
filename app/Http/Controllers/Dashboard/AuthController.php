@@ -213,8 +213,7 @@ class AuthController extends Controller
             'reset_code_expires_at' => Carbon::now()->addMinutes(2),
         ]);
 
-        // SendRestPasswordJob::dispatch($user);
-        event(new ResetPasswordEvent($user));
+        SendRestPasswordJob::dispatch($user);
 
         return to_route('password.reset.code', $user->email);
     }

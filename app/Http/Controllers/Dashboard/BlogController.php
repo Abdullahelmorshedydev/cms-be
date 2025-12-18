@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Dashboard\BaseDashboardController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Blog\StoreBlogRequest;
 use App\Http\Requests\Blog\UpdateBlogRequest;
 use App\Http\Requests\BlogComment\StoreBlogCommentRequest;
 use App\Http\Requests\BlogComment\UpdateBlogCommentRequest;
 use App\Services\BlogService;
 use App\Services\BlogCommentService;
+use App\Services\MediaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class BlogController extends BaseDashboardController
+class BlogController extends Controller
 {
     public function __construct(
         protected BlogService $blogService,
-        protected BlogCommentService $commentService
+        protected BlogCommentService $commentService,
+        protected MediaService $mediaService
     ) {
     }
 
@@ -30,7 +32,10 @@ class BlogController extends BaseDashboardController
             $data = $request->all();
             $serviceResponse = $this->blogService->index(
                 $data,
-                ['creator', 'image'],
+                [
+                    'creator',
+                    'image'
+                ],
                 ['*'],
                 ['id' => 'DESC'],
                 $request->get('limit', 10)
@@ -75,7 +80,10 @@ class BlogController extends BaseDashboardController
     {
         try {
             $data = $request->validated();
-            $response = $this->blogService->createBlog($data);
+            $response = $this->blogService->store($data, function ($blog) use ($data): void {
+                if (!empty($data['image']))
+                    $this->mediaService->uploadImage($data['image'], $blog, $blog->getTranslation('title'));
+            });
 
             $message = [
                 'status' => $response['code'] == Response::HTTP_CREATED,
@@ -95,19 +103,18 @@ class BlogController extends BaseDashboardController
     public function show($slug)
     {
         try {
-            $response = $this->blogService->showWithComments($slug);
-
-            // ModelNotFoundException will be handled by exception handler, so if we get here, record exists
-            if (!isset($response['data']['record']) || !$response['data']['record']) {
-                abort(404, __('custom.messages.not_found'));
-            }
-
             return view('admin.pages.blogs.show', [
-                'blog' => $response['data']['record']
+                'blog' => $this->blogService->show(
+                    'slug',
+                    $slug,
+                    [
+                        'creator',
+                        'comments',
+                        'comments.user',
+                        'comments.replies.user'
+                    ]
+                )['data']['record']
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
-            throw $e;
         } catch (\Exception $e) {
             Log::error('Error loading blog', ['slug' => $slug, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -120,19 +127,9 @@ class BlogController extends BaseDashboardController
     public function edit($slug)
     {
         try {
-            $response = $this->blogService->edit($slug);
-
-            // ModelNotFoundException will be handled by exception handler, so if we get here, record exists
-            if (!isset($response['data']) || empty($response['data'])) {
-                abort(404, __('custom.messages.not_found'));
-            }
-
             return view('admin.pages.blogs.edit', [
-                'data' => $response['data']
+                'data' => $this->blogService->edit($slug)['data']
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
-            throw $e;
         } catch (\Exception $e) {
             Log::error('Error loading blog for edit', ['slug' => $slug, 'error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -146,7 +143,10 @@ class BlogController extends BaseDashboardController
     {
         try {
             $data = $request->validated();
-            $response = $this->blogService->updateBlog($slug, $data);
+            $response = $this->blogService->update($data, $slug, 'slug', function ($blog) use ($data) {
+                if (!empty($data['image']))
+                    $this->mediaService->uploadImage($data['image'], $blog, $blog->getTranslation('title'));
+            });
 
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
@@ -166,7 +166,15 @@ class BlogController extends BaseDashboardController
     public function destroy($slug)
     {
         try {
-            $response = $this->blogService->destroyBlog($slug);
+            $response = $this->blogService->destroy('slug', $slug, function ($blog) {
+                $this->mediaService->removeImage($blog);
+                foreach ($blog->comments as $comment) {
+                    foreach ($comment->replies as $reply) {
+                        $reply->delete();
+                    }
+                    $comment->delete();
+                }
+            });
 
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
@@ -191,7 +199,15 @@ class BlogController extends BaseDashboardController
                 'ids.*' => 'integer|exists:blogs,id'
             ]);
 
-            $response = $this->blogService->destroyAllBlogs($request->ids);
+            $response = $this->blogService->destroyAll($request->ids, function ($blog) {
+                $this->mediaService->removeImage($blog);
+                foreach ($blog->comments as $comment) {
+                    foreach ($comment->replies as $reply) {
+                        $reply->delete();
+                    }
+                    $comment->delete();
+                }
+            });
 
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
@@ -338,9 +354,8 @@ class BlogController extends BaseDashboardController
             $criteria = $request->all();
             $filePath = $this->blogService->export($criteria);
 
-            if (!file_exists($filePath)) {
+            if (!file_exists($filePath))
                 throw new \Exception('Export file not found');
-            }
 
             return response()->download($filePath)->deleteFileAfterSend(true);
         } catch (\Exception $e) {
@@ -370,8 +385,6 @@ class BlogController extends BaseDashboardController
             ];
 
             return back()->with('message', $message);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Error importing blogs', [
                 'error' => $e->getMessage(),

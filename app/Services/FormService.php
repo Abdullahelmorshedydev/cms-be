@@ -13,57 +13,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class FormService extends BaseService
 {
-    public function __construct(FormRepository $repository, protected FormBuilder $builder)
-    {
+    public function __construct(
+        FormRepository $repository,
+        protected FormBuilder $builder
+    ) {
         parent::__construct($repository);
-    }
-
-    /**
-     * Get all forms with pagination and filters
-     */
-    public function getAllPaginated($data, $with = [], $columns = ['*'], $order = ['created_at' => 'DESC'], $limit = 15)
-    {
-        // Build filters array
-        $filters = [];
-
-        // Type filter
-        if (!empty($data['type'])) {
-            $filters['type'] = $data['type'];
-        }
-
-        // Read status filter
-        if (isset($data['is_read'])) {
-            $filters['is_read'] = $data['is_read'];
-        }
-
-        // Active status filter
-        if (isset($data['is_active'])) {
-            $filters['is_active'] = $data['is_active'];
-        }
-
-        // Date range filters
-        if (!empty($data['date_from'])) {
-            $filters['created_at'] = [
-                'operator' => '>=',
-                'value' => $data['date_from']
-            ];
-        }
-
-        if (!empty($data['date_to'])) {
-            $filters['created_at'] = [
-                'operator' => '<=',
-                'value' => $data['date_to']
-            ];
-        }
-
-        // Handle search using the advanced search method from BaseRepository
-        if (!empty($data['search'])) {
-            $searchColumns = ['name', 'first_name', 'last_name', 'email', 'company', 'subject', 'message'];
-            return $this->repository->search($data['search'], $searchColumns, $filters, $limit ?? 15);
-        }
-
-        // Use repository method directly for pagination
-        return $this->repository->findByWith($filters, $columns, $with, $order, $limit ?? 15);
     }
 
     /**

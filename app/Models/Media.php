@@ -30,11 +30,12 @@ class Media extends Model
 
     protected $casts = [
         'is_active' => StatusEnum::class,
-        'type'      => MediaTypeEnum::class,
+        'type' => MediaTypeEnum::class,
     ];
 
     protected $appends = [
         'url',
+        'poster'
     ];
 
     public function mediaable(): MorphTo
@@ -46,6 +47,13 @@ class Media extends Model
     {
         return Attribute::make(
             get: fn() => url('storage/' . $this->media_path . $this->name),
+        );
+    }
+
+    public function poster(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->type->hasPoster() ? $this->mediaable->images()->where('device', $this->device)->first() : null,
         );
     }
 }

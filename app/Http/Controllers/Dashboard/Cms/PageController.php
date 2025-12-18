@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard\Cms;
 
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrCreatePageRequest;
 use App\Models\Page;
@@ -20,8 +21,9 @@ class PageController extends Controller
     public function index()
     {
         try {
-            $pages = $this->service->getAll();
-            return view('admin.pages.cms.pages.index', compact('pages'));
+            return view('admin.pages.cms.pages.index', [
+                'pages' => $this->service->getAll()
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading CMS pages', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -31,12 +33,9 @@ class PageController extends Controller
     public function create()
     {
         try {
-            $status = [
-                ['value' => 1, 'lang' => __('custom.words.active')],
-                ['value' => 0, 'lang' => __('custom.words.inactive')]
-            ];
-            $data = ['status' => $status];
-            return view('admin.pages.cms.pages.create', compact('data'));
+            return view('admin.pages.cms.pages.create', [
+                'status' => StatusEnum::getAll()
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading CMS page create form', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -47,11 +46,10 @@ class PageController extends Controller
     {
         try {
             $data = $request->validated();
-            if ($request->has('is_active')) {
+            if ($request->has('is_active'))
                 $data['is_active'] = $request->input('is_active', 1);
-            }
-            $page = $this->service->create($data);
-            
+            $this->service->create($data);
+
             return redirect()
                 ->route('dashboard.cms.pages.index')
                 ->with('success', __('response_messages.created', ['model' => 'Page']));
@@ -75,15 +73,10 @@ class PageController extends Controller
     public function edit(Page $page)
     {
         try {
-            $status = [
-                ['value' => 1, 'lang' => __('custom.words.active')],
-                ['value' => 0, 'lang' => __('custom.words.inactive')]
-            ];
-            $data = [
+            return view('admin.pages.cms.pages.edit', [
                 'record' => $page,
-                'status' => $status
-            ];
-            return view('admin.pages.cms.pages.edit', compact('data'));
+                'status' => StatusEnum::getAll()
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading CMS page for edit', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -94,11 +87,11 @@ class PageController extends Controller
     {
         try {
             $data = $request->validated();
-            if ($request->has('is_active')) {
+            if ($request->has('is_active'))
                 $data['is_active'] = $request->input('is_active');
-            }
+
             $this->service->update($data, $page);
-            
+
             return redirect()
                 ->route('dashboard.cms.pages.index')
                 ->with('success', __('response_messages.updated', ['model' => 'Page']));

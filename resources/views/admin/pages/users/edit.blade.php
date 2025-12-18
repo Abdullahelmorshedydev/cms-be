@@ -1,3 +1,7 @@
+@php
+    use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', __('custom.words.edit') . ' ' . __('custom.user.user'))
@@ -101,16 +105,6 @@
                         </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
-                                <input id="date_of_birthInput" class="form-control" type="date" name="date_of_birth"
-                                    value="{{ old('date_of_birth', $data['record']->date_of_birth) }}">
-                                <label for="date_of_birthInput">{{ __('custom.inputs.date_of_birth') }}</label>
-                                @error('date_of_birth')
-                                    <div class="text-danger"> {{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-floating form-floating-outline">
                                 <select id="is_adminSelect" class="form-control" name="is_admin">
                                     <option value="">{{ __('custom.words.choose') }}</option>
                                     <option value="1"
@@ -128,48 +122,17 @@
                         </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
-                                <select id="genderSelect" class="form-control" name="gender">
-                                    <option value="">{{ __('custom.words.choose') }}</option>
-                                    @foreach ($data['genders'] as $gender)
-                                        <option value="{{ $gender['value'] }}"
-                                            {{ old('gender', $data['record']?->gender?->value) == $gender['value'] ? 'selected' : '' }}>
-                                            {{ $gender['lang'] }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="genderSelect">{{ __('custom.inputs.gender') }}</label>
-                                @error('gender')
-                                    <div class="text-danger"> {{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-floating form-floating-outline">
                                 <select id="roleSelect" class="form-control" name="role">
                                     <option value="">{{ __('custom.words.choose') }}</option>
                                     @foreach ($data['roles'] as $role)
                                         <option value="{{ $role->name }}"
                                             {{ old('role', $data['record']->getRoleNames()->count() ? $data['record']->getRoleNames()[0] : '') == $role->name ? 'selected' : '' }}>
-                                            {{ $role->name }}</option>
+                                            {{ json_decode($role->display_name)->{LaravelLocalization::getCurrentLocale()} }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <label for="roleSelect">{{ __('custom.inputs.role') }}</label>
                                 @error('role')
-                                    <div class="text-danger"> {{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-floating form-floating-outline">
-                                <select id="statusSelect" class="form-control" name="is_active">
-                                    <option value="">{{ __('custom.words.choose') }}</option>
-                                    @foreach ($data['status'] as $stat)
-                                        <option value="{{ $stat['value'] }}"
-                                            {{ old('is_active', $data['record']->is_active->value) == $stat['value'] ? 'selected' : '' }}>
-                                            {{ $stat['lang'] }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="statusSelect">{{ __('custom.inputs.is_active') }}</label>
-                                @error('is_active')
                                     <div class="text-danger"> {{ $message }}</div>
                                 @enderror
                             </div>

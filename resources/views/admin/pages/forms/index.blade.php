@@ -2,7 +2,7 @@
 
 @php
     $pageTitle = isset($currentType) && $currentType
-        ? \App\Enums\FormTypeEnum::from($currentType)->lang()
+        ? \App\Enums\FormTypeEnum::tryFrom($currentType)->lang()
         : __('custom.words.forms');
 @endphp
 
@@ -38,7 +38,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title mb-0">{{ __('custom.words.total') }}</h6>
-                                <h3 class="mb-0">{{ $statistics['total'] }}</h3>
+                                <h3 class="mb-0">{{ $statistics['total'] ?? 0 }}</h3>
                             </div>
                             <div class="avatar">
                                 <span class="avatar-initial rounded bg-label-primary">
@@ -89,7 +89,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title mb-0">{{ __('custom.words.today') }}</h6>
-                                <h3 class="mb-0">{{ $forms->where('created_at', '>=', now()->startOfDay())->count() }}</h3>
+                                <h3 class="mb-0">{{ collect($data['data']['data'])->where('created_at', '>=', now()->startOfDay())->count() }}</h3>
                             </div>
                             <div class="avatar">
                                 <span class="avatar-initial rounded bg-label-info">
@@ -108,22 +108,24 @@
                     <div class="col-md-12 d-flex align-items-end justify-content-between">
                         <h5 class="mb-0">
                             @if(isset($currentType) && $currentType)
-                                <i class="{{ \App\Enums\FormTypeEnum::from($currentType)->icon() }} me-2"></i>
-                                {{ \App\Enums\FormTypeEnum::from($currentType)->lang() }}
+                                <i class="{{ \App\Enums\FormTypeEnum::tryFrom($currentType)->icon() }} me-2"></i>
+                                {{ \App\Enums\FormTypeEnum::tryFrom($currentType)->lang() }}
                             @else
                                 {{ __('custom.words.forms') }}
                             @endif
                         </h5>
                         <div class="d-flex gap-2">
-                            <form action="{{ route('dashboard.forms.export') }}" method="GET">
-                                @foreach(request()->except('_token') as $key => $value)
-                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                @endforeach
-                                <button type="submit" class="btn btn-success">
-                                    <i class="mdi mdi-download me-1"></i>
-                                    {{ __('custom.words.export') }}
-                                </button>
-                            </form>
+                            @can('form-export')
+                                <form action="{{ route('dashboard.forms.export') }}" method="GET">
+                                   @foreach(request()->except('_token') as $key => $value)
+                                       <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                   @endforeach
+                                   <button type="submit" class="btn btn-success">
+                                       <i class="mdi mdi-download me-1"></i>
+                                       {{ __('custom.words.export') }}
+                                   </button>
+                                </form>
+                            @endcan
                             <a href="{{ route('dashboard.form-emails.index') }}" class="btn btn-info">
                                 <i class="mdi mdi-email-settings me-1"></i>
                                 {{ __('custom.words.email_recipients') }}
@@ -203,7 +205,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($forms as $form)
+                        @forelse($data['data']['data'] as $form)
                             <tr class="{{ $form->is_read ? '' : 'table-active' }}">
                                 <td>
                                     <input type="checkbox" class="form-check-input form-check" value="{{ $form->id }}">
@@ -314,7 +316,9 @@
 
             <!-- Pagination -->
             <div class="card-footer">
-                {{ $forms->links() }}
+                @if (!empty($data['meta']))
+                    <x-pagination :meta="$data['meta']" />
+                @endif
             </div>
         </div>
     </div>

@@ -1,3 +1,7 @@
+@php
+    use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+@endphp
+
 <table class="table">
     <thead class="table-light">
         <tr>
@@ -16,7 +20,7 @@
                 <td>
                     <input type="checkbox" class="form-check-input checkboxInput" value="{{ $role->id }}">
                 </td>
-                <td>{{ $role->display_name }}</td>
+                <td>{{ json_decode($role->display_name)->{LaravelLocalization::getCurrentLocale()} }}</td>
                 @canany(['role.edit', 'role.delete'])
                     <td>
                         <div class="dropdown">

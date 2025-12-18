@@ -4,10 +4,15 @@ namespace App\Services;
 
 use App\Models\SectionType;
 use Illuminate\Support\Facades\DB;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Services\MediaService;
 
 class SectionTypeService
 {
+  public function __construct(
+    protected MediaService $mediaService
+  ) {
+  }
+
   public function getAll()
   {
     return SectionType::all();
@@ -20,7 +25,7 @@ class SectionTypeService
       $sectionType = SectionType::create($data);
 
       if (isset($data['image'])) {
-        $sectionType->addMedia($data['image'])->toMediaCollection('image');
+        $this->mediaService->uploadImage($data['image'], $sectionType, $sectionType->name ?? null, 'image');
       }
 
       DB::commit();
@@ -38,7 +43,10 @@ class SectionTypeService
       $sectionType->update($data);
 
       if (isset($data['image'])) {
-        $sectionType->addMedia($data['image'])->toMediaCollection('image');
+        // Remove existing image if any
+        $this->mediaService->removeImage($sectionType);
+        // Upload new image
+        $this->mediaService->uploadImage($data['image'], $sectionType, $sectionType->name ?? null);
       }
 
       DB::commit();
@@ -51,6 +59,8 @@ class SectionTypeService
 
   public function delete(SectionType $sectionType): void
   {
+    // Remove associated media through MediaService
+    $this->mediaService->removeImage($sectionType);
     $sectionType->delete();
   }
 

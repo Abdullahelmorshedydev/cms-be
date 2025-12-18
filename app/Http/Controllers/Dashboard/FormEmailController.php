@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\FormTypeEnum;
 use App\Enums\StatusEnum;
-use App\Http\Controllers\Dashboard\BaseDashboardController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\FormEmail\StoreFormEmailRequest;
 use App\Http\Requests\FormEmail\UpdateFormEmailRequest;
 use App\Services\FormEmailService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class FormEmailController extends BaseDashboardController
+class FormEmailController extends Controller
 {
     public function __construct(
         protected FormEmailService $service
@@ -21,27 +22,40 @@ class FormEmailController extends BaseDashboardController
     /**
      * Display all form email recipients
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $formEmails = $this->service->getAllPaginated();
+            $data = $request->all();
+            unset($data['_token']);
+            unset($data['limit']);
 
-            // Handle pagination if it's a paginator
-            $formEmailsPaginated = ($formEmails instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                ? $formEmails
-                : $this->extractPaginatedData(['data' => ['data' => $formEmails ?? []]]);
+            $response = $this->service->index(
+                $data,
+                [],
+                ['*'],
+                [
+                    'id' => 'DESC'
+                ],
+                request('limit', 10)
+            );
 
             return view('admin.pages.form-emails.index', [
-                'formEmails' => $formEmailsPaginated,
+                'data' => $response
             ]);
         } catch (\Exception $e) {
+            dd($e->getMessage());
             Log::error('Error loading form emails', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $this->handleError($e, 'dashboard.pages.form-emails.index', [
-                'formEmails' => $this->getEmptyPaginator(),
+            return handleError($e, 'admin.pages.form-emails.index', [
+                'data' => [
+                    'data' => [
+                        'data' => []
+                    ]
+                ],
+                'meta' => [],
             ]);
         }
     }
@@ -90,19 +104,11 @@ class FormEmailController extends BaseDashboardController
         try {
             $response = $this->service->show('id', $id);
 
-            // ModelNotFoundException will be handled by exception handler, so if we get here, record exists
-            if (!isset($response['data']['record']) || !$response['data']['record']) {
-                abort(404, __('custom.messages.not_found'));
-            }
-
             return view('admin.pages.form-emails.edit', [
                 'formEmail' => $response['data']['record'],
                 'types' => FormTypeEnum::toArray(),
                 'status' => StatusEnum::cases(),
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
-            throw $e;
         } catch (\Exception $e) {
             Log::error('Error loading form email for edit', ['id' => $id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);

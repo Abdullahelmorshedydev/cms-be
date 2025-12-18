@@ -1,3 +1,7 @@
+@php
+    use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', __('custom.words.create_new') . ' ' . __('custom.role.role'))
@@ -72,7 +76,8 @@
                                                     <input id="{{ $permission->id }}" type="checkbox" name="permissions[]"
                                                         value="{{ $permission->name }}"
                                                         class="permission-checkbox permission-{{ $groupPermissions['value'] }}">
-                                                    <label for="{{ $permission->id }}">{{ $permission->display_name }}</label>
+                                                    <label
+                                                        for="{{ $permission->id }}">{{ json_decode($permission->display_name)->{LaravelLocalization::getCurrentLocale()} }}</label>
                                                 </div>
                                             @endforeach
                                         </div>

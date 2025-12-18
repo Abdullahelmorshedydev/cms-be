@@ -20,8 +20,9 @@ class SectionController extends Controller
     public function index()
     {
         try {
-            $sections = $this->service->getAll();
-            return view('admin.pages.cms.sections.index', compact('sections'));
+            return view('admin.pages.cms.sections.index', [
+                'services' => $this->service->getAll()
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading CMS sections', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -34,8 +35,8 @@ class SectionController extends Controller
             $pageId = $request->input('page_id');
             $page = $pageId ? Page::findOrFail($pageId) : null;
             $sectionTypes = $this->sectionTypeService->getAll();
-            $pages = \App\Models\Page::all();
-            
+            $pages = Page::all();
+
             return view('admin.pages.cms.sections.create', compact('page', 'sectionTypes', 'pages'));
         } catch (\Exception $e) {
             Log::error('Error loading CMS section create form', ['error' => $e->getMessage()]);
@@ -47,11 +48,11 @@ class SectionController extends Controller
     {
         try {
             $section = $this->service->create($request->all());
-            
-            $redirectRoute = $request->input('page_id') 
+
+            $redirectRoute = $request->input('page_id')
                 ? route('dashboard.cms.pages.show', $request->input('page_id'))
                 : route('dashboard.cms.sections.index');
-            
+
             return redirect($redirectRoute)
                 ->with('success', trans('messages.created_successfully'));
         } catch (\Exception $e) {
@@ -82,8 +83,8 @@ class SectionController extends Controller
                 abort(404);
             }
             $sectionTypes = $this->sectionTypeService->getAll();
-            $pages = \App\Models\Page::all();
-            
+            $pages = Page::all();
+
             return view('admin.pages.cms.sections.edit', compact('section', 'sectionTypes', 'pages'));
         } catch (\Exception $e) {
             Log::error('Error loading CMS section for edit', ['error' => $e->getMessage()]);
@@ -95,11 +96,11 @@ class SectionController extends Controller
     {
         try {
             $section = $this->service->update($request->all(), $id);
-            
-            $redirectRoute = $request->input('page_id') 
+
+            $redirectRoute = $request->input('page_id')
                 ? route('dashboard.cms.pages.show', $request->input('page_id'))
                 : route('dashboard.cms.sections.index');
-            
+
             return redirect($redirectRoute)
                 ->with('success', trans('messages.updated_successfully'));
         } catch (\Exception $e) {
@@ -115,9 +116,9 @@ class SectionController extends Controller
             if (!$section) {
                 abort(404);
             }
-            
+
             $this->service->deleteMany([$id]);
-            
+
             return redirect()
                 ->route('dashboard.cms.sections.index')
                 ->with('success', trans('messages.deleted_successfully'));
@@ -141,7 +142,7 @@ class SectionController extends Controller
                     ], $sectionData));
                 }
             }
-            
+
             return redirect()
                 ->back()
                 ->with('success', trans('messages.updated_successfully'));

@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Decorators\PaginatorDecorator;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -110,13 +109,7 @@ trait ApiResponse
      */
     public function setData($data)
     {
-        $decorated = PaginatorDecorator::apply($data);
-
-        if (!empty($decorated['meta'])) {
-            $this->setMeta($decorated['meta']);
-        }
-
-        $this->data = $decorated['data'];
+        $this->data = $data;
         return $this;
     }
 

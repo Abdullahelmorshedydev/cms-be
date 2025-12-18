@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Facades\Media;
 use App\HelperClasses\CmsHelpers;
 use App\Repositories\PageRepository;
 use App\Repositories\SectionModelRepository;
@@ -15,24 +14,19 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Enums\SectionParentTypeEnum;
-use App\Models\CmsSection;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use App\Enums\SectionButtonTypeEnum;
 use App\Enums\SectionModelTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
-// use Modules\Vehicle\Models\ExteriorColor;
-// use Modules\Vehicle\Models\InteriorColor;
-// use Modules\Vehicle\Models\Vehicle;
-// use Modules\Vehicle\Models\VehicleModel;
-// use Modules\Vehicle\Models\VehicleVariant;
 
 class SectionService
 {
     public function __construct(
         protected SectionRepository $repository,
         protected PageRepository $pageRepository,
-        private SectionModelRepository $sectionModelRepository
+        private SectionModelRepository $sectionModelRepository,
+        protected MediaService $mediaService
     ) {
     }
     public function getPageSections($page_id)
@@ -54,19 +48,19 @@ class SectionService
             $sectionType = SectionType::where('slug', $data['type'])->first();
 
             if ($this->hasField($sectionType, SectionFieldEnum::image->value))
-                $this->addDesktopMobileImagesToSection(section: $section);
+                $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
             if ($this->hasField($sectionType, SectionFieldEnum::gallery->value))
-                $this->addMultipleMediaToSection(section: $section);
+                $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
             if ($this->hasField($sectionType, SectionFieldEnum::icon->value))
-                $this->uploadIcon(section: $section);
+                $this->uploadIcon($section, $data['icon']);
 
             if ($this->hasField($sectionType, SectionFieldEnum::video->value))
-                $this->addDesktopMobileVideosToSection(section: $section);
+                $this->addMultipleVideosToSection($section, $data['videos'], $data['images'], $data['remove_videos_ids'], $data['remove_images_ids']);
 
             if ($this->hasChildSection($data))
-                $this->addMultipleChildSection(sections: $data['sub_sections'], parent_id: $section->id);
+                $this->addMultipleChildSection($data['sub_sections'], $section->id);
 
             if ($this->hasModel($data)) {
                 $section_model = ['section' => $section, 'model' => $data['model'], 'model_data' => $data['model_data']];
@@ -127,27 +121,35 @@ class SectionService
         $sectionType = SectionType::where('slug', $data['type'])->first();
 
         if ($this->hasField($sectionType, SectionFieldEnum::icon->value))
-            $this->uploadIcon(section: $section);
+            $this->uploadIcon($section, $data['icon']);
 
         if ($this->hasField($sectionType, SectionFieldEnum::image->value))
-            $this->addDesktopMobileImagesToSection(section: $section);
+            $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
         if ($this->hasField($sectionType, SectionFieldEnum::gallery->value))
-            $this->addMultipleMediaToSection(section: $section);
+            $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
         if ($this->hasField($sectionType, SectionFieldEnum::video->value))
-            $this->addDesktopMobileVideosToSection(section: $section);
+            $this->addMultipleVideosToSection($section, $data['videos'], $data['images'], $data['remove_videos_ids'], $data['remove_images_ids']);
         if ($this->hasChildSection($data))
-            $this->addMultipleChildSection(sections: $data['sub_sections'], parent_id: $section->id);
+            $this->addMultipleChildSection($data['sub_sections'], $section->id);
         $section->refresh();
         return $section;
     }
     public function delete($id)
     {
+        $section = $this->repository->findOne($id);
+        if ($section)
+            $this->removeAllMediaForSection($section);
         $this->repository->delete($id);
     }
     public function deleteMany(array $sections_ids)
     {
+        foreach ($sections_ids as $sectionId) {
+            $section = $this->repository->findOne($sectionId);
+            if ($section)
+                $this->removeAllMediaForSection($section);
+        }
         $this->repository->deleteMany($sections_ids);
     }
     protected function hasField(?SectionType $sectionType, string $field)
@@ -158,25 +160,18 @@ class SectionService
     {
         return isset($data['sub_sections']);
     }
-    protected function addMultipleMediaToSection($section): void
+    protected function addMultipleImagesToSection($section, $images, $removeIds): void
     {
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['images' => 'images']);
+        $this->mediaService->uploadImages($images, $section, $section->name, $removeIds);
     }
-    protected function addDesktopMobileImagesToSection($section)
+    protected function uploadIcon($section, $icon)
     {
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['image_desktop' => 'image_desktop']);
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['image_mobile' => 'image_mobile']);
+        $this->mediaService->uploadIcon($icon, $section, $section->name);
     }
-    protected function uploadIcon($section)
+    protected function addMultipleVideosToSection($section, $videos, $images, $removeVideosIds, $removeImagesIds): void
     {
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['icon' => 'icon']);
-    }
-    protected function addDesktopMobileVideosToSection($section)
-    {
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['video_desktop' => 'video_desktop']);
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['video_mobile' => 'video_mobile']);
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['poster_desktop' => 'poster_desktop']);
-        Media::attachMediaFromRequest(model: $section, mediaMap: ['poster_mobile' => 'poster_mobile']);
+        $this->mediaService->uploadVideos($videos, $section, $section->name, $removeVideosIds);
+        $this->addMultipleImagesToSection($section, $images, $removeImagesIds);
     }
     protected function addMultipleChildSection($sections, $parent_id)
     {
@@ -245,43 +240,6 @@ class SectionService
     private function removeAllSectionRelations($section)
     {
         $section->models()->delete();
-    }
-    private function deleteObsoleteMedia(CmsSection $section, array $newData): void
-    {
-        $oldType = $section->type;
-        $newTypeSlug = $newData['type'];
-
-        if ($oldType === $newTypeSlug) {
-            return;
-        }
-
-        $newType = SectionType::where('slug', $newTypeSlug)->first();
-        $oldSectionType = SectionType::where('slug', $oldType)->first(); // Assuming type stored in DB is slug
-
-        // If we can't find types, we can't safely determine obsolescence, so we skip
-        if (!$newType)
-            return;
-
-        // Check if old type had images but new type doesn't
-        if ($this->hasField($oldSectionType, SectionFieldEnum::image->value) && !$this->hasField($newType, SectionFieldEnum::image->value)) {
-            $section->clearMediaCollection('image_desktop');
-            $section->clearMediaCollection('image_mobile');
-        }
-
-        if ($this->hasField($oldSectionType, SectionFieldEnum::gallery->value) && !$this->hasField($newType, SectionFieldEnum::gallery->value)) {
-            $section->clearMediaCollection('images');
-        }
-
-        if ($this->hasField($oldSectionType, SectionFieldEnum::video->value) && !$this->hasField($newType, SectionFieldEnum::video->value)) {
-            $section->clearMediaCollection('video_desktop');
-            $section->clearMediaCollection('video_mobile');
-            $section->clearMediaCollection('poster_desktop');
-            $section->clearMediaCollection('poster_mobile');
-        }
-
-        if ($this->hasField($oldSectionType, SectionFieldEnum::icon->value) && !$this->hasField($newType, SectionFieldEnum::icon->value)) {
-            $section->clearMediaCollection('icon');
-        }
     }
     private function getModel($section, $model_id)
     {
@@ -475,14 +433,14 @@ class SectionService
                     $this->addFileRule($rules, $data, 'icon', 'required|image|max:900', $isUpdate);
                     break;
                 case SectionFieldEnum::image->value:
-                    $this->addImageRules($rules, $data, ['image_desktop', 'image_mobile'], $isUpdate);
+                    $this->addImageRules($rules, $data, ['images.*.file'], $isUpdate);
                     break;
                 case SectionFieldEnum::gallery->value:
                     $rules['images'] = $isUpdate ? 'nullable|array' : 'required|array';
-                    $this->addFileRule($rules, $data, 'images.*', 'required|image|max:900', $isUpdate);
+                    $this->addFileRule($rules, $data, 'images.*.file', 'required|image|max:900', $isUpdate);
                     break;
                 case SectionFieldEnum::video->value:
-                    $this->addVideoRules($rules, $data, ['video_desktop', 'video_mobile'], ['poster_desktop', 'poster_mobile'], $isUpdate);
+                    $this->addVideoRules($rules, $data, ['videos.*.file'], ['images.*.file'], $isUpdate);
                     break;
                 case SectionFieldEnum::buttons->value:
                     $rules['content.buttons'] = 'nullable|array';
@@ -560,6 +518,13 @@ class SectionService
     }
     public function getSectionTypes()
     {
-        return \App\Models\SectionType::all();
+        return SectionType::all();
+    }
+    private function removeAllMediaForSection($section)
+    {
+        $this->mediaService->removeImages($section, null, true);
+        $this->mediaService->removeFiles($section, null, true);
+        $this->mediaService->removeVideos($section, null, true);
+        $this->mediaService->removeIcons($section, null, true);
     }
 }

@@ -3,16 +3,14 @@
 namespace App\Models;
 
 use App\Models\CmsSectionSectionType;
-use App\Traits\DynamicMediaCollectionTrait;
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
-class CmsSection extends Model implements HasMedia
+class CmsSection extends Model
 {
-    use HasFactory, HasTranslations, InteractsWithMedia, DynamicMediaCollectionTrait;
+    use HasFactory, HasTranslations, HasMedia;
 
     protected $table = 'cms_sections';
     protected $fillable = [

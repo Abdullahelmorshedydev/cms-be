@@ -32,7 +32,9 @@ abstract class BaseService
      *
      * @param mixed $repository The repository instance for data access
      */
-    public function __construct(protected $repository) {}
+    public function __construct(protected $repository)
+    {
+    }
 
     /**
      * Retrieve paginated list of records
@@ -58,17 +60,36 @@ abstract class BaseService
             $data['limit'] ?? $limit
         );
 
-        // Return standardized response with pagination metadata
-        return returnData([], Response::HTTP_OK, [
-            'data' => $results->items(),
-        ], __('custom.messages.retrieved_success'), [
-            'current_page'  => $results->currentPage(),
-            'total'         => $results->total(),
-            'per_page'      => $results->perPage(),
-            'last_page'     => $results->lastPage(),
-            'next_page_url' => $results->nextPageUrl(),
-            'prev_page_url' => $results->previousPageUrl(),
-        ]);
+        // Check if results is a paginator or collection
+        if ($results instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+            // Return standardized response with pagination metadata
+            return returnData([], Response::HTTP_OK, [
+                'data' => $results->items(),
+            ], __('custom.messages.retrieved_success'), [
+                'current_page' => $results->currentPage(),
+                'total' => $results->total(),
+                'per_page' => $results->perPage(),
+                'last_page' => $results->lastPage(),
+                'next_page_url' => $results->nextPageUrl(),
+                'prev_page_url' => $results->previousPageUrl(),
+            ]);
+        } else {
+            // Handle Collection case
+            $items = $results instanceof \Illuminate\Database\Eloquent\Collection 
+                ? $results->toArray() 
+                : (is_array($results) ? $results : [$results]);
+            
+            return returnData([], Response::HTTP_OK, [
+                'data' => $items,
+            ], __('custom.messages.retrieved_success'), [
+                'current_page' => 1,
+                'total' => count($items),
+                'per_page' => count($items),
+                'last_page' => 1,
+                'next_page_url' => null,
+                'prev_page_url' => null,
+            ]);
+        }
     }
 
     /**
@@ -334,22 +355,47 @@ abstract class BaseService
     {
         $results = $this->repository->search($searchTerm, $columns, $criteria, $limit);
 
-        return returnData(
-            [],
-            Response::HTTP_OK,
-            [
-                'data' => $results->items(),
-            ],
-            __('custom.messages.retrieved_success'),
-            [
-                'current_page'  => $results->currentPage(),
-                'total'         => $results->total(),
-                'per_page'      => $results->perPage(),
-                'last_page'     => $results->lastPage(),
-                'next_page_url' => $results->nextPageUrl(),
-                'prev_page_url' => $results->previousPageUrl(),
-            ]
-        );
+        // Check if results is a paginator or collection
+        if ($results instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+            return returnData(
+                [],
+                Response::HTTP_OK,
+                [
+                    'data' => $results->items(),
+                ],
+                __('custom.messages.retrieved_success'),
+                [
+                    'current_page' => $results->currentPage(),
+                    'total' => $results->total(),
+                    'per_page' => $results->perPage(),
+                    'last_page' => $results->lastPage(),
+                    'next_page_url' => $results->nextPageUrl(),
+                    'prev_page_url' => $results->previousPageUrl(),
+                ]
+            );
+        } else {
+            // Handle Collection case
+            $items = $results instanceof \Illuminate\Database\Eloquent\Collection 
+                ? $results->toArray() 
+                : (is_array($results) ? $results : [$results]);
+            
+            return returnData(
+                [],
+                Response::HTTP_OK,
+                [
+                    'data' => $items,
+                ],
+                __('custom.messages.retrieved_success'),
+                [
+                    'current_page' => 1,
+                    'total' => count($items),
+                    'per_page' => count($items),
+                    'last_page' => 1,
+                    'next_page_url' => null,
+                    'prev_page_url' => null,
+                ]
+            );
+        }
     }
 
     /**

@@ -36,7 +36,8 @@
                     @if($blog->creator)
                         <div class="d-flex align-items-center">
                             <div class="avatar avatar-sm me-2">
-                                <img src="{{ $blog->creator->imagePath }}" alt="{{ $blog->creator->name }}" class="rounded-circle">
+                                <img src="{{ $blog->creator->imagePath }}" alt="{{ $blog->creator->name }}"
+                                    class="rounded-circle">
                             </div>
                             <div>
                                 <span class="fw-medium">{{ $blog->creator->name }}</span>
@@ -87,7 +88,8 @@
                             @endcan
                             @can('blog.delete')
                                 <a class="dropdown-item waves-effect delete-btn" href="#" data-bs-toggle="modal"
-                                    data-bs-target="#deleteModal" data-url="{{ route('dashboard.blogs.destroy', $blog->slug) }}">
+                                    data-bs-target="#deleteModal"
+                                    data-url="{{ route('dashboard.blogs.destroy', $blog->slug) }}">
                                     <i class="mdi mdi-trash-can-outline me-1"></i>
                                     {{ __('custom.words.delete') }}
                                 </a>
@@ -115,5 +117,5 @@
     </tbody>
 </table>
 <div class="mt-3 px-3">
-    <x-pagination :meta="$data['meta']" />
+    {{ $data['data']->appends(request()->all())->links() }}
 </div>

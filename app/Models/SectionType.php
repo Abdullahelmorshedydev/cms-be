@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\CmsSection;
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Modules\Cms\Models\CmsSection;
 
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-
-class SectionType extends Model implements HasMedia
+class SectionType extends Model
 {
-    use InteractsWithMedia;
+    use HasMedia;
+
     protected $table = 'section_types';
 
     protected $fillable = [

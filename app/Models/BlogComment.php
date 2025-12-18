@@ -6,8 +6,6 @@ use App\Enums\StatusEnum;
 use App\Traits\ScopeActive;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -34,7 +32,7 @@ class BlogComment extends Model
     /**
      * Get the blog this comment belongs to
      */
-    public function blog(): BelongsTo
+    public function blog()
     {
         return $this->belongsTo(Blog::class);
     }
@@ -42,7 +40,7 @@ class BlogComment extends Model
     /**
      * Get the user who created this comment
      */
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
@@ -50,7 +48,7 @@ class BlogComment extends Model
     /**
      * Get the parent comment
      */
-    public function parent(): BelongsTo
+    public function parent()
     {
         return $this->belongsTo(BlogComment::class, 'parent_id');
     }
@@ -58,7 +56,7 @@ class BlogComment extends Model
     /**
      * Get all replies to this comment
      */
-    public function replies(): HasMany
+    public function replies()
     {
         return $this->hasMany(BlogComment::class, 'parent_id')->orderBy('created_at', 'asc');
     }
@@ -66,7 +64,7 @@ class BlogComment extends Model
     /**
      * Get active replies only
      */
-    public function activeReplies(): HasMany
+    public function activeReplies()
     {
         return $this->hasMany(BlogComment::class, 'parent_id')
             ->where('is_active', StatusEnum::ACTIVE->value)

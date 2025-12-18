@@ -7,7 +7,6 @@ use App\Enums\StatusEnum;
 use App\Traits\ScopeActive;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
 class Form extends Model
@@ -56,17 +55,17 @@ class Form extends Model
     ];
 
     protected $casts = [
-        'type'      => FormTypeEnum::class,
+        'type' => FormTypeEnum::class,
         'is_active' => StatusEnum::class,
-        'data'      => 'array',
-        'is_read'   => 'boolean',
-        'read_at'   => 'datetime',
+        'data' => 'array',
+        'is_read' => 'boolean',
+        'read_at' => 'datetime',
     ];
 
     /**
      * Get all emails that should receive this form type
      */
-    public function emails(): BelongsToMany
+    public function emails()
     {
         return $this->belongsToMany(
             FormEmail::class,

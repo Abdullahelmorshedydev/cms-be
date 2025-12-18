@@ -7,20 +7,19 @@ use App\Enums\GenderEnum;
 use App\Enums\StatusEnum;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
-use App\Traits\MediaHandler;
-use Illuminate\Support\Facades\Auth;
+use App\Services\MediaService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserService extends BaseService
 {
-    use MediaHandler;
-
     public function __construct(
         UserRepository $repository,
         protected UserBuilder $builder,
-        protected RoleRepository $roleRepository
+        protected RoleRepository $roleRepository,
+        protected MediaService $mediaService
     ) {
         parent::__construct($repository);
     }
@@ -77,7 +76,7 @@ class UserService extends BaseService
     {
         return parent::store($data, function ($model, $data) {
             if (isset($data['image']) && is_file($data['image'])) {
-                $this->uploadImage($data['image'], $model, $model->name);
+                $this->mediaService->uploadImage($data['image'], $model, $model->name);
             }
             if (isset($data['role'])) {
                 try {
@@ -96,12 +95,11 @@ class UserService extends BaseService
                     );
                     $model->assignRole($role);
                 } catch (\Exception $e) {
-                    \Log::error('Failed to assign role during user creation', [
+                    Log::error('Failed to assign role during user creation', [
                         'user_id' => $model->id,
                         'role' => $data['role'],
                         'error' => $e->getMessage()
                     ]);
-                    // Don't throw - role assignment failure shouldn't prevent user creation
                 }
             }
         });
@@ -150,7 +148,7 @@ class UserService extends BaseService
     {
         return parent::update($data, $value, $key, function ($model, $data) {
             if (isset($data['image']) && is_file($data['image'])) {
-                $this->uploadImage($data['image'], $model, $model->name);
+                $this->mediaService->uploadImage($data['image'], $model, $model->name);
             }
             if (isset($data['role'])) {
                 $model->syncRoles([$data['role']]);
@@ -161,14 +159,14 @@ class UserService extends BaseService
     public function destroy($key, $value, callable $beforeDelete = null)
     {
         return parent::destroy($key, $value, function ($model) {
-            $this->removeImage($model);
+            $this->mediaService->removeImage($model);
         });
     }
 
     public function destroyAll(array $ids, callable $beforeDelete = null)
     {
         return parent::destroyAll($ids, function ($model) {
-            $this->removeImage($model);
+            $this->mediaService->removeImage($model);
         });
     }
 

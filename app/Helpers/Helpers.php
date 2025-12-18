@@ -191,3 +191,31 @@ if (!function_exists('handleException')) {
         );
     }
 }
+
+if (!function_exists('handleError')) {
+    function handleError(\Exception $e, $view, $variables)
+    {
+        logger($e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'code' => $e->getCode(),
+            'message' => $e->getMessage()
+        ]);
+
+        // Use translated error message
+        $message = app()->environment('production')
+            ? __('custom.exceptions.internal_server_error')
+            : $e->getMessage();
+
+        // Ensure code is an integer (getCode() can return string for some exceptions like PDO)
+        $exceptionCode = $e->getCode();
+        $code = (is_numeric($exceptionCode) && $exceptionCode > 0) ? (int) $exceptionCode : 500;
+
+        // Ensure valid HTTP status code range (100-599)
+        if ($code < 100 || $code >= 600) {
+            $code = 500;
+        }
+
+        return view($view, $variables);
+    }
+}

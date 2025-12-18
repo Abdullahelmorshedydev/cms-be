@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Dashboard\BaseDashboardController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Repositories\RoleRepository;
@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoleController extends BaseDashboardController
+class RoleController extends Controller
 {
     public function __construct(
         protected RoleRepository $roleRepository,
@@ -22,7 +22,7 @@ class RoleController extends BaseDashboardController
     public function index(Request $request)
     {
         try {
-            $serviceResponse = $this->service->index(
+            $response = $this->service->index(
                 [
                     'name' => [
                         'operator' => '!=',
@@ -34,10 +34,8 @@ class RoleController extends BaseDashboardController
                 ['id' => 'DESC'],
                 request()->get('limit', 10)
             );
-
             return view('admin.pages.roles.index', [
-                'data' => $serviceResponse,
-                'roles' => $this->extractPaginatedData($serviceResponse),
+                'data' => $response
             ]);
         } catch (\Exception $e) {
             Log::error('Error loading roles', [
@@ -45,9 +43,13 @@ class RoleController extends BaseDashboardController
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $this->handleError($e, 'dashboard.pages.roles.index', [
-                'data' => ['data' => ['data' => []]],
-                'roles' => $this->getEmptyPaginator(),
+            return handleError($e, 'admin.pages.roles.index', [
+                'data' => [
+                    'data' => [
+                        'data' => []
+                    ]
+                ],
+                'meta' => [],
             ]);
         }
     }
@@ -82,17 +84,7 @@ class RoleController extends BaseDashboardController
     public function edit($role)
     {
         try {
-            $response = $this->service->edit($role);
-
-            // ModelNotFoundException will be handled by exception handler, so if we get here, record exists
-            if (!isset($response['data']) || empty($response['data'])) {
-                abort(404, __('custom.messages.not_found'));
-            }
-
-            return view('admin.pages.roles.edit', ['data' => $response['data']]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Let ModelNotFoundException bubble up to be handled by exception handler (shows 404 page)
-            throw $e;
+            return view('admin.pages.roles.edit', ['data' => $this->service->edit($role)['data']]);
         } catch (\Exception $e) {
             Log::error('Error loading role for edit', ['id' => $role, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);

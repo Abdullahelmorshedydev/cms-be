@@ -7,7 +7,6 @@
             <th>{{ __('custom.columns.name') }}</th>
             <th>{{ __('custom.columns.email') }}</th>
             <th>{{ __('custom.columns.role_name') }}</th>
-            <th>{{ __('custom.columns.activation') }}</th>
             <th>{{ __('custom.words.actions') }}</th>
         </tr>
     </thead>
@@ -19,10 +18,7 @@
                 </td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->email }}</td>
-                <td>{{ $user->getRoleNames()->count() ? $user->getRoleNames()[0] : __('custom.user.customer') }}</td>
-                <td>
-                    {{ $user->is_active->lang() }}
-                </td>
+                <td>{!! $user->getRoleNames()->count() ? $user->getRolesDisplayNames() : __('custom.user.customer') !!}</td>
                 <td>
                     <div class="dropdown">
                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"
@@ -51,6 +47,5 @@
     </tbody>
 </table>
 <div class="mt-3 px-3">
-    {{-- {{ $users->appends(request()->all())->links() }} --}}
     <x-pagination :meta="$data['meta']" />
 </div>

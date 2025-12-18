@@ -1,3 +1,7 @@
+@php
+    use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', __('custom.words.create_new') . ' ' . __('custom.user.user'))
@@ -47,9 +51,10 @@
                         </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
-                                <input id="passwordConfirmationInput" class="form-control" type="password" name="password_confirmation"
-                                    value="{{ old('password') }}">
-                                <label for="passwordConfirmationInput">{{ __('custom.inputs.password_confirmation') }}</label>
+                                <input id="passwordConfirmationInput" class="form-control" type="password"
+                                    name="password_confirmation" value="{{ old('password') }}">
+                                <label
+                                    for="passwordConfirmationInput">{{ __('custom.inputs.password_confirmation') }}</label>
                                 @error('password_confirmation')
                                     <div class="text-danger"> {{ $message }}</div>
                                 @enderror
@@ -60,8 +65,7 @@
                                 <select name="country_code" class="form-select country-code-select"
                                     style="max-width: 140px; position: absolute; top: 0; right: 0">
                                 </select>
-                                <input id="phone" class="form-control" type="text" name="phone"
-                                    value="{{ old('phone') }}">
+                                <input id="phone" class="form-control" type="text" name="phone" value="{{ old('phone') }}">
                                 <label for="phone">{{ __('custom.inputs.phone') }}</label>
                                 @error('phone')
                                     <div class="text-danger"> {{ $message }}</div>
@@ -100,20 +104,14 @@
                         </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
-                                <input id="date_of_birthInput" class="form-control" type="date" name="date_of_birth"
-                                    value="{{ old('date_of_birth') }}">
-                                <label for="date_of_birthInput">{{ __('custom.inputs.date_of_birth') }}</label>
-                                @error('date_of_birth')
-                                    <div class="text-danger"> {{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-floating form-floating-outline">
                                 <select id="is_adminSelect" class="form-control" name="is_admin">
                                     <option value="">{{ __('custom.words.choose') }}</option>
-                                    <option value="1" {{ old('is_admin') == 1 ? 'selected' : '' }}>{{ __('custom.user.admin') }}</option>
-                                    <option value="0" {{ old('is_admin') == 0 ? 'selected' : '' }}>{{ __('custom.user.customer') }}</option>
+                                    <option value="1" {{ old('is_admin') == 1 ? 'selected' : '' }}>
+                                        {{ __('custom.user.admin') }}
+                                    </option>
+                                    <option value="0" {{ old('is_admin') == 0 ? 'selected' : '' }}>
+                                        {{ __('custom.user.customer') }}
+                                    </option>
                                 </select>
                                 <label for="is_adminSelect">{{ __('custom.inputs.is_admin') }}</label>
                                 @error('is_admin')
@@ -123,47 +121,16 @@
                         </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
-                                <select id="genderSelect" class="form-control" name="gender">
-                                    <option value="">{{ __('custom.words.choose') }}</option>
-                                    @foreach ($data['genders'] as $gender)
-                                        <option value="{{ $gender['value'] }}"
-                                            {{ old('gender') == $gender['value'] ? 'selected' : '' }}>
-                                            {{ $gender['lang'] }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="genderSelect">{{ __('custom.inputs.gender') }}</label>
-                                @error('gender')
-                                    <div class="text-danger"> {{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-floating form-floating-outline">
                                 <select id="roleSelect" class="form-control" name="role">
                                     <option value="">{{ __('custom.words.choose') }}</option>
                                     @foreach ($data['roles'] as $role)
-                                        <option value="{{ $role->name }}"
-                                            {{ old('role') == $role->name ? 'selected' : '' }}>
-                                            {{ $role->display_name }}</option>
+                                        <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>
+                                            {{ json_decode($role->display_name)->{LaravelLocalization::getCurrentLocale()} }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <label for="roleSelect">{{ __('custom.inputs.role') }}</label>
                                 @error('role')
-                                    <div class="text-danger"> {{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6 mt-3">
-                            <div class="form-floating form-floating-outline">
-                                <select id="statusSelect" class="form-control" name="is_active">
-                                    <option value="">{{ __('custom.words.choose') }}</option>
-                                    @foreach ($data['status'] as $stat)
-                                        <option value="{{ $stat['value'] }}" {{ old('is_active') == $stat['value'] }}>
-                                            {{ $stat['lang'] }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="statusSelect">{{ __('custom.inputs.is_active') }}</label>
-                                @error('is_active')
                                     <div class="text-danger"> {{ $message }}</div>
                                 @enderror
                             </div>
@@ -183,73 +150,73 @@
 @section('js')
     <script>
         const countryCodes = [{
-                code: "+20",
-                name: "Egypt"
-            },
-            {
-                code: "+1",
-                name: "United States"
-            },
-            {
-                code: "+44",
-                name: "United Kingdom"
-            },
-            {
-                code: "+61",
-                name: "Australia"
-            },
-            {
-                code: "+91",
-                name: "India"
-            },
-            {
-                code: "+49",
-                name: "Germany"
-            },
-            {
-                code: "+81",
-                name: "Japan"
-            },
-            {
-                code: "+33",
-                name: "France"
-            },
-            {
-                code: "+34",
-                name: "Spain"
-            },
-            {
-                code: "+86",
-                name: "China"
-            },
-            {
-                code: "+39",
-                name: "Italy"
-            },
-            {
-                code: "+7",
-                name: "Russia"
-            },
-            {
-                code: "+55",
-                name: "Brazil"
-            },
-            {
-                code: "+1-242",
-                name: "Bahamas"
-            },
-            {
-                code: "+1-246",
-                name: "Barbados"
-            },
-            {
-                code: "+1-441",
-                name: "Bermuda"
-            },
-            {
-                code: "+1-268",
-                name: "Antigua and Barbuda"
-            },
+            code: "+20",
+            name: "Egypt"
+        },
+        {
+            code: "+1",
+            name: "United States"
+        },
+        {
+            code: "+44",
+            name: "United Kingdom"
+        },
+        {
+            code: "+61",
+            name: "Australia"
+        },
+        {
+            code: "+91",
+            name: "India"
+        },
+        {
+            code: "+49",
+            name: "Germany"
+        },
+        {
+            code: "+81",
+            name: "Japan"
+        },
+        {
+            code: "+33",
+            name: "France"
+        },
+        {
+            code: "+34",
+            name: "Spain"
+        },
+        {
+            code: "+86",
+            name: "China"
+        },
+        {
+            code: "+39",
+            name: "Italy"
+        },
+        {
+            code: "+7",
+            name: "Russia"
+        },
+        {
+            code: "+55",
+            name: "Brazil"
+        },
+        {
+            code: "+1-242",
+            name: "Bahamas"
+        },
+        {
+            code: "+1-246",
+            name: "Barbados"
+        },
+        {
+            code: "+1-441",
+            name: "Bermuda"
+        },
+        {
+            code: "+1-268",
+            name: "Antigua and Barbuda"
+        },
             // Add more country codes as needed
         ];
 

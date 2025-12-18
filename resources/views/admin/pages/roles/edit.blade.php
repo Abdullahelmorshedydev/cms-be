@@ -1,3 +1,7 @@
+@php
+    use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', __('custom.words.edit') . ' ' . __('custom.role.role'))
@@ -31,7 +35,7 @@
                             <div class="form-group">
                                 <label for="displayNameEn">{{ __('custom.inputs.display_name_en') }}</label>
                                 <input id="displayNameEn" class="form-control" type="text" name="display_name[en]"
-                                    value="{{ old('display_name.en', $data['record']->getTranslation('display_name', 'en')) }}">
+                                    value="{{ old('display_name.en', json_decode($data['record']->display_name)->en) }}">
                                 @error('display_name.en')
                                     <div class="text-danger"> {{ $message }}</div>
                                 @enderror
@@ -41,7 +45,7 @@
                             <div class="form-group">
                                 <label for="displayNameAr">{{ __('custom.inputs.display_name_ar') }}</label>
                                 <input id="displayNameAr" class="form-control" type="text" name="display_name[ar]"
-                                    value="{{ old('display_name.ar', $data['record']->getTranslation('display_name', 'ar')) }}">
+                                    value="{{ old('display_name.ar', json_decode($data['record']->display_name)->ar) }}">
                                 @error('display_name.ar')
                                     <div class="text-danger"> {{ $message }}</div>
                                 @enderror
@@ -75,7 +79,7 @@
                                                         {{ in_array($permission->name, $data['record']->permissions->pluck('name')->toArray()) ? 'checked' : '' }}
                                                         class="permission-checkbox permission-{{ $groupPermissions['value'] }}">
                                                     <label
-                                                        for="{{ $permission->id }}">{{ $permission->display_name }}</label>
+                                                        for="{{ $permission->id }}">{{ json_decode($permission->display_name)->{LaravelLocalization::getCurrentLocale()} }}</label>
                                                 </div>
                                             @endforeach
                                         </div>

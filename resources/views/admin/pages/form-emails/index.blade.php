@@ -40,7 +40,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($formEmails as $formEmail)
+                        @forelse($data['data']['data'] as $formEmail)
                             <tr>
                                 <td>{{ $formEmail->id }}</td>
                                 <td>
@@ -115,7 +115,7 @@
             </div>
 
             <div class="card-footer">
-                {{ $formEmails->links() }}
+                <x-pagination :meta="$data['meta']" />
             </div>
         </div>
 

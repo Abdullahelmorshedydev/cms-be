@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\FormTypeEnum;
 use App\Enums\StatusEnum;
-use App\Http\Controllers\Dashboard\BaseDashboardController;
-use App\Http\Requests\Form\SubmitFormRequest;
+use App\Http\Controllers\Controller;
 use App\Services\FormService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class FormController extends BaseDashboardController
+class FormController extends Controller
 {
     public function __construct(
         protected FormService $service
@@ -24,22 +23,26 @@ class FormController extends BaseDashboardController
     public function index(Request $request, $type = null)
     {
         try {
-            // If type is provided, filter by it
             $requestData = $request->all();
-            if ($type) {
+            unset($requestData['_token']);
+            unset($requestData['limit']);
+            if ($type)
                 $requestData['type'] = $type;
-            }
 
-            $forms = $this->service->getAllPaginated($requestData);
+            $response = $this->service->index(
+                $requestData,
+                [],
+                ['*'],
+                [
+                    'id' => 'DESC'
+                ],
+                request('limit', 10)
+            );
+
             $statistics = $this->service->getStatistics();
 
-            // Extract paginated data if forms is a paginator
-            $formsPaginated = ($forms instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                ? $forms
-                : $this->extractPaginatedData(['data' => ['data' => $forms ?? []]]);
-
             return view('admin.pages.forms.index', [
-                'forms' => $formsPaginated,
+                'data' => $response,
                 'statistics' => $statistics ?? [],
                 'types' => FormTypeEnum::toArray(),
                 'status' => StatusEnum::cases(),
@@ -51,8 +54,13 @@ class FormController extends BaseDashboardController
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $this->handleError($e, 'dashboard.pages.forms.index', [
-                'forms' => $this->getEmptyPaginator(),
+            return handleError($e, 'admin.pages.forms.index', [
+                'data' => [
+                    'data' => [
+                        'data' => []
+                    ],
+                    'meta' => []
+                ],
                 'statistics' => [],
                 'types' => FormTypeEnum::toArray(),
                 'status' => StatusEnum::cases(),

@@ -220,4 +220,35 @@ abstract class BaseRepository
     {
         return $this->model->query();
     }
+
+    /**
+     * Count records matching criteria
+     *
+     * @param array $criteria Filter criteria
+     * @return int
+     */
+    public function count(array $criteria = []): int
+    {
+        $builder = $this->model->query();
+
+        foreach ($criteria as $key => $value) {
+            $operator = '=';
+
+            if (is_array($value)) {
+                $operator = $value['operator'] ?? $operator;
+                $value = $value['value'];
+            }
+
+            if (strpos($key, '.') !== false) {
+                list($relation, $relationKey) = explode('.', $key);
+                $builder->whereHas($relation, function ($query) use ($relationKey, $operator, $value) {
+                    $query->where($relationKey, $operator, $value);
+                });
+            } else {
+                $builder->where($key, $operator, $value);
+            }
+        }
+
+        return $builder->count();
+    }
 }

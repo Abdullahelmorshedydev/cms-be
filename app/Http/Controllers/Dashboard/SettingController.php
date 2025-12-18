@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Enums\SettingGroupEnum;
-use App\Http\Controllers\Dashboard\BaseDashboardController;
-use App\Models\Setting;
+use App\Http\Controllers\Controller;
+use App\Services\MediaService;
 use App\Services\SettingService;
-use App\Traits\MediaHandler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class SettingController extends BaseDashboardController
+class SettingController extends Controller
 {
-    use MediaHandler;
-
-    public function __construct(protected SettingService $service)
-    {
+    public function __construct(
+        protected SettingService $service,
+        protected MediaService $mediaService
+    ) {
     }
 
     public function index()
@@ -32,7 +30,7 @@ class SettingController extends BaseDashboardController
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return $this->handleError($e, 'dashboard.pages.settings.index', [
+            return handleError($e, 'admin.pages.settings.index', [
                 'settings' => [],
                 'settingGroups' => [],
             ]);
@@ -45,10 +43,10 @@ class SettingController extends BaseDashboardController
             $data = $request->all();
             $response = $this->service->update($data, $key, 'key', function ($model, $data) {
                 if (isset($data['value']['en']) && is_file($data['value']['en'])) {
-                    $newImageId = $this->uploadImage($data['value']['en'], $model, $model->getTranslation('label', 'en'));
+                    $newImage = $this->mediaService->uploadImage($data['value']['en'], $model, $model->getTranslation('label', 'en'));
                     $model->value = [
-                        'en' => $newImageId,
-                        'ar' => $newImageId
+                        'en' => $newImage,
+                        'ar' => $newImage
                     ];
                     $model->save();
                 }
