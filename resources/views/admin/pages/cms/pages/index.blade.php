@@ -26,7 +26,9 @@
                             <tr>
                                 <th>{{ __('custom.columns.name') }}</th>
                                 <th>{{ __('custom.columns.slug') }}</th>
-                                <th>{{ __('custom.columns.activation') }}</th>
+                                @if(isset($pages->first()->is_active))
+                                    <th>{{ __('custom.columns.activation') }}</th>
+                                @endif
                                 <th>{{ __('custom.columns.created_at') }}</th>
                                 <th>{{ __('custom.words.actions') }}</th>
                             </tr>
@@ -36,11 +38,13 @@
                                 <tr>
                                     <td>{{ $page->name }}</td>
                                     <td>{{ $page->slug }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ $page->is_active ? 'success' : 'danger' }}">
-                                            {{ $page->is_active ? __('custom.words.active') : __('custom.words.inactive') }}
-                                        </span>
-                                    </td>
+                                    @if(isset($page->is_active))
+                                        <td>
+                                            <span class="badge bg-{{ $page->is_active ? 'success' : 'danger' }}">
+                                                {{ $page->is_active ? __('custom.words.active') : __('custom.words.inactive') }}
+                                            </span>
+                                        </td>
+                                    @endif
                                     <td>{{ $page->created_at->format('Y-m-d H:i') }}</td>
                                     <td>
                                         <div class="dropdown">
@@ -66,7 +70,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center">{{ __('custom.words.no_data') }}</td>
+                                    <td colspan="{{ isset($pages->first()->is_active) ? '5' : '4' }}" class="text-center">{{ __('custom.words.no_data') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

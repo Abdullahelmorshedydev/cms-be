@@ -26,14 +26,16 @@
                         <strong>{{ __('custom.columns.slug') }}:</strong>
                         <p>{{ $page->slug }}</p>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <strong>{{ __('custom.columns.activation') }}:</strong>
-                        <p>
-                            <span class="badge bg-{{ $page->is_active ? 'success' : 'danger' }}">
-                                {{ $page->is_active ? __('custom.words.active') : __('custom.words.inactive') }}
-                            </span>
-                        </p>
-                    </div>
+                    @if(isset($page->is_active))
+                        <div class="col-md-6 mb-3">
+                            <strong>{{ __('custom.columns.activation') }}:</strong>
+                            <p>
+                                <span class="badge bg-{{ $page->is_active ? 'success' : 'danger' }}">
+                                    {{ $page->is_active ? __('custom.words.active') : __('custom.words.inactive') }}
+                                </span>
+                            </p>
+                        </div>
+                    @endif
                     <div class="col-md-6 mb-3">
                         <strong>{{ __('custom.columns.created_at') }}:</strong>
                         <p>{{ $page->created_at->format('Y-m-d H:i:s') }}</p>

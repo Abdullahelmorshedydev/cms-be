@@ -72,6 +72,36 @@
         @endcanany
 
         <!-- ============================================
+            CMS MANAGEMENT
+        ============================================ -->
+        <li class="menu-item {{ isActiveRoute(['dashboard.cms.*']) ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons mdi mdi-content-copy"></i>
+                <div>{{ __('custom.sidebar.cms_management') ?? 'CMS Management' }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ isActiveRoute('dashboard.cms.pages.*') }}">
+                    <a href="{{ route('dashboard.cms.pages.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons mdi mdi-file-document-outline"></i>
+                        <div>{{ __('custom.words.pages') ?? 'Pages' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ isActiveRoute('dashboard.cms.sections.*') }}">
+                    <a href="{{ route('dashboard.cms.sections.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons mdi mdi-view-sequential-outline"></i>
+                        <div>{{ __('custom.words.sections') ?? 'Sections' }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ isActiveRoute('dashboard.cms.section-types.*') }}">
+                    <a href="{{ route('dashboard.cms.section-types.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
+                        <div>{{ __('custom.words.section_types') ?? 'Section Types' }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- ============================================
             FORMS MANAGEMENT
         ============================================ -->
         @canany(['form.show', 'form-email.show'])

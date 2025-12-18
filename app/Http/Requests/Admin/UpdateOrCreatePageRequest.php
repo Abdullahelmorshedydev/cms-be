@@ -11,13 +11,17 @@ class UpdateOrCreatePageRequest extends FormRequest
      */
     public function rules(): array
     {
+        $page = $this->route('page');
+        $pageId = $page?->id ?? null;
+        
         return [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                'unique:pages,name'
+                $pageId ? "unique:pages,name,{$pageId}" : 'unique:pages,name'
             ],
+            'is_active' => ['nullable', 'boolean', 'in:0,1'],
         ];
     }
 

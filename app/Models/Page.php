@@ -14,7 +14,7 @@ class Page extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'is_active'];
 
     // protected static function newFactory(): PageFactory
     // {

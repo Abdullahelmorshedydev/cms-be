@@ -2,26 +2,18 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Http\Controllers\Dashboard\BaseDashboardController;
-use App\Services\AnalyticsService;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class DashboardController extends BaseDashboardController
+class DashboardController extends Controller
 {
-    protected AnalyticsService $analyticsService;
-
-    public function __construct(AnalyticsService $analyticsService)
-    {
-        $this->analyticsService = $analyticsService;
-    }
-
     public function index()
     {
         try {
-            $analytics = $this->analyticsService->getDashboardAnalytics();
-
-            return view('dashboard.index', compact('analytics'));
+            return view('dashboard.index' . [
+                'analytics' => $this->getDefaultAnalytics()
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading dashboard analytics', [
                 'error' => $e->getMessage(),

@@ -68,12 +68,12 @@ if (!function_exists('getTranslatedValue')) {
         if (is_string($value)) {
             return $value;
         }
-        
+
         if (is_array($value)) {
             $locale = $locale ?? app()->getLocale();
             return $value[$locale] ?? $value['en'] ?? $value['ar'] ?? '';
         }
-        
+
         // If it's an object, try to get string representation
         if (is_object($value)) {
             // If object has __toString, use it
@@ -83,7 +83,7 @@ if (!function_exists('getTranslatedValue')) {
             // Otherwise return empty string for objects
             return '';
         }
-        
+
         // For other types (null, numeric, etc.), convert to string
         return (string) ($value ?? '');
     }
@@ -94,7 +94,7 @@ if (!function_exists('apiResponse')) {
     {
         // Ensure message is translated if it's empty
         if (empty($message) && $code >= 400) {
-            $message = match($code) {
+            $message = match ($code) {
                 400 => __('custom.exceptions.bad_request'),
                 401 => __('custom.exceptions.unauthorized'),
                 403 => __('custom.exceptions.forbidden'),
@@ -107,14 +107,14 @@ if (!function_exists('apiResponse')) {
                 default => __('custom.exceptions.unknown_error'),
             };
         }
-        
+
         return response()->json([
             'success' => $code < 400,
-            'code'    => $code,
-            'errors'  => $errors,
-            'data'    => $data,
+            'code' => $code,
+            'errors' => $errors,
+            'data' => $data,
             'message' => $message,
-            'meta'    => $meta
+            'meta' => $meta
         ], $code);
     }
 }
@@ -153,21 +153,21 @@ if (!function_exists('handleException')) {
             'code' => $e->getCode(),
             'message' => $e->getMessage()
         ]);
-        
+
         // Use translated error message
-        $message = app()->environment('production') 
+        $message = app()->environment('production')
             ? __('custom.exceptions.internal_server_error')
             : $e->getMessage();
-        
+
         // Ensure code is an integer (getCode() can return string for some exceptions like PDO)
         $exceptionCode = $e->getCode();
-        $code = (is_numeric($exceptionCode) && $exceptionCode > 0) ? (int)$exceptionCode : 500;
-        
+        $code = (is_numeric($exceptionCode) && $exceptionCode > 0) ? (int) $exceptionCode : 500;
+
         // Ensure valid HTTP status code range (100-599)
         if ($code < 100 || $code >= 600) {
             $code = 500;
         }
-        
+
         return returnData(
             [
                 'file' => $e->getFile(),
