@@ -30,8 +30,6 @@ return [
     'page' => ['show', 'edit', 'create', 'delete'],
     'section' => ['show', 'edit', 'create', 'delete'],
     'section-type' => ['show', 'edit', 'create', 'delete'],
-    'blog' => ['show', 'edit', 'create', 'delete', 'import', 'export'],
-    'blog.comment' => ['create', 'edit', 'delete', 'approve', 'reject'],
 
     // System
     'telescope' => ['show'],
