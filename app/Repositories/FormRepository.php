@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Form;
 
-class FormRepository extends BaseRepository
+class FormRepository extends BasicRepository
 {
     public function model(): string
     {

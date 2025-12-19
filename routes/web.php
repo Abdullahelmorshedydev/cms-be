@@ -88,40 +88,6 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
             Route::middleware('check.permission:settings.edit')->post('/{setting}', 'update')->name('update');
         });
 
-        // Blogs
-        Route::controller(BlogController::class)->prefix('/blogs')->as('blogs.')->group(function () {
-            // Static routes first (must come before parameter routes to avoid conflicts)
-            Route::get('/', 'index')->middleware('check.permission:blog.show')->name('index');
-            Route::post('/import', 'import')->middleware('check.permission:blog.import')->name('import');
-            Route::get('/export', 'export')->middleware('check.permission:blog.export')->name('export');
-
-            // Blog Comments (static routes)
-            Route::post('/comments', 'storeComment')->middleware('check.permission:blog.comment.create')->name('comments.store');
-
-            Route::middleware('check.permission:blog.create')->group(function () {
-                Route::get('/create', 'create')->name('create');
-                Route::post('/', 'store')->name('store');
-            });
-            Route::middleware('check.permission:blog.delete')->group(function () {
-                Route::delete('/delete', 'destroyAll')->name('delete');
-            });
-
-            // Parameter routes (must come last)
-            Route::get('/{blog}/comments', 'getComments')->middleware('check.permission:blog.show')->name('comments.index');
-            Route::put('/comments/{comment}', 'updateComment')->middleware('check.permission:blog.comment.edit')->name('comments.update');
-            Route::post('/comments/{comment}/approve', 'approveComment')->middleware('check.permission:blog.comment.approve')->name('comments.approve');
-            Route::post('/comments/{comment}/reject', 'rejectComment')->middleware('check.permission:blog.comment.reject')->name('comments.reject');
-            Route::delete('/comments/{comment}', 'destroyComment')->middleware('check.permission:blog.comment.delete')->name('comments.destroy');
-            Route::middleware('check.permission:blog.edit')->group(function () {
-                Route::get('/{blog}/edit', 'edit')->name('edit');
-                Route::put('/{blog}', 'update')->name('update');
-            });
-            Route::middleware('check.permission:blog.delete')->group(function () {
-                Route::delete('/{blog}', 'destroy')->name('destroy');
-            });
-            Route::get('/{blog}', 'show')->middleware('check.permission:blog.show')->name('show');
-        });
-
         // Forms - All Types
         Route::controller(FormController::class)->prefix('/forms')->as('forms.')->group(function () {
             // Static routes first (most specific)

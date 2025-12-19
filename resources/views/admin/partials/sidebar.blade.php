@@ -43,7 +43,7 @@
         <!-- ============================================
             CONTENT MANAGEMENT
         ============================================ -->
-        @canany(['page.show', 'blog.show'])
+        @canany(['page.show'])
             <li
                 class="menu-item {{ isActiveRoute(['dashboard.cms.pages.*', 'dashboard.cms.section-types.*', 'dashboard.blogs.*']) ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -65,15 +65,6 @@
                             <a href="{{ route('dashboard.cms.section-types.index') }}" class="menu-link">
                                 <i class="menu-icon tf-icons mdi mdi-shape-outline"></i>
                                 <div>{{ __('custom.words.section_types') ?? 'Section Types' }}</div>
-                            </a>
-                        </li>
-                    @endcan
-
-                    @can('blog.show')
-                        <li class="menu-item {{ isActiveRoute('dashboard.blogs.*') }}">
-                            <a href="{{ route('dashboard.blogs.index') }}" class="menu-link">
-                                <i class="menu-icon tf-icons mdi mdi-post-outline"></i>
-                                <div>{{ __('custom.sidebar.blogs') }}</div>
                             </a>
                         </li>
                     @endcan
