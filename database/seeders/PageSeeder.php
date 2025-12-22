@@ -2,21 +2,52 @@
 
 namespace Database\Seeders;
 
+use App\Enums\StatusEnum;
 use App\Models\Page;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class PageSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Only create pages if factory exists, otherwise skip
-        // Pages can be created manually through the dashboard
-        // DB::table('pages')->delete();
-        // Page::factory(5)->create();
+        $pages = [
+            [
+                'name' => 'Home',
+                'slug' => 'home'
+            ],
+            [
+                'name' => 'About Us',
+                'slug' => 'about-us',
+            ],
+            [
+                'name' => 'Contact Us',
+                'slug' => 'contact-us',
+            ],
+            [
+                'name' => 'Privacy Policy',
+                'slug' => 'privacy-policy',
+            ],
+            [
+                'name' => 'Terms & Conditions',
+                'slug' => 'terms-and-conditions',
+            ],
+            [
+                'name' => 'FAQ',
+                'slug' => 'faq',
+            ],
+            [
+                'name' => 'Help',
+                'slug' => 'help',
+            ],
+        ];
+
+        foreach ($pages as $page) {
+            Page::updateOrCreate(
+                [
+                    'slug' => $page['slug']
+                ],
+                $page
+            );
+        }
     }
 }

@@ -13,7 +13,7 @@ class Page extends Model
 
     protected $translatable = [];
 
-    protected $fillable = ['name', 'is_active'];
+    protected $fillable = ['name', 'slug'];
 
     public function sections()
     {

@@ -9,7 +9,6 @@ use App\Http\Controllers\Dashboard\RoleController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\AuthController;
-use App\Http\Controllers\Dashboard\BlogController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\FormController;
 use App\Http\Controllers\Dashboard\FormEmailController;
