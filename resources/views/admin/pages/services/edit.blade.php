@@ -8,7 +8,7 @@
         <!-- services List Table -->
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <h4>{{ __('custom.words.create_new') . ' ' . __('custom.service.service') }}</h4>
+                <h4>{{ __('custom.words.edit') . ' ' . __('custom.service.service') }}</h4>
                 <a href="{{ route('dashboard.services.index') }}" class="btn btn-primary">{{ __('custom.words.back') }}</a>
             </div>
             <div class="card-body">

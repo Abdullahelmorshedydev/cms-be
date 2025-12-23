@@ -81,7 +81,8 @@ class ServiceService extends BaseService
                         ['slug' => $slug],
                         ['*'],
                         [
-                            'image'
+                            'image',
+                            'tags'
                         ]
                     )),
             __('custom.messages.retrieved_success')

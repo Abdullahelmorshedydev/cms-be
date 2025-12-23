@@ -8,7 +8,7 @@
         <!-- tags List Table -->
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <h4>{{ __('custom.words.create_new') . ' ' . __('custom.tag.tag') }}</h4>
+                <h4>{{ __('custom.words.edit') . ' ' . __('custom.tag.tag') }}</h4>
                 <a href="{{ route('dashboard.tags.index') }}" class="btn btn-primary">{{ __('custom.words.back') }}</a>
             </div>
             <div class="card-body">

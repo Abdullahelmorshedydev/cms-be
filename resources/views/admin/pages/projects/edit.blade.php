@@ -8,7 +8,7 @@
         <!-- projects List Table -->
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <h4>{{ __('custom.words.create_new') . ' ' . __('custom.project.project') }}</h4>
+                <h4>{{ __('custom.words.edit') . ' ' . __('custom.project.project') }}</h4>
                 <a href="{{ route('dashboard.projects.index') }}" class="btn btn-primary">{{ __('custom.words.back') }}</a>
             </div>
             <div class="card-body">
