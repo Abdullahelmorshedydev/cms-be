@@ -55,7 +55,7 @@ class ServiceService extends BaseService
         return parent::store($data, function ($model, $data) {
             if (isset($data['image']) && is_file($data['image']))
                 $this->mediaService->uploadImage($data['image'], $model, $model->name);
-            if (isset($data['tags']))
+            if (isset($data['tags']) && $data['tags'] && $data['tags'][0])
                 $model->tags()->attach($data['tags']);
         });
     }
@@ -65,7 +65,7 @@ class ServiceService extends BaseService
         return parent::show($key, $value, $with);
     }
 
-    public function edit($id)
+    public function edit($slug)
     {
         return returnData(
             [],
@@ -78,7 +78,7 @@ class ServiceService extends BaseService
                     null
                 )
             )->edit($this->repository->findOneByWith(
-                        ['id' => $id],
+                        ['slug' => $slug],
                         ['*'],
                         [
                             'image'
@@ -88,13 +88,15 @@ class ServiceService extends BaseService
         );
     }
 
-    public function update($data, $value, $key = 'id', callable $callback = null)
+    public function update($data, $value, $key = 'slug', callable $callback = null)
     {
         return parent::update($data, $value, $key, function ($model, $data) {
             if (isset($data['image']) && is_file($data['image']))
                 $this->mediaService->uploadImage($data['image'], $model, $model->name);
-            if (isset($data['tags']))
+            if (isset($data['tags']) && $data['tags'] && $data['tags'][0])
                 $model->tags()->sync($data['tags']);
+            else
+                $model->tags()->detach();
         });
     }
 

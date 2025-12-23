@@ -99,7 +99,15 @@ return [
         'import_instruction_2' => 'يجب أن يحتوي الصف الأول على عناوين الأعمدة',
         'import_instruction_3' => 'تأكد من تضمين جميع الحقول المطلوبة',
     ],
-
+    'tag' => [
+        'tag' => 'وسم',
+    ],
+    'project' => [
+        'project' => 'مشروع',
+    ],
+    'service' => [
+        'service' => 'خدمة',
+    ],
     'words' => [
         'won' => 'الفائز',
         'back_to_home' => 'العودة الى الصفحة الرئيسية',
@@ -418,6 +426,11 @@ return [
         'button_type' => 'نوع الزر',
         'subject' => 'الموضوع',
         'message' => 'الرسالة',
+        'tags' => 'الوسوم',
+        'short_description' => 'وصف قصير',
+        'short_description_en' => 'وصف قصير [EN]',
+        'short_description_ar' => 'وصف قصير [AR]',
+        'url' => 'الرابط',
     ],
     'columns' => [
         'id' => 'ID',
@@ -796,6 +809,21 @@ return [
             'required' => 'النشط مطلوب',
             'in' => 'النشط غير صالح',
         ],
+        'status' => [
+            'required' => 'النشط مطلوب',
+            'in' => 'النشط غير صالح',
+        ],
+        'tags' => [
+            'required' => 'النشط مطلوب',
+            'array' => 'النشط غير صالح',
+            'exists' => 'النشط غير صالح',
+        ],
+        'url' => [
+            'required' => 'الرابط مطلوب',
+            'string' => 'الرابط غير صالح',
+            'min' => 'الرابط يجب الا يقل عن :min احرف',
+            'max' => 'الرابط يجب الا يزيد عن :max احرف',
+        ],
         'label' => [
             'required' => 'التسمية مطلوب',
             'in' => 'التسمية غير صالح',
@@ -979,6 +1007,9 @@ return [
         'sizes' => 'المقاسات',
         'materials' => 'الخامات',
         'country_origins' => 'الدول المنشأه',
+        'tags' => 'الوسوم',
+        'projects' => 'المشاريع',
+        'services' => 'الخدمات',
     ],
     'sidebar' => [
         'dashboard' => 'لوحة التحكم',
@@ -1049,8 +1080,9 @@ return [
         'reports_leads' => 'تحويل العملاء المحتملين',
         // Automation
         'automation' => 'الأتمتة',
-        // Settings
-        'settings' => 'الإعدادات',
+        'tags' => 'الوسوم',
+        'services' => 'الخدمات',
+        'projects' => 'المشاريع',
     ],
     'messages' => [
         'retrieved_success' => 'استرجاع ناجحة',

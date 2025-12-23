@@ -27,7 +27,6 @@ class StoreServiceRequest extends FormRequest
             'name' => ['required', 'array'],
             'name.en' => ['required', 'string', 'min:3', 'max:100'],
             'name.ar' => ['required', 'string', 'min:3', 'max:100'],
-            'slug' => ['required', 'string', 'min:3', 'max:100', 'unique:services,slug'],
             'status' => ['required', Rule::in(StatusEnum::values())],
             'short_description' => ['nullable', 'array'],
             'short_description.en' => ['nullable', 'string'],
@@ -35,6 +34,8 @@ class StoreServiceRequest extends FormRequest
             'description' => ['nullable', 'array'],
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
+            'tags' => ['nullable', 'array'],
+            'tags.*' => ['nullable', 'exists:tags,id'],
             'image' => ['nullable', 'image', 'mimetypes:image/png,image/jpg,image/jpeg,image/webp', 'mimes:png,jpg,jpeg,webp', 'max:2048']
         ];
     }
@@ -52,11 +53,6 @@ class StoreServiceRequest extends FormRequest
             'name.ar.string' => __('custom.validation.name_ar.string'),
             'name.ar.min' => __('custom.validation.name_ar.min'),
             'name.ar.max' => __('custom.validation.name_ar.max'),
-            'slug.required' => __('custom.validation.slug.required'),
-            'slug.string' => __('custom.validation.slug.string'),
-            'slug.min' => __('custom.validation.slug.min'),
-            'slug.max' => __('custom.validation.slug.max'),
-            'slug.unique' => __('custom.validation.slug.unique'),
             'status.required' => __('custom.validation.status.required'),
             'status.in' => __('custom.validation.status.in'),
             'short_description.array' => __('custom.validation.short_description.array'),
@@ -65,6 +61,8 @@ class StoreServiceRequest extends FormRequest
             'description.array' => __('custom.validation.description.array'),
             'description.en.string' => __('custom.validation.description_en.string'),
             'description.ar.string' => __('custom.validation.description_ar.string'),
+            'tags.array' => __('custom.validation.tags.array'),
+            'tags.*.exists' => __('custom.validation.tags.exists'),
             'image.image' => __('custom.validation.image.image'),
             'image.mimetypes' => __('custom.validation.image.mimetypes'),
             'image.mimes' => __('custom.validation.image.mimes'),

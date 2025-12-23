@@ -96,7 +96,15 @@ return [
         'import_instruction_2' => 'First row should contain column headers',
         'import_instruction_3' => 'Ensure all required fields are included',
     ],
-
+    'tag' => [
+        'tag' => 'Tags',
+    ],
+    'project' => [
+        'project' => 'Project',
+    ],
+    'service' => [
+        'service' => 'Service',
+    ],
     'words' => [
         'won' => 'Won',
         'back_to_home' => 'Back to home',
@@ -417,6 +425,11 @@ return [
         'button_type' => 'Button type',
         'subject' => 'Subject',
         'message' => 'Message',
+        'tags' => 'Tags',
+        'short_description' => 'Short description',
+        'short_description_en' => 'Short description [EN]',
+        'short_description_ar' => 'Short description [AR]',
+        'url' => 'Url',
     ],
     'columns' => [
         'id' => 'ID',
@@ -795,6 +808,22 @@ return [
             'required' => 'Is active is required',
             'in' => 'Is active invalid',
         ],
+        'status' => [
+            'required' => 'Status is required',
+            'in' => 'Status invalid',
+        ],
+        'tags' => [
+            'required' => 'Tags is required',
+            'array' => 'Tags invalid',
+            'exists' => 'Tags invalid',
+        ],
+        'url' => [
+            'required' => 'URL is required',
+            'array' => 'URL invalid',
+            'string' => 'URL invalid',
+            'min' => 'URL must be at least :min characters',
+            'max' => 'URL must not exceed :max characters',
+        ],
         'label' => [
             'required' => 'Label is required',
             'in' => 'Label invalid',
@@ -1018,6 +1047,9 @@ return [
         'sizes' => 'Sizes',
         'materials' => 'Materials',
         'country_origins' => 'Countries Origins',
+        'tags' => 'Tags',
+        'projects' => 'Projects',
+        'services' => 'Services',
     ],
     'sidebar' => [
         'dashboard' => 'Dashboard',
@@ -1090,6 +1122,9 @@ return [
         'automation' => 'Automation',
         // Settings
         'settings' => 'Settings',
+        'tags' => 'Tags',
+        'services' => 'Services',
+        'projects' => 'Projects',
     ],
     'currency' => [
         'eg' => 'EGP'

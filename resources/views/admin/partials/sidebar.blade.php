@@ -105,6 +105,47 @@
         @endcanany
 
         <!-- ============================================
+            MANAGEMENT
+        ============================================ -->
+        @canany(['tag.show', 'project.show', 'service.show'])
+            <li
+                class="menu-item {{ isActiveRoute(['dashboard.tags.*', 'dashboard.services.*', 'dashboard.projects.*']) ? 'open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons mdi mdi-account-cog-outline"></i>
+                    <div>{{ __('custom.sidebar.management') }}</div>
+                </a>
+                <ul class="menu-sub">
+                    @can('tag.show')
+                        <li class="menu-item {{ isActiveRoute('dashboard.tags.*') }}">
+                            <a href="{{ route('dashboard.tags.index') }}" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-tag-outline"></i>
+                                <div>{{ __('custom.sidebar.tags') }}</div>
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('service.show')
+                        <li class="menu-item {{ isActiveRoute('dashboard.services.*') }}">
+                            <a href="{{ route('dashboard.services.index') }}" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-briefcase-outline"></i>
+                                <div>{{ __('custom.sidebar.services') }}</div>
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('project.show')
+                        <li class="menu-item {{ isActiveRoute('dashboard.projects.*') }}">
+                            <a href="{{ route('dashboard.projects.index') }}" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-folder-outline"></i>
+                                <div>{{ __('custom.sidebar.projects') }}</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
+
+        <!-- ============================================
             USER MANAGEMENT
         ============================================ -->
         @canany(['user.show', 'role.show'])

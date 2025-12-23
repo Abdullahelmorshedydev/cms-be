@@ -78,20 +78,20 @@ class ProjectController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit($slug)
     {
         try {
-            return view('admin.pages.projects.edit', ['data' => $this->service->edit($id)['data']]);
+            return view('admin.pages.projects.edit', ['data' => $this->service->edit($slug)['data']]);
         } catch (\Exception $e) {
-            Log::error('Error loading project for edit', ['id' => $id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('Error loading project for edit', ['slug' => $slug, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
         }
     }
 
-    public function update(UpdateProjectRequest $request, $id)
+    public function update(UpdateProjectRequest $request, $slug)
     {
         try {
-            $response = $this->service->update($request->validated(), $id);
+            $response = $this->service->update($request->validated(), $slug);
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
                 'content' => $response['message']
@@ -99,15 +99,15 @@ class ProjectController extends Controller
 
             return to_route('dashboard.projects.index')->with('message', $message);
         } catch (\Exception $e) {
-            Log::error('Error updating project', ['id' => $id, 'error' => $e->getMessage()]);
+            Log::error('Error updating project', ['slug' => $slug, 'error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.updated_failed')])->withInput();
         }
     }
 
-    public function destroy($id)
+    public function destroy($slug)
     {
         try {
-            $response = $this->service->destroy('id', $id);
+            $response = $this->service->destroy('slug', $slug);
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
                 'content' => $response['message']
@@ -115,7 +115,7 @@ class ProjectController extends Controller
 
             return to_route('dashboard.projects.index')->with('message', $message);
         } catch (\Exception $e) {
-            Log::error('Error deleting service', ['id' => $id, 'error' => $e->getMessage()]);
+            Log::error('Error deleting service', ['slug' => $slug, 'error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.deleted_failed')]);
         }
     }

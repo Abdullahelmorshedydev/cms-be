@@ -78,20 +78,20 @@ class TagController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit($slug)
     {
         try {
-            return view('admin.pages.tags.edit', ['data' => $this->service->edit($id)['data']]);
+            return view('admin.pages.tags.edit', ['data' => $this->service->edit($slug)['data']]);
         } catch (\Exception $e) {
-            Log::error('Error loading tag for edit', ['id' => $id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('Error loading tag for edit', ['slug' => $slug, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
         }
     }
 
-    public function update(UpdateTagRequest $request, $id)
+    public function update(UpdateTagRequest $request, $slug)
     {
         try {
-            $response = $this->service->update($request->validated(), $id);
+            $response = $this->service->update($request->validated(), $slug);
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
                 'content' => $response['message']
@@ -99,15 +99,15 @@ class TagController extends Controller
 
             return to_route('dashboard.tags.index')->with('message', $message);
         } catch (\Exception $e) {
-            Log::error('Error updating tag', ['id' => $id, 'error' => $e->getMessage()]);
+            Log::error('Error updating tag', ['slug' => $slug, 'error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.updated_failed')])->withInput();
         }
     }
 
-    public function destroy($id)
+    public function destroy($slug)
     {
         try {
-            $response = $this->service->destroy('id', $id);
+            $response = $this->service->destroy('slug', $slug);
             $message = [
                 'status' => $response['code'] == Response::HTTP_OK,
                 'content' => $response['message']
@@ -115,7 +115,7 @@ class TagController extends Controller
 
             return to_route('dashboard.tags.index')->with('message', $message);
         } catch (\Exception $e) {
-            Log::error('Error deleting service', ['id' => $id, 'error' => $e->getMessage()]);
+            Log::error('Error deleting service', ['id' => $slug, 'error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.deleted_failed')]);
         }
     }

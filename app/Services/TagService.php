@@ -48,13 +48,13 @@ class TagService extends BaseService
         return parent::show($key, $value, $with);
     }
 
-    public function edit($id)
+    public function edit($slug)
     {
         return returnData(
             [],
             Response::HTTP_OK,
             $this->builder->edit($this->repository->findOneByWith(
-                ['id' => $id],
+                ['slug' => $slug],
                 ['*'],
                 [
                     'image'
@@ -64,7 +64,7 @@ class TagService extends BaseService
         );
     }
 
-    public function update($data, $value, $key = 'id', callable $callback = null)
+    public function update($data, $value, $key = 'slug', callable $callback = null)
     {
         return parent::update($data, $value, $key, function ($model, $data) {
             if (isset($data['image']) && is_file($data['image']))

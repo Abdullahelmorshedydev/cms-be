@@ -15,6 +15,8 @@ return new class extends Migration {
             $table->id();
             $table->json('name');
             $table->string('slug');
+            $table->json('short_description')->nullable();
+            $table->json('description')->nullable();
             $table->text('url')->nullable();
             $table->tinyInteger('status')->default(StatusEnum::ACTIVE->value);
             $table->timestamps();
