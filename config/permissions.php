@@ -7,6 +7,11 @@ return [
     'permission' => ['show'],
     'settings' => ['show', 'edit', 'create', 'delete'],
 
+    // Management
+    'tag' => ['show', 'edit', 'create', 'delete'],
+    'service' => ['show', 'edit', 'create', 'delete'],
+    'project' => ['show', 'edit', 'create', 'delete'],
+
     // Forms
     'form' => ['show', 'edit', 'create', 'delete', 'export'],
     'form-email' => ['show', 'edit', 'create', 'delete'],

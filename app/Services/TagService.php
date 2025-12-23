@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Services;
+
+use App\Builders\TagBuilder;
+use App\Enums\StatusEnum;
+use App\Repositories\TagRepository;
+use App\Services\MediaService;
+use Symfony\Component\HttpFoundation\Response;
+
+class TagService extends BaseService
+{
+    public function __construct(
+        TagRepository $repository,
+        protected TagBuilder $builder,
+        protected MediaService $mediaService
+    ) {
+        parent::__construct($repository);
+    }
+
+    public function index($data, $with = [], $columns = ['*'], $order = ['id' => 'DESC'], $limit = 10)
+    {
+        $result = parent::index($data, $with, $columns, $order, $limit);
+        $result['data']['status'] = StatusEnum::getAll();
+        return $result;
+    }
+
+    public function create()
+    {
+        return returnData(
+            [],
+            Response::HTTP_OK,
+            $this->builder->create(),
+            __('custom.messages.retrieved_success')
+        );
+    }
+
+    public function store($data, callable $callback = null)
+    {
+        return parent::store($data, function ($model, $data) {
+            if (isset($data['image']) && is_file($data['image']))
+                $this->mediaService->uploadImage($data['image'], $model, $model->name);
+        });
+    }
+
+    public function show($key, $value, $with = [])
+    {
+        return parent::show($key, $value, $with);
+    }
+
+    public function edit($id)
+    {
+        return returnData(
+            [],
+            Response::HTTP_OK,
+            $this->builder->edit($this->repository->findOneByWith(
+                ['id' => $id],
+                ['*'],
+                [
+                    'image'
+                ]
+            )),
+            __('custom.messages.retrieved_success')
+        );
+    }
+
+    public function update($data, $value, $key = 'id', callable $callback = null)
+    {
+        return parent::update($data, $value, $key, function ($model, $data) {
+            if (isset($data['image']) && is_file($data['image']))
+                $this->mediaService->uploadImage($data['image'], $model, $model->name);
+        });
+    }
+
+    public function destroy($key, $value, callable $beforeDelete = null)
+    {
+        return parent::destroy($key, $value, function ($model) {
+            $this->mediaService->removeImage($model);
+        });
+    }
+
+    public function destroyAll(array $ids, callable $beforeDelete = null)
+    {
+        return parent::destroyAll($ids, function ($model) {
+            $this->mediaService->removeImage($model);
+        });
+    }
+}

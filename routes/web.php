@@ -1,17 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dashboard\AuthController;
 use App\Http\Controllers\Dashboard\Cms\PageController as CmsPageController;
 use App\Http\Controllers\Dashboard\Cms\SectionController as CmsSectionController;
 use App\Http\Controllers\Dashboard\Cms\SectionTypeController as CmsSectionTypeController;
 
-use App\Http\Controllers\Dashboard\RoleController;
-use App\Http\Controllers\Dashboard\SettingController;
-use App\Http\Controllers\Dashboard\UserController;
-use App\Http\Controllers\Dashboard\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\FormController;
 use App\Http\Controllers\Dashboard\FormEmailController;
+use App\Http\Controllers\Dashboard\ProjectController;
+use App\Http\Controllers\Dashboard\RoleController;
+use App\Http\Controllers\Dashboard\ServiceController;
+use App\Http\Controllers\Dashboard\SettingController;
+use App\Http\Controllers\Dashboard\TagController;
+use App\Http\Controllers\Dashboard\UserController;
+use Illuminate\Support\Facades\Route;
+
+
+
 
 // Dashboard Routes
 Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(function () {
@@ -119,6 +125,63 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
             Route::get('/{form_email}/edit', 'edit')->middleware('check.permission:form-email.edit')->name('edit');
             Route::put('/{form_email}', 'update')->middleware('check.permission:form-email.edit')->name('update');
             Route::delete('/{form_email}', 'destroy')->middleware('check.permission:form-email.delete')->name('destroy');
+        });
+
+        // Tags
+        Route::controller(TagController::class)->prefix('/tags')->as('tags.')->group(function () {
+            Route::get('/', 'index')->middleware('check.permission:tag.show')->name('index');
+            Route::middleware('check.permission:tag.create')->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+            });
+            Route::middleware('check.permission:tag.edit')->group(function () {
+                Route::get('/{tag}/edit', 'edit')->name('edit');
+                Route::put('/{tag}', 'update')->name('update');
+            });
+            Route::middleware('check.permission:tag.delete')->group(function () {
+                Route::delete('/delete', 'destroyAll')->name('delete');
+                Route::delete('/{tag}', 'destroy')->name('destroy');
+            });
+            Route::post('/import', 'import')->middleware('check.permission:tag.import')->name('import');
+            Route::get('/export', 'export')->middleware('check.permission:tag.export')->name('export');
+        });
+
+        // Services
+        Route::controller(ServiceController::class)->prefix('/services')->as('services.')->group(function () {
+            Route::get('/', 'index')->middleware('check.permission:service.show')->name('index');
+            Route::middleware('check.permission:service.create')->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+            });
+            Route::middleware('check.permission:service.edit')->group(function () {
+                Route::get('/{service}/edit', 'edit')->name('edit');
+                Route::put('/{service}', 'update')->name('update');
+            });
+            Route::middleware('check.permission:service.delete')->group(function () {
+                Route::delete('/delete', 'destroyAll')->name('delete');
+                Route::delete('/{service}', 'destroy')->name('destroy');
+            });
+            Route::post('/import', 'import')->middleware('check.permission:service.import')->name('import');
+            Route::get('/export', 'export')->middleware('check.permission:service.export')->name('export');
+        });
+
+        // Projects
+        Route::controller(ProjectController::class)->prefix('/projects')->as('projects.')->group(function () {
+            Route::get('/', 'index')->middleware('check.permission:project.show')->name('index');
+            Route::middleware('check.permission:project.create')->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+            });
+            Route::middleware('check.permission:project.edit')->group(function () {
+                Route::get('/{project}/edit', 'edit')->name('edit');
+                Route::put('/{project}', 'update')->name('update');
+            });
+            Route::middleware('check.permission:project.delete')->group(function () {
+                Route::delete('/delete', 'destroyAll')->name('delete');
+                Route::delete('/{project}', 'destroy')->name('destroy');
+            });
+            Route::post('/import', 'import')->middleware('check.permission:project.import')->name('import');
+            Route::get('/export', 'export')->middleware('check.permission:project.export')->name('export');
         });
 
         // CMS (Pages, Section Types, Sections)

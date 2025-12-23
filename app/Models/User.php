@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\UserTypeEnum;
 use App\Traits\HasMedia;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -59,7 +58,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
-            'user_type' => UserTypeEnum::class,
             'address' => 'array',
         ];
     }
@@ -74,7 +72,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // Helper methods to check user type
     public function isAdmin(): bool
     {
-        return $this->is_admin || $this->user_type === UserTypeEnum::ADMIN;
+        return $this->is_admin;
     }
 
     public function getRolesDisplayNames()

@@ -13,7 +13,7 @@ class UpdateOrCreatePageRequest extends FormRequest
     {
         $page = $this->route('page');
         $pageId = $page?->id ?? null;
-        
+
         return [
             'name' => [
                 'required',
