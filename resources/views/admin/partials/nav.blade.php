@@ -10,12 +10,13 @@
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
         <ul class="navbar-nav flex-row align-items-center ms-auto">
             {{-- @canany(['lead.create', 'lead.create-not-assign'])
-                <li class="nav-item me-1 me-xl-0">
-                    <button onclick="window.location.href='{{ route('leads.create') }}'" type="button" class="nav-link btn btn-outline-primary waves-effect width-md"
-                        style="width: 130px;margin-inline-end: 10px;">
-                        {{ __('custom.words.add') . ' ' . __('custom.lead.lead') }}
-                    </button>
-                </li>
+            <li class="nav-item me-1 me-xl-0">
+                <button onclick="window.location.href='{{ route('leads.create') }}'" type="button"
+                    class="nav-link btn btn-outline-primary waves-effect width-md"
+                    style="width: 130px;margin-inline-end: 10px;">
+                    {{ __('custom.words.add') . ' ' . __('custom.lead.lead') }}
+                </button>
+            </li>
             @endcanany --}}
 
             <!-- Language -->
@@ -60,7 +61,7 @@
             </li>
 
             <!-- Notifications -->
-            <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-2 me-xl-0">
+            {{-- <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-2 me-xl-0">
                 <a class="nav-link hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
                     data-bs-auto-close="outside" aria-expanded="false">
                     <i class="mdi mdi-bell-outline mdi-24px"></i>
@@ -100,7 +101,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> --}}
             <!--/ Notifications -->
 
             <!-- User -->
@@ -116,7 +117,8 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="{{ route('dashboard.profile.index') }}">
+                        {{-- {{ route('dashboard.profile.index') }} --}}
+                        <a class="dropdown-item" href="#">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
@@ -133,12 +135,12 @@
                     <li>
                         <div class="dropdown-divider"></div>
                     </li>
-                    <li>
+                    {{-- <li>
                         <a class="dropdown-item" href="{{ route('dashboard.profile.index') }}">
                             <i class="mdi mdi-account-outline me-2"></i>
                             <span class="align-middle">{{ __('custom.nav.profile') }}</span>
                         </a>
-                    </li>
+                    </li> --}}
                     {{-- TODO : Add Settings --}}
                     {{-- <li>
                         <a class="dropdown-item" href="#">
@@ -146,9 +148,9 @@
                             <span class="align-middle">{{ __('custom.nav.settings') }}</span>
                         </a>
                     </li> --}}
-                    <li>
+                    {{-- <li>
                         <div class="dropdown-divider"></div>
-                    </li>
+                    </li> --}}
                     <li>
                         <a class="dropdown-item" href="javascript:void(0);" onclick="$('#logoutForm').submit()">
                             <i class="mdi mdi-logout me-2"></i>

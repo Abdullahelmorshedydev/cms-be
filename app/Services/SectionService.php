@@ -2,23 +2,25 @@
 
 namespace App\Services;
 
+use App\Enums\SectionButtonTypeEnum;
+use App\Enums\SectionFieldEnum;
+use App\Enums\SectionModelTypeEnum;
+use App\Enums\SectionParentTypeEnum;
 use App\HelperClasses\CmsHelpers;
+use App\Models\Page;
+use App\Models\Project;
+use App\Models\SectionType;
+use App\Models\Service;
 use App\Repositories\PageRepository;
 use App\Repositories\SectionModelRepository;
 use App\Repositories\SectionRepository;
-use Illuminate\Validation\Rules\Enum;
-use App\Models\Page;
-use App\Models\SectionType;
-use App\Enums\SectionFieldEnum;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use App\Enums\SectionParentTypeEnum;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-use App\Enums\SectionButtonTypeEnum;
-use App\Enums\SectionModelTypeEnum;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class SectionService
 {
@@ -248,11 +250,8 @@ class SectionService
     private function getSectionModel($section)
     {
         return match ($section) {
-            // (new VehicleModel())->getTable() => VehicleModel::class,
-            // (new ExteriorColor())->getTable() => ExteriorColor::class,
-            // (new InteriorColor())->getTable() => InteriorColor::class,
-            // (new VehicleVariant())->getTable() => VehicleVariant::class,
-            // (Vehicle::class) => Vehicle::class,
+            (new Service())->getTable() => Service::class,
+            (new Project())->getTable() => Project::class,
             default => null,
         };
     }
@@ -261,11 +260,8 @@ class SectionService
         return collect($deletedModels)->map(function ($deletedModel) {
             return [
                 'model_type' => match ($deletedModel['model_type']) {
-                    // (new VehicleModel())->getTable() => VehicleModel::class,
-                    // (new ExteriorColor())->getTable() => ExteriorColor::class,
-                    // (new InteriorColor())->getTable() => InteriorColor::class,
-                    // (new VehicleVariant())->getTable() => VehicleVariant::class,
-                    // (new Vehicle())->getTable() => Vehicle::class,
+                    (new Service())->getTable() => Service::class,
+                    (new Project())->getTable() => Project::class,
                     default => $deletedModel['model_type'],
                 },
                 'model_id' => $deletedModel['model_id'],
@@ -279,7 +275,7 @@ class SectionService
     private function prepareSectionData(array $data): array
     {
         $data['parent_id'] = $data['parent_id'] ?? request('page_id');
-        $data['parent_type'] = CmsHelpers::convertToClassName($data['parent_type'] ?? 'page', 'Cms');
+        $data['parent_type'] = CmsHelpers::convertToClassName($data['parent_type'] ?? 'page');
         $data['name'] = Str::slug($data['name']);
         if ($this->hasButton($data)) {
             foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
