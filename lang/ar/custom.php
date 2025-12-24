@@ -108,6 +108,9 @@ return [
     'service' => [
         'service' => 'خدمة',
     ],
+    'partner' => [
+        'partner' => 'شريك',
+    ],
     'words' => [
         'won' => 'الفائز',
         'back_to_home' => 'العودة الى الصفحة الرئيسية',
@@ -805,6 +808,9 @@ return [
             'mimetypes' => 'الصورة غير صالحة',
             'max' => 'الصورة غير صالحة',
         ],
+        'slug' => [
+            'required' => 'الرابط مطلوب',
+        ],
         'is_active' => [
             'required' => 'النشط مطلوب',
             'in' => 'النشط غير صالح',
@@ -1010,6 +1016,7 @@ return [
         'tags' => 'الوسوم',
         'projects' => 'المشاريع',
         'services' => 'الخدمات',
+        'partners' => 'الشركاء'
     ],
     'sidebar' => [
         'dashboard' => 'لوحة التحكم',
@@ -1083,6 +1090,7 @@ return [
         'tags' => 'الوسوم',
         'services' => 'الخدمات',
         'projects' => 'المشاريع',
+        'partners' => 'الشركاء',
     ],
     'messages' => [
         'retrieved_success' => 'استرجاع ناجحة',

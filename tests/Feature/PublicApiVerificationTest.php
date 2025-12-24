@@ -18,7 +18,7 @@ class PublicApiVerificationTest extends TestCase
     SectionType::create([
       'name' => 'Test Type',
       'slug' => 'test-type',
-      'fields' => [SectionFieldEnum::title->value],
+      'fields' => [SectionFieldEnum::TITLE->value],
     ]);
 
     $response = $this->getJson('/api/cms/sections/types');
@@ -53,7 +53,7 @@ class PublicApiVerificationTest extends TestCase
     $sectionType = SectionType::create([
       'name' => 'Test Type',
       'slug' => 'test-type',
-      'fields' => [SectionFieldEnum::title->value],
+      'fields' => [SectionFieldEnum::TITLE->value],
     ]);
 
     $page->sections()->create([

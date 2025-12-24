@@ -107,9 +107,9 @@
         <!-- ============================================
             MANAGEMENT
         ============================================ -->
-        @canany(['tag.show', 'project.show', 'service.show'])
+        @canany(['tag.show', 'project.show', 'service.show', 'partner.show'])
             <li
-                class="menu-item {{ isActiveRoute(['dashboard.tags.*', 'dashboard.services.*', 'dashboard.projects.*']) ? 'open' : '' }}">
+                class="menu-item {{ isActiveRoute(['dashboard.tags.*', 'dashboard.services.*', 'dashboard.projects.*', 'dashboard.partners.*']) ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-account-cog-outline"></i>
                     <div>{{ __('custom.sidebar.management') }}</div>
@@ -138,6 +138,15 @@
                             <a href="{{ route('dashboard.projects.index') }}" class="menu-link">
                                 <i class="menu-icon tf-icons mdi mdi-folder-outline"></i>
                                 <div>{{ __('custom.sidebar.projects') }}</div>
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('partner.show')
+                        <li class="menu-item {{ isActiveRoute('dashboard.partners.*') }}">
+                            <a href="{{ route('dashboard.partners.index') }}" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-folder-outline"></i>
+                                <div>{{ __('custom.sidebar.partners') }}</div>
                             </a>
                         </li>
                     @endcan

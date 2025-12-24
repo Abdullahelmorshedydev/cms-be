@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\Cms\SectionTypeController as CmsSectionTypeCo
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\FormController;
 use App\Http\Controllers\Dashboard\FormEmailController;
+use App\Http\Controllers\Dashboard\PartnerController;
 use App\Http\Controllers\Dashboard\ProjectController;
 use App\Http\Controllers\Dashboard\RoleController;
 use App\Http\Controllers\Dashboard\ServiceController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\Dashboard\UserController;
 use Illuminate\Support\Facades\Route;
+
 
 
 
@@ -184,6 +186,25 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
             Route::get('/export', 'export')->middleware('check.permission:project.export')->name('export');
         });
 
+        // Partners
+        Route::controller(PartnerController::class)->prefix('/partners')->as('partners.')->group(function () {
+            Route::get('/', 'index')->middleware('check.permission:partner.show')->name('index');
+            Route::middleware('check.permission:partner.create')->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+            });
+            Route::middleware('check.permission:partner.edit')->group(function () {
+                Route::get('/{partner}/edit', 'edit')->name('edit');
+                Route::put('/{partner}', 'update')->name('update');
+            });
+            Route::middleware('check.permission:partner.delete')->group(function () {
+                Route::delete('/delete', 'destroyAll')->name('delete');
+                Route::delete('/{partner}', 'destroy')->name('destroy');
+            });
+            Route::post('/import', 'import')->middleware('check.permission:partner.import')->name('import');
+            Route::get('/export', 'export')->middleware('check.permission:partner.export')->name('export');
+        });
+
         // CMS (Pages, Section Types, Sections)
         Route::prefix('/cms')->as('cms.')->group(function () {
             // Pages
@@ -195,6 +216,8 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
                 Route::get('/{page}/edit', 'edit')->middleware('check.permission:page.edit')->name('edit');
                 Route::put('/{page}', 'update')->middleware('check.permission:page.edit')->name('update');
                 Route::delete('/{page}', 'destroy')->middleware('check.permission:page.delete')->name('destroy');
+                // Edit page sections (STATIC sections edit view)
+                Route::get('/{page}/sections/edit', 'editSections')->middleware('check.permission:section.edit')->name('sections.edit');
             });
 
             // Section Types

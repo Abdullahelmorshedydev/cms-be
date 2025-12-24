@@ -77,7 +77,7 @@ class PageService
     public function getSectionsNames(string $pageName): array
     {
         $page = $this->repository->findOneBy([
-            'name' => $pageName,
+            'slug' => $pageName,
         ]);
         if (!$page) {
             return [];
@@ -85,6 +85,7 @@ class PageService
         return [
             'id' => $page->id,
             'name' => $page->name,
+            'slug' => $page->slug,
             'sections' => $page->sections->map(fn($section) => [
                 'id' => $section->id,
                 'name' => $section->name,
@@ -98,7 +99,6 @@ class PageService
 
     public function create($data)
     {
-
         return $this->repository->create($data);
     }
     public function update($data, $page)

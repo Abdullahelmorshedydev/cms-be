@@ -105,6 +105,9 @@ return [
     'service' => [
         'service' => 'Service',
     ],
+    'partner' => [
+        'partner' => 'Partner',
+    ],
     'words' => [
         'won' => 'Won',
         'back_to_home' => 'Back to home',
@@ -804,6 +807,9 @@ return [
             'mimetypes' => 'Image must be a png,jpg,jpeg,webp',
             'max' => 'Image size can not be more than :max',
         ],
+        'slug' => [
+            'required' => 'Slug is required',
+        ],
         'is_active' => [
             'required' => 'Is active is required',
             'in' => 'Is active invalid',
@@ -1050,6 +1056,7 @@ return [
         'tags' => 'Tags',
         'projects' => 'Projects',
         'services' => 'Services',
+        'partners' => 'Partners',
     ],
     'sidebar' => [
         'dashboard' => 'Dashboard',
@@ -1125,6 +1132,7 @@ return [
         'tags' => 'Tags',
         'services' => 'Services',
         'projects' => 'Projects',
+        'partners' => 'Partners',
     ],
     'currency' => [
         'eg' => 'EGP'

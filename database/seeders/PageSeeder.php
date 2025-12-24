@@ -31,35 +31,7 @@ class PageSeeder extends Seeder
                     'ar' => 'اتصل بنا'
                 ],
                 'slug' => 'contact-us',
-            ],
-            [
-                'name' => [
-                    'en' => 'Privacy Policy',
-                    'ar' => 'سياسة الخصوصية'
-                ],
-                'slug' => 'privacy-policy',
-            ],
-            [
-                'name' => [
-                    'en' => 'Terms & Conditions',
-                    'ar' => 'الشروط والاحكام'
-                ],
-                'slug' => 'terms-and-conditions',
-            ],
-            [
-                'name' => [
-                    'en' => 'FAQ',
-                    'ar' => 'الاسئلة الشائعة'
-                ],
-                'slug' => 'faq',
-            ],
-            [
-                'name' => [
-                    'en' => 'Help',
-                    'ar' => 'المساعدة'
-                ],
-                'slug' => 'help',
-            ],
+            ]
         ];
 
         foreach ($pages as $page) {

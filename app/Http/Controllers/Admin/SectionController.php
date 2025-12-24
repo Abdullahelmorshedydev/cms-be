@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\SectionService;
-use App\Transformers\Admin\SectionResource;
+use App\Resources\Admin\SectionResource;
 use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller

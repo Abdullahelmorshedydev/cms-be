@@ -25,7 +25,7 @@ class SectionTypeTest extends TestCase
         'name' => 'Test Card',
         'slug' => 'test-card',
         'description' => 'A test card section',
-        'fields' => [SectionFieldEnum::title->value, SectionFieldEnum::image->value],
+        'fields' => [SectionFieldEnum::TITLE->value, SectionFieldEnum::IMAGE->value],
       ]);
     }
   }
@@ -36,7 +36,7 @@ class SectionTypeTest extends TestCase
     $data = [
       'name' => 'New Type',
       'description' => 'New Type Description',
-      'fields' => [SectionFieldEnum::title->value, SectionFieldEnum::subtitle->value],
+      'fields' => [SectionFieldEnum::TITLE->value, SectionFieldEnum::SUBTITLE->value],
     ];
 
     $sectionType = $service->create($data);

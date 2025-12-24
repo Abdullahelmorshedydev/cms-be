@@ -7,7 +7,7 @@ use App\Http\Requests\Admin\UpdateOrCreatePageRequest;
 use App\Models\Page;
 use App\Services\PageService;
 use App\Services\SectionService;
-use App\Transformers\Admin\PageResource;
+use App\Resources\Admin\PageResource;
 
 class PageController extends Controller
 {

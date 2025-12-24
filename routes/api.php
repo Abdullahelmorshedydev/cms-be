@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Admin\SectionTypeController;
 use App\Http\Controllers\API\PageController;
+use App\Http\Controllers\API\PartnerController;
 use App\Http\Controllers\API\ProjectController;
 use App\Http\Controllers\API\SectionController as SectionController;
 use App\Http\Controllers\API\ServiceController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\API\TagController;
 use App\Http\Middleware\APILocaleMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -45,3 +47,6 @@ Route::get('/projects', ProjectController::class)->name('projects');
 
 // Tags
 Route::get('/tags', TagController::class)->name('tags');
+
+// Partners
+Route::get('/partners', PartnerController::class)->name('partners');

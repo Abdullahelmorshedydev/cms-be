@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Services\PageService;
-use App\Transformers\API\PageResource;
-use App\Transformers\API\SectionResource;
+use App\Resources\API\PageResource;
+use App\Resources\API\SectionResource;
 
 class PageController extends Controller
 {
@@ -19,7 +19,7 @@ class PageController extends Controller
     {
         return $this->successResponse(
             ['pages' => $this->service->getAllWithModelSections()],
-            __('response_messages.retrieved', ['model' => 'Pages'])
+            __('custom.messages.retrieved_success')
         );
     }
 
@@ -47,8 +47,10 @@ class PageController extends Controller
             return $this->notFound();
         $page = PageResource::make($page);
         return $this->successResponse(
-            ['page' => $page],
-            __('response_messages.retrieved', ['model' => 'Page' . ' ' . $page->name])
+            [
+                'page' => $page
+            ],
+            __('custom.messages.retrieved_success')
         );
     }
 
@@ -63,43 +65,44 @@ class PageController extends Controller
             if (!$section)
                 return $this->notFound();
             return $this->successResponse(
-                ['section' => SectionResource::make($section)],
-                trans('messages.success')
+                [
+                    'section' => SectionResource::make($section)
+                ],
+                __('custom.messages.retrieved_success')
             );
-
         }
 
-        $data = [
+        $section = $this->service->getPageSection([
             'page_id' => $page_id,
             'section_name' => $section_name
-        ];
-
-        $section = $this->service->getPageSection($data);
+        ]);
 
         if (!$section)
             return $this->notFound();
         return $this->successResponse(
-            ['section' => SectionResource::make($section)],
-            trans('messages.success')
+            [
+                'section' => SectionResource::make($section)
+            ],
+            __('custom.messages.retrieved_success')
         );
     }
 
     public function getSectionsNames(Request $request)
     {
-        if (!$request->page_name) {
+        if (!$request->page_slug)
             return $this->errorResponse(
-                trans('response_messages.page_name_required'),
+                __('custom.validation.slug.required'),
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
-        }
-        $sections = $this->service->getSectionsNames($request->page_name);
-        if (!$sections) {
+        $sections = $this->service->getSectionsNames($request->page_slug);
+        if (!$sections)
             return $this->notFound();
-        }
 
         return $this->successResponse(
-            ['section' => $sections],
-            trans('messages.success')
+            [
+                'section' => $sections
+            ],
+            __('custom.messages.retrieved_success')
         );
 
     }

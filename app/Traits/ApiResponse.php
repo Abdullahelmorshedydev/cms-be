@@ -286,7 +286,7 @@ trait ApiResponse
     public function notFound()
     {
         return $this->errorResponse(
-            trans('response_messages.not_found'),
+            __('custom.messages.not_found'),
             Response::HTTP_NOT_FOUND
         );
     }

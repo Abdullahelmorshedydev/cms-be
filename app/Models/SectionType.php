@@ -4,40 +4,29 @@ namespace App\Models;
 
 use App\Models\CmsSection;
 use App\Traits\HasMedia;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class SectionType extends Model
 {
-    use HasMedia;
+    use HasMedia, HasSlug, HasTranslations;
 
-    protected $table = 'section_types';
+    public $translatable = [
+        'name',
+        'description'
+    ];
 
     protected $fillable = [
         'name',
         'slug',
         'description',
-        'fields',
+        'fields'
     ];
 
     protected $casts = [
-        'fields' => 'array',
+        'fields' => 'array'
     ];
-
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('image')->singleFile();
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::saving(function ($sectionType) {
-            if (empty($sectionType->slug)) {
-                $sectionType->slug = Str::slug($sectionType->name);
-            }
-        });
-    }
 
     /**
      * The CMS sections that belong to the section type.

@@ -11,6 +11,16 @@ trait HasMedia
 {
     /**
      * =========================
+     * General relations
+     * =========================
+     */
+    public function media(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediaable');
+    }
+
+    /**
+     * =========================
      * Single relations (MorphOne)
      * =========================
      */

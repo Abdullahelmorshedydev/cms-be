@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SectionType\StoreSectionTypeRequest;
 use App\Http\Requests\Admin\SectionType\UpdateSectionTypeRequest;
 use App\Services\SectionTypeService;
-use App\Transformers\Admin\SectionTypeResource;
+use App\Resources\Admin\SectionTypeResource;
 
 class SectionTypeController extends Controller
 {

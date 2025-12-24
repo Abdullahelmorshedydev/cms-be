@@ -105,5 +105,32 @@ class PageController extends Controller
             return back()->withErrors(['error' => __('custom.messages.deleted_failed')]);
         }
     }
+
+    /**
+     * Edit page sections (STATIC sections edit view)
+     * View-only controller method that returns the edit page sections view
+     */
+    public function editSections(Page $page)
+    {
+        try {
+            // Get all sections for this page - using existing service/repository exactly as is
+            $sections = $this->sectionService->getPageSections($page->id);
+            
+            // Organize sections by their static keys
+            $sectionsByKey = [];
+            foreach ($sections as $section) {
+                $sectionsByKey[$section->name] = $section;
+            }
+
+            return view('admin.pages.cms.pages.sections.edit', [
+                'page' => $page,
+                'sections' => $sections,
+                'sectionsByKey' => $sectionsByKey
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error loading page sections for edit', ['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
+        }
+    }
 }
 

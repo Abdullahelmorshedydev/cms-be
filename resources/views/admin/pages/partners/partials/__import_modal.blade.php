@@ -7,7 +7,7 @@
                 </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('dashboard.projects.import') }}" method="post" enctype="multipart/form-data">
+            <form action="{{ route('dashboard.partners.import') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <input type="file" class="form-control" name="excel_file" accept=".xlsx">

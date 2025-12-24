@@ -24,7 +24,7 @@ class SectionApiVerificationTest extends TestCase
     // 1. Create SectionType
     $response = $this->postJson('/api/cms/admin/section-types', [
       'name' => \App\Enums\SectionTypeEnum::text_with_image->value,
-      'fields' => [SectionFieldEnum::title->value, SectionFieldEnum::image->value],
+      'fields' => [SectionFieldEnum::TITLE->value, SectionFieldEnum::IMAGE->value],
     ]);
 
     $response->assertStatus(200);
@@ -33,7 +33,7 @@ class SectionApiVerificationTest extends TestCase
 
     // 2. Update SectionType
     $response = $this->putJson("/api/cms/admin/section-types/{$sectionTypeId}", [
-      'fields' => [SectionFieldEnum::title->value, SectionFieldEnum::image->value, SectionFieldEnum::subtitle->value],
+      'fields' => [SectionFieldEnum::TITLE->value, SectionFieldEnum::IMAGE->value, SectionFieldEnum::SUBTITLE->value],
     ]);
     $response->assertStatus(200);
 
@@ -51,7 +51,7 @@ class SectionApiVerificationTest extends TestCase
     $type = SectionType::create([
       'name' => 'Feature Card',
       'slug' => 'feature-card',
-      'fields' => [SectionFieldEnum::title->value, SectionFieldEnum::image->value],
+      'fields' => [SectionFieldEnum::TITLE->value, SectionFieldEnum::IMAGE->value],
     ]);
 
     // 1. Create Section
@@ -102,7 +102,7 @@ class SectionApiVerificationTest extends TestCase
     // 1. Create SectionType with buttons field
     $response = $this->postJson('/api/cms/admin/section-types', [
       'name' => \App\Enums\SectionTypeEnum::buttons_section->value,
-      'fields' => [SectionFieldEnum::title->value, SectionFieldEnum::buttons->value],
+      'fields' => [SectionFieldEnum::TITLE->value, SectionFieldEnum::BUTTONS->value],
     ]);
     $response->assertStatus(200);
     $sectionTypeId = $response->json('data.section_type.id');

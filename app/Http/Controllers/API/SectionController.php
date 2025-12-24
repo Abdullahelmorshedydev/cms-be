@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Repositories\SectionRepository;
 use App\Services\SectionService;
-use App\Transformers\API\SectionResource;
+use App\Resources\API\SectionResource;
 
 class SectionController extends Controller
 {

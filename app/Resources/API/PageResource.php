@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Transformers\Admin;
+namespace App\Resources\API;
 
 use App\HelperClasses\CmsHelpers;
 use Illuminate\Http\Request;

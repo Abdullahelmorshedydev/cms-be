@@ -49,16 +49,16 @@ class SectionService
             $section = $this->repository->create($data);
             $sectionType = SectionType::where('slug', $data['type'])->first();
 
-            if ($this->hasField($sectionType, SectionFieldEnum::image->value))
+            if ($this->hasField($sectionType, SectionFieldEnum::IMAGE->value))
                 $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
-            if ($this->hasField($sectionType, SectionFieldEnum::gallery->value))
+            if ($this->hasField($sectionType, SectionFieldEnum::GALLERY->value))
                 $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
-            if ($this->hasField($sectionType, SectionFieldEnum::icon->value))
+            if ($this->hasField($sectionType, SectionFieldEnum::ICON->value))
                 $this->uploadIcon($section, $data['icon']);
 
-            if ($this->hasField($sectionType, SectionFieldEnum::video->value))
+            if ($this->hasField($sectionType, SectionFieldEnum::VIDEO->value))
                 $this->addMultipleVideosToSection($section, $data['videos'], $data['images'], $data['remove_videos_ids'], $data['remove_images_ids']);
 
             if ($this->hasChildSection($data))
@@ -122,16 +122,16 @@ class SectionService
             $this->addModelToSection(['model' => $data['model'], 'model_data' => $data['model_data'], 'section' => $section]);
         $sectionType = SectionType::where('slug', $data['type'])->first();
 
-        if ($this->hasField($sectionType, SectionFieldEnum::icon->value))
+        if ($this->hasField($sectionType, SectionFieldEnum::ICON->value))
             $this->uploadIcon($section, $data['icon']);
 
-        if ($this->hasField($sectionType, SectionFieldEnum::image->value))
+        if ($this->hasField($sectionType, SectionFieldEnum::IMAGE->value))
             $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
-        if ($this->hasField($sectionType, SectionFieldEnum::gallery->value))
+        if ($this->hasField($sectionType, SectionFieldEnum::GALLERY->value))
             $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
 
-        if ($this->hasField($sectionType, SectionFieldEnum::video->value))
+        if ($this->hasField($sectionType, SectionFieldEnum::VIDEO->value))
             $this->addMultipleVideosToSection($section, $data['videos'], $data['images'], $data['remove_videos_ids'], $data['remove_images_ids']);
         if ($this->hasChildSection($data))
             $this->addMultipleChildSection($data['sub_sections'], $section->id);
@@ -298,20 +298,20 @@ class SectionService
         $content = null;
         $sectionType = SectionType::where('slug', $data['type'])->first();
 
-        if ($this->hasField($sectionType, SectionFieldEnum::title->value)) {
+        if ($this->hasField($sectionType, SectionFieldEnum::TITLE->value)) {
             $content['title'] = $this->prepareContentTranslator($data, 'title');
         }
-        if ($this->hasField($sectionType, SectionFieldEnum::subtitle->value)) {
+        if ($this->hasField($sectionType, SectionFieldEnum::SUBTITLE->value)) {
             $content['subtitle'] = $this->prepareContentTranslator($data, 'subtitle');
         }
-        if ($this->hasField($sectionType, SectionFieldEnum::description->value)) {
+        if ($this->hasField($sectionType, SectionFieldEnum::DESCRIPTION->value)) {
             $content['description'] = $this->prepareContentTranslator($data, 'description');
         }
-        if ($this->hasField($sectionType, SectionFieldEnum::short_description->value)) {
+        if ($this->hasField($sectionType, SectionFieldEnum::SHORT_DESCRIPTION->value)) {
             $content['short_description'] = $this->prepareContentTranslator($data, 'short_description');
         }
 
-        if ($this->hasField($sectionType, SectionFieldEnum::buttons->value)) {
+        if ($this->hasField($sectionType, SectionFieldEnum::BUTTONS->value)) {
             $buttons = $data['content']['buttons'] ?? [];
             $processedButtons = [];
             foreach ($buttons as $button) {
@@ -413,32 +413,32 @@ class SectionService
 
         foreach ($sectionType->fields as $field) {
             switch ($field) {
-                case SectionFieldEnum::title->value:
+                case SectionFieldEnum::TITLE->value:
                     $rules['title'] = 'nullable|string|max:191';
                     break;
-                case SectionFieldEnum::subtitle->value:
+                case SectionFieldEnum::SUBTITLE->value:
                     $rules['subtitle'] = 'nullable|string|max:191';
                     break;
-                case SectionFieldEnum::description->value:
+                case SectionFieldEnum::DESCRIPTION->value:
                     $rules['description'] = 'nullable|string|max:500';
                     break;
-                case SectionFieldEnum::short_description->value:
+                case SectionFieldEnum::SHORT_DESCRIPTION->value:
                     $rules['short_description'] = 'nullable|string|max:255';
                     break;
-                case SectionFieldEnum::icon->value:
+                case SectionFieldEnum::ICON->value:
                     $this->addFileRule($rules, $data, 'icon', 'required|image|max:900', $isUpdate);
                     break;
-                case SectionFieldEnum::image->value:
+                case SectionFieldEnum::IMAGE->value:
                     $this->addImageRules($rules, $data, ['images.*.file'], $isUpdate);
                     break;
-                case SectionFieldEnum::gallery->value:
+                case SectionFieldEnum::GALLERY->value:
                     $rules['images'] = $isUpdate ? 'nullable|array' : 'required|array';
                     $this->addFileRule($rules, $data, 'images.*.file', 'required|image|max:900', $isUpdate);
                     break;
-                case SectionFieldEnum::video->value:
+                case SectionFieldEnum::VIDEO->value:
                     $this->addVideoRules($rules, $data, ['videos.*.file'], ['images.*.file'], $isUpdate);
                     break;
-                case SectionFieldEnum::buttons->value:
+                case SectionFieldEnum::BUTTONS->value:
                     $rules['content.buttons'] = 'nullable|array';
                     $rules['content.buttons.*.label'] = 'required|array';
                     $rules['content.buttons.*.url'] = 'required|string';

@@ -12,7 +12,8 @@ class CmsSection extends Model
 {
     use HasFactory, HasTranslations, HasMedia;
 
-    protected $table = 'cms_sections';
+    public array $translatable = ['button_text'];
+
     protected $fillable = [
         'name',
         'content',
@@ -25,12 +26,11 @@ class CmsSection extends Model
         'button_text',
         'button_type'
     ];
+
     protected $casts = [
         'content' => 'json',
         'disabled' => 'boolean',
     ];
-
-    public array $translatable = ['button_text'];
 
     public function sections()
     {
@@ -41,10 +41,12 @@ class CmsSection extends Model
     {
         return 'parent_id';
     }
+
     public function models()
     {
         return $this->hasMany(SectionModel::class, 'section_id');
     }
+
     public function getModels()
     {
         $models = [];
@@ -54,6 +56,15 @@ class CmsSection extends Model
                 $models[] = $model->model;
         })->values();
         return $models;
+    }
+
+    public function getMediaResponse()
+    {
+        $media = [];
+        $this->media->each(function ($mediaItem) use (&$media) {
+            $media[] = $mediaItem->getMediaResponse();
+        });
+        return $media;
     }
 
     /**
