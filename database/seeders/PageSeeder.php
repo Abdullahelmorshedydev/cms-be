@@ -12,31 +12,52 @@ class PageSeeder extends Seeder
     {
         $pages = [
             [
-                'name' => 'Home',
+                'name' => [
+                    'en' => 'Home',
+                    'ar' => 'الصفحة الرئيسية'
+                ],
                 'slug' => 'home'
             ],
             [
-                'name' => 'About Us',
+                'name' => [
+                    'en' => 'About Us',
+                    'ar' => 'من نحن'
+                ],
                 'slug' => 'about-us',
             ],
             [
-                'name' => 'Contact Us',
+                'name' => [
+                    'en' => 'Contact Us',
+                    'ar' => 'اتصل بنا'
+                ],
                 'slug' => 'contact-us',
             ],
             [
-                'name' => 'Privacy Policy',
+                'name' => [
+                    'en' => 'Privacy Policy',
+                    'ar' => 'سياسة الخصوصية'
+                ],
                 'slug' => 'privacy-policy',
             ],
             [
-                'name' => 'Terms & Conditions',
+                'name' => [
+                    'en' => 'Terms & Conditions',
+                    'ar' => 'الشروط والاحكام'
+                ],
                 'slug' => 'terms-and-conditions',
             ],
             [
-                'name' => 'FAQ',
+                'name' => [
+                    'en' => 'FAQ',
+                    'ar' => 'الاسئلة الشائعة'
+                ],
                 'slug' => 'faq',
             ],
             [
-                'name' => 'Help',
+                'name' => [
+                    'en' => 'Help',
+                    'ar' => 'المساعدة'
+                ],
                 'slug' => 'help',
             ],
         ];

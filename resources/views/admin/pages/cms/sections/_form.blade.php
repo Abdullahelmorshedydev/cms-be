@@ -1,12 +1,8 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="form-floating form-floating-outline">
-            <input type="text"
-                   class="form-control @error('name') is-invalid @enderror"
-                   id="name"
-                   name="name"
-                   value="{{ old('name', $section->name ?? null) }}"
-                   required>
+            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name"
+                value="{{ old('name', $section->name ?? null) }}" required>
             <label for="name">{{ __('custom.columns.name') }} *</label>
             @error('name')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -16,14 +12,10 @@
 
     <div class="col-md-6 mb-3">
         <div class="form-floating form-floating-outline">
-            <select class="form-control @error('type') is-invalid @enderror"
-                    id="type"
-                    name="type"
-                    required>
+            <select class="form-control @error('type') is-invalid @enderror" id="type" name="type" required>
                 <option value="">{{ __('custom.words.choose') }}</option>
                 @foreach($sectionTypes as $sectionType)
-                    <option value="{{ $sectionType->slug }}"
-                        {{ old('type', $section->type ?? null) == $sectionType->slug ? 'selected' : '' }}>
+                    <option value="{{ $sectionType->slug }}" {{ old('type', $section->type ?? null) == $sectionType->slug ? 'selected' : '' }}>
                         {{ $sectionType->name }}
                     </option>
                 @endforeach
@@ -41,13 +33,10 @@
     @else
         <div class="col-md-6 mb-3">
             <div class="form-floating form-floating-outline">
-                <select class="form-control @error('page_id') is-invalid @enderror"
-                        id="page_id"
-                        name="page_id">
+                <select class="form-control @error('page_id') is-invalid @enderror" id="page_id" name="page_id">
                     <option value="">{{ __('custom.words.choose') }}</option>
                     @foreach($pages as $p)
-                        <option value="{{ $p->id }}"
-                            {{ (int) old('page_id', $section->parent_id ?? null) === (int) $p->id ? 'selected' : '' }}>
+                        <option value="{{ $p->id }}" {{ (int) old('page_id', $section->parent_id ?? null) === (int) $p->id ? 'selected' : '' }}>
                             {{ $p->name }}
                         </option>
                     @endforeach
@@ -62,11 +51,8 @@
 
     <div class="col-md-6 mb-3">
         <div class="form-floating form-floating-outline">
-            <input type="number"
-                   class="form-control @error('order') is-invalid @enderror"
-                   id="order"
-                   name="order"
-                   value="{{ old('order', $section->order ?? null) }}">
+            <input type="number" class="form-control @error('order') is-invalid @enderror" id="order" name="order"
+                value="{{ old('order', $section->order ?? null) }}">
             <label for="order">{{ __('custom.columns.order') }}</label>
             @error('order')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -83,6 +69,3 @@
         </a>
     </div>
 </div>
-
-
-

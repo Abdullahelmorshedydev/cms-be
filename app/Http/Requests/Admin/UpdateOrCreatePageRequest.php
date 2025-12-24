@@ -2,28 +2,13 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class UpdateOrCreatePageRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
-    public function rules(): array
-    {
-        $page = $this->route('page');
-        $pageId = $page?->id ?? null;
-
-        return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                $pageId ? "unique:pages,name,{$pageId}" : 'unique:pages,name'
-            ],
-            'is_active' => ['nullable', 'boolean', 'in:0,1'],
-        ];
-    }
 
     /**
      * Determine if the user is authorized to make this request.
@@ -31,5 +16,32 @@ class UpdateOrCreatePageRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     */
+    public function rules(): array
+    {
+        $page = $this->route('page');
+        $pageId = $page?->id ?? null;
+        $rules = [];
+
+        foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $properties) {
+            $rules[] = [
+                "name.{$localeCode}" => [
+                    'required',
+                    'string',
+                    'max:255',
+                    $pageId ? Rule::unique('pages', "name->{$localeCode}")->ignore($pageId) : Rule::unique('pages', "name->{$localeCode}")
+                ]
+            ];
+        }
+
+        $rules[] = [
+            'status' => ['nullable', Rule::in(StatusEnum::values())]
+        ];
+
+        return $rules;
     }
 }

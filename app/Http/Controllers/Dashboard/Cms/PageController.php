@@ -22,7 +22,8 @@ class PageController extends Controller
     {
         try {
             return view('admin.pages.cms.pages.index', [
-                'pages' => $this->service->getAll()
+                'pages' => $this->service->getAll(),
+                'status' => StatusEnum::getAll()
             ]);
         } catch (\Exception $e) {
             Log::error('Error loading CMS pages', ['error' => $e->getMessage()]);
@@ -45,11 +46,7 @@ class PageController extends Controller
     public function store(UpdateOrCreatePageRequest $request)
     {
         try {
-            $data = $request->validated();
-            if ($request->has('is_active'))
-                $data['is_active'] = $request->input('is_active', 1);
-            $this->service->create($data);
-
+            $this->service->create($request->validated());
             return redirect()
                 ->route('dashboard.cms.pages.index')
                 ->with('success', __('response_messages.created', ['model' => 'Page']));
@@ -86,12 +83,7 @@ class PageController extends Controller
     public function update(UpdateOrCreatePageRequest $request, Page $page)
     {
         try {
-            $data = $request->validated();
-            if ($request->has('is_active'))
-                $data['is_active'] = $request->input('is_active');
-
-            $this->service->update($data, $page);
-
+            $this->service->update($request->validated(), $page);
             return redirect()
                 ->route('dashboard.cms.pages.index')
                 ->with('success', __('response_messages.updated', ['model' => 'Page']));

@@ -12,7 +12,7 @@
     <meta name="user-id" content="{{ auth()->id() }}">
     <meta name="is-admin" content="{{ auth()->user()->is_admin ?? false }}">
 
-    <title>@yield('title') - {{ config('app.name', 'TOTC') }}</title>
+    <title>@yield('title') - {{ setting('site_name') }}</title>
 
     <meta name="description" content="@yield('description', 'TOTC Platform - Learning Management System')" />
     <meta name="theme-color" content="#696cff" />
@@ -77,8 +77,6 @@
     @include('admin.partials.scripts')
 
     @yield('js')
-
-
 </body>
 
 </html>

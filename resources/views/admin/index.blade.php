@@ -255,41 +255,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Recent Users -->
-            <div class="col-12 col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">{{ __('custom.words.recent_users') }}</h5>
-                        <a href="{{ route('dashboard.users.index') }}" class="btn btn-sm btn-text-primary">
-                            {{ __('custom.words.view_all') }}
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        @forelse($analytics['recent_users'] as $user)
-                            <div class="recent-item">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">
-                                            {{ $user['name'] }}
-                                            @if($user['is_admin'])
-                                                <span class="badge badge-sm bg-primary">Admin</span>
-                                            @endif
-                                        </h6>
-                                        <small class="text-muted d-block">{{ $user['email'] }}</small>
-                                    </div>
-                                    <small class="text-muted">{{ $user['created_at'] }}</small>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center text-muted py-4">
-                                <i class="mdi mdi-account-off-outline mdi-48px mb-2"></i>
-                                <p class="mb-0">{{ __('custom.words.no_recent_users') }}</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
     <!-- / Content -->
@@ -299,7 +264,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Monthly Statistics Chart
             const monthlyCtx = document.getElementById('monthlyChart');
             if (monthlyCtx) {
                 const monthlyData = @json($analytics['monthly_stats']);
@@ -309,14 +273,6 @@
                     data: {
                         labels: monthlyData.labels,
                         datasets: [
-                            {
-                                label: '{{ __("custom.words.users") }}',
-                                data: monthlyData.users,
-                                borderColor: 'rgb(105, 108, 255)',
-                                backgroundColor: 'rgba(105, 108, 255, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            },
                             {
                                 label: '{{ __("custom.words.forms") }}',
                                 data: monthlyData.forms,

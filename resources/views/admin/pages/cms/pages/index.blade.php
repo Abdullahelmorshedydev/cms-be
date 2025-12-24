@@ -9,12 +9,15 @@
                 <div class="row align-items-end">
                     <div class="d-flex align-items-end justify-content-end">
                         <div class="ms-2">
-                            <a href="{{ route('dashboard.cms.pages.create') }}" class="dt-button add-new btn btn-primary">
-                                <span>
-                                    <i class="mdi mdi-plus me-0 me-sm-1"></i>
-                                    <span class="d-none d-sm-inline-block">{{ __('custom.words.add') . ' ' . __('custom.words.page') }}</span>
-                                </span>
-                            </a>
+                            @can('page.create')
+                                <a href="{{ route('dashboard.cms.pages.create') }}" class="dt-button add-new btn btn-primary">
+                                    <span>
+                                        <i class="mdi mdi-plus me-0 me-sm-1"></i>
+                                        <span
+                                            class="d-none d-sm-inline-block">{{ __('custom.words.add') . ' ' . __('custom.words.page') }}</span>
+                                    </span>
+                                </a>
+                            @endcan
                         </div>
                     </div>
                 </div>
@@ -26,10 +29,7 @@
                             <tr>
                                 <th>{{ __('custom.columns.name') }}</th>
                                 <th>{{ __('custom.columns.slug') }}</th>
-                                @if(isset($pages->first()->is_active))
-                                    <th>{{ __('custom.columns.activation') }}</th>
-                                @endif
-                                <th>{{ __('custom.columns.created_at') }}</th>
+                                <th>{{ __('custom.columns.activation') }}</th>
                                 <th>{{ __('custom.words.actions') }}</th>
                             </tr>
                         </thead>
@@ -38,39 +38,39 @@
                                 <tr>
                                     <td>{{ $page->name }}</td>
                                     <td>{{ $page->slug }}</td>
-                                    @if(isset($page->is_active))
-                                        <td>
-                                            <span class="badge bg-{{ $page->is_active ? 'success' : 'danger' }}">
-                                                {{ $page->is_active ? __('custom.words.active') : __('custom.words.inactive') }}
-                                            </span>
-                                        </td>
-                                    @endif
-                                    <td>{{ $page->created_at->format('Y-m-d H:i') }}</td>
+                                    <td>{{ $page->status->lang() }}</td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="mdi mdi-dots-vertical"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item waves-effect" href="{{ route('dashboard.cms.pages.show', $page->id) }}">
-                                                    <i class="mdi mdi-eye-outline me-1"></i> {{ __('custom.words.show') }}
-                                                </a>
-                                                <a class="dropdown-item waves-effect" href="{{ route('dashboard.cms.pages.edit', $page->id) }}">
-                                                    <i class="mdi mdi-pencil-outline me-1"></i> {{ __('custom.words.edit') }}
-                                                </a>
-                                                <a class="dropdown-item waves-effect text-danger delete-item" 
-                                                   data-url="{{ route('dashboard.cms.pages.destroy', $page->id) }}" 
-                                                   data-bs-toggle="modal" 
-                                                   data-bs-target="#deleteModal">
-                                                    <i class="mdi mdi-trash-can-outline me-1"></i> {{ __('custom.words.delete') }}
-                                                </a>
+                                        @canany(['page.edit', 'page.delete'])
+                                            <div class="dropdown">
+                                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                                    data-bs-toggle="dropdown">
+                                                    <i class="mdi mdi-dots-vertical"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    @can('page.edit')
+                                                        <a class="dropdown-item waves-effect"
+                                                            href="{{ route('dashboard.cms.pages.edit', $page->slug) }}">
+                                                            <i class="mdi mdi-pencil-outline me-1"></i> {{ __('custom.words.edit') }}
+                                                        </a>
+                                                    @endcan
+                                                    @can('page.delete')
+                                                        <a class="dropdown-item waves-effect text-danger delete-item"
+                                                            data-url="{{ route('dashboard.cms.pages.destroy', $page->slug) }}"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                            <i class="mdi mdi-trash-can-outline me-1"></i>
+                                                            {{ __('custom.words.delete') }}
+                                                        </a>
+                                                    @endcan
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endcanany
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ isset($pages->first()->is_active) ? '5' : '4' }}" class="text-center">{{ __('custom.words.no_data') }}</td>
+                                    <td colspan="3" class="text-center">
+                                        {{ __('custom.words.no_data') }}
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -81,4 +81,3 @@
     </div>
     @include('admin.partials.__delete_modal')
 @endsection
-

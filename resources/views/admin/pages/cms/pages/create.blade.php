@@ -14,13 +14,16 @@
             <div class="card-body">
                 <form action="{{ route('dashboard.cms.pages.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @php($page = null)
-                    @php($submitLabel = __('custom.words.create'))
-                    @include('admin.pages.cms.pages._form', compact('page', 'data', 'submitLabel'))
+                    @include(
+                        'admin.pages.cms.pages._form',
+                        [
+                            'page' => null,
+                            'data' => $data ?? ['status' => []],
+                            'submitLabel' => __('custom.words.create')
+                        ]
+                    )
                 </form>
             </div>
         </div>
     </div>
 @endsection
-
-

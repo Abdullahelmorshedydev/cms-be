@@ -12,16 +12,17 @@
                 </a>
             </div>
             <div class="card-body">
-                <form action="{{ route('dashboard.cms.pages.update', $data['record']->id) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('dashboard.cms.pages.update', $data['record']->slug) }}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    @php($page = $data['record'])
-                    @php($submitLabel = __('custom.words.update'))
-                    @include('admin.pages.cms.pages._form', compact('page', 'data', 'submitLabel'))
+                    @include('admin.pages.cms.pages._form', [
+                        'page' => $data['record'],
+                        'data' => $data,
+                        'submitLabel' => __('custom.words.update')
+                    ])
                 </form>
             </div>
         </div>
     </div>
 @endsection
-
-

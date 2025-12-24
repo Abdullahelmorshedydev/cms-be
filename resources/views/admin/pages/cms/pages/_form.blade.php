@@ -1,35 +1,34 @@
+@php
+    use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+@endphp
+
 <div class="row">
-    <div class="col-md-12 mb-3">
-        <div class="form-floating form-floating-outline">
-            <input type="text"
-                   class="form-control @error('name') is-invalid @enderror"
-                   id="name"
-                   name="name"
-                   value="{{ old('name', $page->name ?? null) }}"
-                   required>
-            <label for="name">{{ __('custom.columns.name') }} *</label>
-            @error('name')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+    @foreach (LaravelLocalization::getSupportedLocales() as $localeCode => $properties)
+        <div class="col-md-6 mb-3">
+            <div class="form-floating form-floating-outline">
+                <input type="text" class="form-control @error('name.' . $localeCode) is-invalid @enderror"
+                    id="name_{{ $localeCode }}" name="name[{{ $localeCode }}]"
+                    value="{{ old('name.' . $localeCode, $page?->getTranslation('name', $localeCode)) }}">
+                <label for="name_{{ $localeCode }}">{{ __('custom.inputs.name_' . $localeCode) }}</label>
+                @error('name.' . $localeCode)
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
-    </div>
+    @endforeach
 
     <div class="col-md-12 mb-3">
         <div class="form-floating form-floating-outline">
-            <select class="form-control @error('is_active') is-invalid @enderror"
-                    id="is_active"
-                    name="is_active"
-                    required>
+            <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
                 <option value="">{{ __('custom.words.choose') }}</option>
                 @foreach ($data['status'] as $stat)
-                    <option value="{{ $stat['value'] }}"
-                        {{ (string) old('is_active', $page->is_active->value ?? $page->is_active ?? '') === (string) $stat['value'] ? 'selected' : '' }}>
+                    <option value="{{ $stat['value'] }}" {{ old('status', $page->status->value ?? '') == $stat['value'] ? 'selected' : '' }}>
                         {{ $stat['lang'] }}
                     </option>
                 @endforeach
             </select>
-            <label for="is_active">{{ __('custom.inputs.is_active') }} *</label>
-            @error('is_active')
+            <label for="status">{{ __('custom.inputs.status') }}</label>
+            @error('status')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
@@ -39,10 +38,5 @@
         <button type="submit" class="btn btn-primary">
             {{ $submitLabel ?? __('custom.words.save') }}
         </button>
-        <a href="{{ route('dashboard.cms.pages.index') }}" class="btn btn-secondary">
-            {{ __('custom.words.cancel') }}
-        </a>
     </div>
 </div>
-
-

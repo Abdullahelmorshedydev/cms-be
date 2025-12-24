@@ -2,29 +2,33 @@
 
 namespace App\Models;
 
+use App\Enums\StatusEnum;
+use App\Traits\HasSlug;
+use App\Traits\RouteKeyName;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
 
 class Page extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, HasSlug, RouteKeyName;
 
-    protected $translatable = [];
+    protected $translatable = [
+        'name'
+    ];
 
-    protected $fillable = ['name', 'slug'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'status'
+    ];
+
+    protected $casts = [
+        'status' => StatusEnum::class
+    ];
 
     public function sections()
     {
         return $this->morphMany(CmsSection::class, 'parent');
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::saving(function ($page) {
-            $page->slug = Str::slug($page->name);
-        });
     }
 }
