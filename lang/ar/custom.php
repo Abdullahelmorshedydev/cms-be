@@ -329,6 +329,10 @@ return [
         'page' => 'صفحة',
         'section' => 'قسم',
         'type' => 'نوع',
+        'read_only' => 'للقراءة فقط',
+        'unsupported_section_type' => 'نوع قسم غير مدعوم',
+        'subsection' => 'قسم فرعي',
+        'subsections' => 'قوائم فرعية',
     ],
     'inputs' => [
         'name' => 'الاسم',

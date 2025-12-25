@@ -33,10 +33,17 @@ class SectionService
     }
     public function getPageSections($page_id)
     {
-        return $this->repository->findBy([
-            'parent_type' => Page::class,
-            'parent_id' => $page_id,
-        ]);
+        return $this->repository->findBy(
+            [
+                'parent_type' => Page::class,
+                'parent_id' => $page_id,
+            ],
+            ['*'],
+            [],
+            false,
+            'order',
+            'ASC'
+        );
     }
 
     public function create($data)
@@ -407,9 +414,8 @@ class SectionService
     }
     private function applyTypeSpecificRules(array &$rules, ?SectionType $sectionType, $data, bool $isUpdate = false): void
     {
-        if (!$sectionType || empty($sectionType->fields)) {
+        if (!$sectionType || empty($sectionType->fields))
             return;
-        }
 
         foreach ($sectionType->fields as $field) {
             switch ($field) {
@@ -488,9 +494,8 @@ class SectionService
             'type' => 'required|exists:section_types,slug',
         ]);
 
-        if ($validator->fails()) {
+        if ($validator->fails())
             $this->formatAndThrowValidationException($validator, $parentFormId, $formId);
-        }
 
         return $validator;
     }

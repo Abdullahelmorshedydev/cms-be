@@ -40,22 +40,28 @@
                                     <td>{{ $page->slug }}</td>
                                     <td>{{ $page->status->lang() }}</td>
                                     <td>
-                                        @canany(['page.edit', 'page.delete'])
+                                        @canany(['section.edit', 'page.edit', 'page.delete'])
                                             <div class="dropdown">
                                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
                                                     data-bs-toggle="dropdown">
                                                     <i class="mdi mdi-dots-vertical"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
+                                                    @can('section.edit')
+                                                        <a class="dropdown-item waves-effect"
+                                                            href="{{ route('dashboard.cms.pages.sections.edit', $page) }}">
+                                                            <i class="mdi mdi-pencil-outline me-1"></i> {{ __('custom.words.edit') . ' ' . __('custom.words.section') }}
+                                                        </a>
+                                                    @endcan
                                                     @can('page.edit')
                                                         <a class="dropdown-item waves-effect"
-                                                            href="{{ route('dashboard.cms.pages.edit', $page->slug) }}">
+                                                            href="{{ route('dashboard.cms.pages.edit', $page) }}">
                                                             <i class="mdi mdi-pencil-outline me-1"></i> {{ __('custom.words.edit') }}
                                                         </a>
                                                     @endcan
                                                     @can('page.delete')
                                                         <a class="dropdown-item waves-effect text-danger delete-item"
-                                                            data-url="{{ route('dashboard.cms.pages.destroy', $page->slug) }}"
+                                                            data-url="{{ route('dashboard.cms.pages.destroy', $page) }}"
                                                             data-bs-toggle="modal" data-bs-target="#deleteModal">
                                                             <i class="mdi mdi-trash-can-outline me-1"></i>
                                                             {{ __('custom.words.delete') }}

@@ -37,6 +37,21 @@ class CmsSection extends Model
         'disabled' => 'boolean',
     ];
 
+    protected $with = [
+        'sections',
+        'models',
+        'media',
+        'image',
+        'images',
+        'video',
+        'videos',
+        'file',
+        'files',
+        'icon',
+        'icons',
+        'sectionTypes'
+    ];
+
     public function sections()
     {
         return $this->hasMany(CmsSection::class, 'section_id', 'id')->orderBy('order', 'ASC');
@@ -78,7 +93,7 @@ class CmsSection extends Model
     public function sectionTypes()
     {
         return $this->belongsToMany(
-            \App\Models\SectionType::class,
+            SectionType::class,
             'cms_section_section_type',
             'cms_section_id',
             'section_type_id'

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrCreatePageRequest;
 use App\Models\Page;
 use App\Services\PageService;
+use App\Services\SectionTypeService;
 use App\Services\SectionService;
 use Illuminate\Support\Facades\Log;
 
@@ -14,7 +15,8 @@ class PageController extends Controller
 {
     public function __construct(
         private PageService $service,
-        private SectionService $sectionService
+        private SectionService $sectionService,
+        private SectionTypeService $sectionTypeService
     ) {
     }
 
@@ -60,7 +62,10 @@ class PageController extends Controller
     {
         try {
             $sections = $this->sectionService->getPageSections($page->id);
-            return view('admin.pages.cms.pages.show', compact('page', 'sections'));
+            return view('admin.pages.cms.pages.show', [
+                'page' => $page,
+                'sections' => $sections
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading CMS page', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
@@ -106,26 +111,21 @@ class PageController extends Controller
         }
     }
 
-    /**
-     * Edit page sections (STATIC sections edit view)
-     * View-only controller method that returns the edit page sections view
-     */
     public function editSections(Page $page)
     {
         try {
-            // Get all sections for this page - using existing service/repository exactly as is
             $sections = $this->sectionService->getPageSections($page->id);
             
-            // Organize sections by their static keys
-            $sectionsByKey = [];
-            foreach ($sections as $section) {
-                $sectionsByKey[$section->name] = $section;
-            }
+            // Ensure sectionTypes are loaded for all sections and subsections
+            $sections->load('sectionTypes', 'images', 'videos', 'icon', 'sections.sectionTypes', 'sections.images', 'sections.videos', 'sections.icon');
+            
+            // Get all available section types
+            $sectionTypes = $this->sectionTypeService->getAll();
 
             return view('admin.pages.cms.pages.sections.edit', [
                 'page' => $page,
                 'sections' => $sections,
-                'sectionsByKey' => $sectionsByKey
+                'sectionTypes' => $sectionTypes,
             ]);
         } catch (\Exception $e) {
             Log::error('Error loading page sections for edit', ['error' => $e->getMessage()]);
