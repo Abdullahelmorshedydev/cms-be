@@ -182,7 +182,8 @@ class UserService extends BaseService
                 'image',
                 'roles:id,name,display_name',
                 'roles.permissions:id,name,group,display_name,display_group_name'
-            ]
+            ],
+            false
         );
 
         // Check if user exists
