@@ -2,21 +2,22 @@
 
 namespace App\Models;
 
-use App\Enums\MediaTypeEnum;
 use App\Enums\SettingGroupEnum;
 use App\Enums\SettingTypeEnum;
 use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Spatie\Translatable\HasTranslations;
 
 class Setting extends Model
 {
     use HasFactory, HasTranslations, HasMedia;
 
-    const IMG_PATH = 'uploads/images/settings/';
+    const IMG_PATH = 'uploads/images/settings';
+    const VIDEO_PATH = 'uploads/videos/settings';
+    const FILE_PATH = 'uploads/files/settings';
+    const ICON_PATH = 'uploads/icons/settings';
 
     protected $translatable = [
         'label',

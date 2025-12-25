@@ -2,10 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Enums\GenderEnum;
-use App\Enums\StatusEnum;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;

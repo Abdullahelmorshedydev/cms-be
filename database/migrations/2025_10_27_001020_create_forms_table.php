@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,26 +12,60 @@ return new class extends Migration
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->string('type'); // Form type (contact, newsletter, support, etc.)
-            $table->string('name')->nullable(); // Sender name
-            $table->string('email')->nullable(); // Sender email
-            $table->string('phone')->nullable(); // Sender phone
-            $table->string('subject')->nullable(); // Form subject
-            $table->text('message')->nullable(); // Form message
-            $table->json('data')->nullable(); // Additional form data (flexible JSON)
-            $table->string('ip_address', 45)->nullable(); // IPv4 or IPv6
-            $table->string('user_agent')->nullable(); // Browser/device info
-            $table->boolean('is_read')->default(false); // Read status
-            $table->timestamp('read_at')->nullable(); // When marked as read
-            $table->tinyInteger('is_active')->default(1); // Status (active/inactive)
-            $table->timestamps();
+            // Core
+            $table->string('type');
+            $table->string('name')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
 
-            // Indexes for better query performance
-            $table->index('type');
-            $table->index('email');
-            $table->index('is_read');
-            $table->index('is_active');
-            $table->index('created_at');
+            // Contact
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('company')->nullable();
+            $table->string('position')->nullable();
+            $table->string('website')->nullable();
+
+            // Address
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('country')->nullable();
+            $table->string('zip_code')->nullable();
+
+            // Message
+            $table->string('subject')->nullable();
+            $table->text('message')->nullable();
+            $table->text('additional_notes')->nullable();
+
+            // Preferences
+            $table->date('preferred_date')->nullable();
+            $table->time('preferred_time')->nullable();
+
+            // Service / Project
+            $table->string('service_type')->nullable();
+            $table->string('referral_source')->nullable();
+            $table->integer('duration')->nullable();
+            $table->integer('participants')->nullable();
+            $table->decimal('budget', 12, 2)->nullable();
+            $table->string('currency', 10)->nullable();
+            $table->date('project_deadline')->nullable();
+
+            // Career
+            $table->string('resume_url')->nullable();
+            $table->string('portfolio_url')->nullable();
+            $table->string('linkedin_url')->nullable();
+            $table->integer('years_experience')->nullable();
+
+            // Meta
+            $table->json('data')->nullable();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+
+            // Status
+            $table->boolean('is_read')->default(false);
+            $table->timestamp('read_at')->nullable();
+
+            $table->timestamps();
         });
     }
 

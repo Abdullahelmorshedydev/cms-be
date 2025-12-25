@@ -14,49 +14,49 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        ################ Permissions ################
-        $permissions = Permission::where('guard_name', 'web')->pluck('name');
-        $permissionsArray = $permissions->values()->toArray();
+        $rolesPermissions = config('roles_permissions');
 
-        ################ Roles ################
-        $superAdminRole = Role::updateOrCreate(
-            [
-                'name' => 'super-admin',
-                'guard_name' => 'web',
-            ],
-            [
-                'display_name' => json_encode([
-                    'en' => 'Super Admin',
-                    'ar' => 'سوبر مسؤول'
-                ]),
-                'guard_name' => 'web',
-            ]
-        );
-        $adminRole = Role::updateOrCreate(
-            [
-                'name' => 'admin',
-                'guard_name' => 'web',
-            ],
-            [
-                'display_name' => json_encode([
-                    'en' => 'Admin',
-                    'ar' => 'مسؤول'
-                ]),
-                'guard_name' => 'web',
-            ]
-        );
+        foreach ($rolesPermissions as $guard => $roles) {
+            $existingPermissions = Permission::where('guard_name', $guard)
+                ->pluck('name')
+                ->toArray();
 
-        ################ Give Permissions to Roles ################
-        $superAdminRole->givePermissionTo($permissionsArray);
-        $adminRole->givePermissionTo($permissionsArray);
+            foreach ($roles as $roleName => $roleData) {
+                $role = Role::updateOrCreate(
+                    [
+                        'name' => $roleName,
+                        'guard_name' => $guard,
+                    ],
+                    [
+                        'display_name' => json_encode($roleData['display_name']),
+                    ]
+                );
+
+                if ($roleData['permissions'] === '*') {
+                    $role->syncPermissions($existingPermissions);
+                    continue;
+                }
+
+                $permissions = [];
+
+                foreach ($roleData['permissions'] as $module => $actions) {
+                    foreach ($actions as $action) {
+                        $permissions[] = "{$module}.{$action}";
+                    }
+                }
+
+                $permissions = array_values(array_intersect(
+                    $permissions,
+                    $existingPermissions
+                ));
+
+                $role->syncPermissions($permissions);
+            }
+        }
 
         ################ Assign Roles to Users ################
-        $superAdmin = User::firstWhere('email', 'super-admin@tasweek.com');
-        if ($superAdmin)
-            $superAdmin->assignRole([$superAdminRole]);
-
-        $admin = User::firstWhere('email', 'admin@tasweek.com');
-        if ($admin)
-            $admin->assignRole([$adminRole]);
+        foreach (config('users_roles') as $userEmail => $roles) {
+            User::firstWhere('email', $userEmail)?->assignRole($roles);
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FormTypeEnum;
 use App\Enums\StatusEnum;
+use App\Traits\HasMedia;
 use App\Traits\ScopeActive;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,12 @@ use Spatie\Translatable\HasTranslations;
 
 class Form extends Model
 {
-    use HasFactory, ScopeActive, HasTranslations;
+    use HasFactory, ScopeActive, HasTranslations, HasMedia;
+
+    const IMG_PATH = 'uploads/images/forms';
+    const VIDEO_PATH = 'uploads/videos/forms';
+    const FILE_PATH = 'uploads/files/forms';
+    const ICON_PATH = 'uploads/icons/forms';
 
     protected $translatable = [];
 
@@ -50,13 +56,11 @@ class Form extends Model
         'ip_address',
         'user_agent',
         'is_read',
-        'is_active',
-        'read_at',
+        'read_at'
     ];
 
     protected $casts = [
         'type' => FormTypeEnum::class,
-        'is_active' => StatusEnum::class,
         'data' => 'array',
         'is_read' => 'boolean',
         'read_at' => 'datetime',

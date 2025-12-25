@@ -12,6 +12,11 @@ class Partner extends Model
 {
     use HasFactory, HasTranslations, HasMedia, HasSlug;
 
+    const IMG_PATH = 'uploads/images/partners';
+    const VIDEO_PATH = 'uploads/videos/partners';
+    const FILE_PATH = 'uploads/files/partners';
+    const ICON_PATH = 'uploads/icons/partners';
+
     protected $translatable = [
         'name'
     ];

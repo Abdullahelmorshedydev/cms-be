@@ -46,7 +46,7 @@ class Media extends Model
     public function url(): Attribute
     {
         return Attribute::make(
-            get: fn() => url('storage/' . $this->media_path . $this->name),
+            get: fn() => url('storage/' . $this->media_path . '/' . $this->name),
         );
     }
 

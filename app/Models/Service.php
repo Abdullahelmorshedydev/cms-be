@@ -13,6 +13,11 @@ class Service extends Model
 {
     use HasFactory, HasTranslations, HasMedia, HasSlug;
 
+    const IMG_PATH = 'uploads/images/services';
+    const VIDEO_PATH = 'uploads/videos/services';
+    const FILE_PATH = 'uploads/files/services';
+    const ICON_PATH = 'uploads/icons/services';
+
     protected $translatable = [
         'name',
         'short_description',

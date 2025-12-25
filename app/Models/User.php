@@ -18,6 +18,11 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasRoles, HasApiTokens, HasTranslations, MustVerifyEmailTrait, HasMedia;
 
+    const IMG_PATH = 'uploads/images/users';
+    const VIDEO_PATH = 'uploads/videos/users';
+    const FILE_PATH = 'uploads/files/users';
+    const ICON_PATH = 'uploads/icons/users';
+
     /**
      * The attributes that are mass assignable.
      *

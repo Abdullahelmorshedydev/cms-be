@@ -8,12 +8,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 trait HasMedia
-{
-    /**
-     * =========================
-     * General relations
-     * =========================
-     */
+{/**
+ * =========================
+ * General relations
+ * =========================
+ */
     public function media(): MorphMany
     {
         return $this->morphMany(Media::class, 'mediaable');

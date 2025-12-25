@@ -13,6 +13,11 @@ class Tag extends Model
 {
     use HasFactory, HasTranslations, HasMedia, HasSlug;
 
+    const IMG_PATH = 'uploads/images/tags';
+    const VIDEO_PATH = 'uploads/videos/tags';
+    const FILE_PATH = 'uploads/files/tags';
+    const ICON_PATH = 'uploads/icons/tags';
+
     protected $translatable = [
         'name'
     ];

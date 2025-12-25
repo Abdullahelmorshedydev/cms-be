@@ -23,14 +23,28 @@ class PageSeeder extends Seeder
                     'en' => 'About Us',
                     'ar' => 'من نحن'
                 ],
-                'slug' => 'about-us',
+                'slug' => 'about-us'
             ],
             [
                 'name' => [
                     'en' => 'Contact Us',
                     'ar' => 'اتصل بنا'
                 ],
-                'slug' => 'contact-us',
+                'slug' => 'contact-us'
+            ],
+            [
+                'name' => [
+                    'en' => 'Services',
+                    'ar' => 'خدماتنا'
+                ],
+                'slug' => 'services'
+            ],
+            [
+                'name' => [
+                    'en' => 'Projects',
+                    'ar' => 'مشاريعنا'
+                ],
+                'slug' => 'projects'
             ]
         ];
 

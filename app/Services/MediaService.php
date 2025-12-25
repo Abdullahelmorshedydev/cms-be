@@ -62,12 +62,12 @@ class MediaService
     // -------------------------
     public function uploadFile($file, $model, string $altText)
     {
-        return $this->uploadSingle($model, 'file', $file, $altText, MediaTypeEnum::FILE->value, $model::FILES_PATH);
+        return $this->uploadSingle($model, 'file', $file, $altText, MediaTypeEnum::FILE->value, $model::FILE_PATH);
     }
 
     public function uploadFiles($files, $model, string $altText, ?array $removeIds = null, bool $removeForce = false)
     {
-        return $this->uploadMany($model, 'files', $files, $altText, MediaTypeEnum::FILE->value, $model::FILES_PATH, $removeIds, $removeForce);
+        return $this->uploadMany($model, 'files', $files, $altText, MediaTypeEnum::FILE->value, $model::FILE_PATH, $removeIds, $removeForce);
     }
 
     public function removeFile($model)
@@ -114,7 +114,7 @@ class MediaService
 
         $media = $model->{$relationName}()->create([
             'name' => $storedName,
-            'media_path' => $basePath,
+            'media_path' => MediaHandler::normalizePath($basePath),
             'type' => $type,
             'alt_text' => $altText,
             'device' => 'desktop'
@@ -149,7 +149,7 @@ class MediaService
 
                 $media = $model->{$relationName}()->create([
                     'name' => $storedName,
-                    'media_path' => $basePath,
+                    'media_path' => MediaHandler::normalizePath($basePath),
                     'type' => $type,
                     'alt_text' => trim($altText . ' ' . $index),
                     'device' => $file['device'],

@@ -13,6 +13,11 @@ class Project extends Model
 {
     use HasFactory, HasTranslations, HasMedia, HasSlug;
 
+    const IMG_PATH = 'uploads/images/projects';
+    const VIDEO_PATH = 'uploads/videos/projects';
+    const FILE_PATH = 'uploads/files/projects';
+    const ICON_PATH = 'uploads/icons/projects';
+
     protected $translatable = [
         'name',
         'short_description',

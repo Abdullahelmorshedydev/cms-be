@@ -52,7 +52,7 @@ class MediaHandler
     /**
      * Normalize path: remove leading slash and ensure trailing slash not duplicated.
      */
-    private static function normalizePath(?string $path)
+    public static function normalizePath(?string $path)
     {
         $path = $path ?? '';
         $path = trim($path);

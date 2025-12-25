@@ -12,6 +12,11 @@ class CmsSection extends Model
 {
     use HasFactory, HasTranslations, HasMedia;
 
+    const IMG_PATH = 'uploads/images/sections';
+    const VIDEO_PATH = 'uploads/videos/sections';
+    const FILE_PATH = 'uploads/files/sections';
+    const ICON_PATH = 'uploads/icons/sections';
+
     public array $translatable = ['button_text'];
 
     protected $fillable = [
