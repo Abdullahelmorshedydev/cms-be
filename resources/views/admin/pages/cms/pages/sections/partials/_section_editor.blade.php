@@ -28,14 +28,66 @@
     $needsGallery = in_array('gallery', $sectionTypeFields);
     
     // Get existing media
-    $desktopImage = $section?->images->where('device', 'desktop')->where('collection_name', 'image_desktop')->first();
-    $mobileImage = $section?->images->where('device', 'mobile')->where('collection_name', 'image_mobile')->first();
-    $desktopVideo = $section?->videos->where('device', 'desktop')->where('collection_name', 'video_desktop')->first();
-    $mobileVideo = $section?->videos->where('device', 'mobile')->where('collection_name', 'video_mobile')->first();
-    $desktopPoster = $section?->images->where('device', 'desktop')->where('collection_name', 'video_poster_desktop')->first();
-    $mobilePoster = $section?->images->where('device', 'mobile')->where('collection_name', 'video_poster_mobile')->first();
+    // Try to find by collection_name first, then fallback to device only
+    $desktopImage = null;
+    $mobileImage = null;
+    if ($section && $section->images && $section->images->count() > 0) {
+        // Try to find by collection_name first
+        $desktopImage = $section->images->where('device', 'desktop')
+            ->where('collection_name', 'image_desktop')
+            ->first();
+        
+        // If not found, get first desktop image (fallback)
+        if (!$desktopImage) {
+            $desktopImage = $section->images->where('device', 'desktop')->first();
+        }
+        
+        // Try to find by collection_name first
+        $mobileImage = $section->images->where('device', 'mobile')
+            ->where('collection_name', 'image_mobile')
+            ->first();
+        
+        // If not found, get first mobile image (fallback)
+        if (!$mobileImage) {
+            $mobileImage = $section->images->where('device', 'mobile')->first();
+        }
+    }
+    
+    $desktopVideo = null;
+    $mobileVideo = null;
+    if ($section && $section->videos) {
+        $desktopVideo = $section->videos->where('device', 'desktop')
+            ->filter(function($vid) {
+                return !$vid->collection_name || $vid->collection_name === 'video_desktop';
+            })->first();
+        
+        $mobileVideo = $section->videos->where('device', 'mobile')
+            ->filter(function($vid) {
+                return !$vid->collection_name || $vid->collection_name === 'video_mobile';
+            })->first();
+    }
+    
+    $desktopPoster = null;
+    $mobilePoster = null;
+    if ($section && $section->images) {
+        $desktopPoster = $section->images->where('device', 'desktop')
+            ->filter(function($img) {
+                return $img->collection_name === 'video_poster_desktop';
+            })->first();
+        
+        $mobilePoster = $section->images->where('device', 'mobile')
+            ->filter(function($img) {
+                return $img->collection_name === 'video_poster_mobile';
+            })->first();
+    }
+    
     $icon = $section?->icon;
-    $galleryItems = $section?->images->where('collection_name', 'gallery') ?: collect();
+    $galleryItems = collect();
+    if ($section && $section->images) {
+        $galleryItems = $section->images->filter(function($img) {
+            return $img->collection_name === 'gallery';
+        });
+    }
 @endphp
 
 @switch($section->type)
@@ -130,5 +182,14 @@
     'mobilePoster' => $mobilePoster,
     'icon' => $icon,
     'galleryItems' => $galleryItems,
+])
+
+{{-- Models Manager --}}
+@include('admin.pages.cms.pages.sections.partials._models_manager', [
+    'section' => $section,
+    'sectionIndex' => $sectionIndex,
+    'isSubsection' => $isSubsection ?? false,
+    'subIndex' => $subIndex ?? null,
+    'parentSection' => $parentSection ?? null,
 ])
 

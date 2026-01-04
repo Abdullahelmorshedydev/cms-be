@@ -11,7 +11,9 @@ class MediaService
 
     public function __construct()
     {
-        $this->disk = config('filesystems.default', 'public');
+        // Force use of 'public' disk (local storage) instead of default filesystem
+        // This ensures files are stored locally in storage/app/public, not AWS S3
+        $this->disk = 'public';
     }
 
     public function uploadImage($image, $model, string $altText)
@@ -152,8 +154,9 @@ class MediaService
                     'media_path' => MediaHandler::normalizePath($basePath),
                     'type' => $type,
                     'alt_text' => trim($altText . ' ' . $index),
-                    'device' => $file['device'],
+                    'device' => $file['device'] ?? 'desktop',
                     'order' => $file['order'] ?? $index,
+                    'collection_name' => $file['collection_name'] ?? null,
                 ]);
 
                 $ids[] = (int) $media->id;

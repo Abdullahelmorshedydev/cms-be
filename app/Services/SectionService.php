@@ -58,22 +58,22 @@ class SectionService
             $sectionType = SectionType::where('slug', $data['type'])->first();
 
             if ($this->hasField($sectionType, SectionFieldEnum::IMAGE->value))
-                $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
+                $this->addMultipleImagesToSection($section, $data['images'] ?? [], $data['removed_ids'] ?? []);
 
             if ($this->hasField($sectionType, SectionFieldEnum::GALLERY->value))
-                $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
+                $this->addMultipleImagesToSection($section, $data['images'] ?? [], $data['removed_ids'] ?? []);
 
             if ($this->hasField($sectionType, SectionFieldEnum::ICON->value))
-                $this->uploadIcon($section, $data['icon']);
+                $this->uploadIcon($section, $data['icon'] ?? null);
 
             if ($this->hasField($sectionType, SectionFieldEnum::VIDEO->value))
-                $this->addMultipleVideosToSection($section, $data['videos'], $data['images'], $data['remove_videos_ids'], $data['remove_images_ids']);
+                $this->addMultipleVideosToSection($section, $data['videos'] ?? [], $data['images'] ?? [], $data['remove_videos_ids'] ?? [], $data['remove_images_ids'] ?? []);
 
             if ($this->hasChildSection($data))
                 $this->addMultipleChildSection($data['sub_sections'], $section->id);
 
             if ($this->hasModel($data)) {
-                $section_model = ['section' => $section, 'model' => $data['model'], 'model_data' => $data['model_data']];
+                $section_model = ['section' => $section, 'model' => $data['model'] ?? null, 'model_data' => $data['model_data'] ?? []];
                 $this->addModelToSection($section_model);
             }
             DB::commit();
@@ -123,24 +123,24 @@ class SectionService
         $section = $this->repository->updateSection($data, $id);
         $section->refresh();
         if ($this->hasDeletedRelations($data))
-            $this->deleteSectionRelations($section->id, $data['deleted_models']);
+            $this->deleteSectionRelations($section->id, $data['deleted_models'] ?? []);
         else if ($this->deleteAllRelations($data))
             $this->removeAllSectionRelations($section);
         if ($this->hasModel($data))
-            $this->addModelToSection(['model' => $data['model'], 'model_data' => $data['model_data'], 'section' => $section]);
+            $this->addModelToSection(['model' => $data['model'] ?? null, 'model_data' => $data['model_data'] ?? [], 'section' => $section]);
         $sectionType = SectionType::where('slug', $data['type'])->first();
 
         if ($this->hasField($sectionType, SectionFieldEnum::ICON->value))
-            $this->uploadIcon($section, $data['icon']);
+            $this->uploadIcon($section, $data['icon'] ?? null);
 
         if ($this->hasField($sectionType, SectionFieldEnum::IMAGE->value))
-            $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
+            $this->addMultipleImagesToSection($section, $data['images'] ?? [], $data['removed_ids'] ?? []);
 
         if ($this->hasField($sectionType, SectionFieldEnum::GALLERY->value))
-            $this->addMultipleImagesToSection($section, $data['images'], $data['removed_ids']);
+            $this->addMultipleImagesToSection($section, $data['images'] ?? [], $data['removed_ids'] ?? []);
 
         if ($this->hasField($sectionType, SectionFieldEnum::VIDEO->value))
-            $this->addMultipleVideosToSection($section, $data['videos'], $data['images'], $data['remove_videos_ids'], $data['remove_images_ids']);
+            $this->addMultipleVideosToSection($section, $data['videos'] ?? [], $data['images'] ?? [], $data['remove_videos_ids'] ?? [], $data['remove_images_ids'] ?? []);
         if ($this->hasChildSection($data))
             $this->addMultipleChildSection($data['sub_sections'], $section->id);
         $section->refresh();
@@ -180,8 +180,15 @@ class SectionService
     }
     protected function addMultipleVideosToSection($section, $videos, $images, $removeVideosIds, $removeImagesIds): void
     {
-        $this->mediaService->uploadVideos($videos, $section, $section->name, $removeVideosIds);
-        $this->addMultipleImagesToSection($section, $images, $removeImagesIds);
+        // Only process videos if provided or there are removals
+        if (!empty($videos) || !empty($removeVideosIds)) {
+            $this->mediaService->uploadVideos($videos ?? [], $section, $section->name, $removeVideosIds ?? []);
+        }
+
+        // Handle video poster images separately
+        if (!empty($images) || !empty($removeImagesIds)) {
+            $this->addMultipleImagesToSection($section, $images ?? [], $removeImagesIds ?? []);
+        }
     }
     protected function addMultipleChildSection($sections, $parent_id)
     {
@@ -207,7 +214,7 @@ class SectionService
     }
     private function hasDeletedRelations($data)
     {
-        return isset($data['deleted_models']) && count($data['deleted_models']);
+        return isset($data['deleted_models']) && is_array($data['deleted_models']) && count($data['deleted_models']) > 0;
     }
     private function deleteAllRelations($data)
     {
@@ -215,10 +222,25 @@ class SectionService
     }
     private function addModelToSection($data)
     {
-        $model_data['model_type'] = $this->getSectionModel($data['model']);
+        if (empty($data['model']) || empty($data['model_data']) || !is_array($data['model_data'])) {
+            return;
+        }
+
+        $model_type = $this->getSectionModel($data['model']);
+
+        // Validate model_type is valid before proceeding
+        if (empty($model_type) || !is_string($model_type) || !class_exists($model_type)) {
+            return;
+        }
+
+        $model_data['model_type'] = $model_type;
         $model_data['section_id'] = $data['section']->id;
-        $this->deleteRemovedModel($data, $model_data['model_type']);
+        $this->deleteRemovedModel($data, $model_type);
+
         foreach ($data['model_data'] as $model) {
+            if (!isset($model['model_id']) || !isset($model['order'])) {
+                continue;
+            }
             $model_data['model_id'] = $model['model_id'];
             $model_data['order'] = $model['order'];
             $old_model = $this->getModel($data['section'], $model_data['model_id']);
@@ -230,9 +252,24 @@ class SectionService
     }
     private function deleteRemovedModel($data, $model_type)
     {
+        // Validate model_type is a valid class
+        if (empty($model_type) || !is_string($model_type) || !class_exists($model_type)) {
+            return;
+        }
+
         $section = $data['section'];
         $old_models = $section->models;
-        $ids = collect($data['model_data'])->pluck('model_id')->toArray();
+
+        // Ensure model_data is an array
+        if (empty($data['model_data']) || !is_array($data['model_data'])) {
+            return;
+        }
+
+        $ids = collect($data['model_data'])->pluck('model_id')->filter()->toArray();
+        if (empty($ids)) {
+            return;
+        }
+
         $new_models = $model_type::whereIn('id', $ids)->pluck('id');
         $removed_models = array_diff($old_models->pluck('model_id')->toArray(), $new_models->toArray());
         if ($removed_models) {
@@ -258,6 +295,7 @@ class SectionService
     private function getSectionModel($section)
     {
         return match ($section) {
+            (new Page())->getTable() => Page::class,
             (new Service())->getTable() => Service::class,
             (new Project())->getTable() => Project::class,
             (new Tag())->getTable() => Tag::class,
@@ -298,9 +336,110 @@ class SectionService
             $data['button_type'] = null;
         }
 
+        // Transform image data structure from form format to MediaService format
+        $data = $this->prepareImageData($data);
+
+        // Transform video data structure
+        $data = $this->prepareVideoData($data);
+
         $content = $this->prepareSectionContent($data);
         if ($content)
             $data['content'] = $content;
+        return $data;
+    }
+
+    /**
+     * Transform image form data to MediaService format
+     * Converts: image[desktop], image[mobile] -> images array with device and collection_name
+     */
+    private function prepareImageData(array $data): array
+    {
+        $images = [];
+
+        // Handle desktop image
+        if (isset($data['image']['desktop']) && $data['image']['desktop'] instanceof UploadedFile) {
+            $images[] = [
+                'file' => $data['image']['desktop'],
+                'device' => 'desktop',
+                'collection_name' => 'image_desktop',
+                'order' => 0,
+            ];
+        }
+
+        // Handle mobile image
+        if (isset($data['image']['mobile']) && $data['image']['mobile'] instanceof UploadedFile) {
+            $images[] = [
+                'file' => $data['image']['mobile'],
+                'device' => 'mobile',
+                'collection_name' => 'image_mobile',
+                'order' => 1,
+            ];
+        }
+
+        // If images array already exists (from other sources), merge them
+        if (!empty($images)) {
+            $data['images'] = array_merge($data['images'] ?? [], $images);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Transform video form data to MediaService format
+     */
+    private function prepareVideoData(array $data): array
+    {
+        $videos = [];
+        $videoPosters = [];
+
+        // Handle desktop video
+        if (isset($data['video']['desktop']) && $data['video']['desktop'] instanceof UploadedFile) {
+            $videos[] = [
+                'file' => $data['video']['desktop'],
+                'device' => 'desktop',
+                'collection_name' => 'video_desktop',
+                'order' => 0,
+            ];
+        }
+
+        // Handle mobile video
+        if (isset($data['video']['mobile']) && $data['video']['mobile'] instanceof UploadedFile) {
+            $videos[] = [
+                'file' => $data['video']['mobile'],
+                'device' => 'mobile',
+                'collection_name' => 'video_mobile',
+                'order' => 1,
+            ];
+        }
+
+        // Handle video posters
+        if (isset($data['video']['poster']['desktop']) && $data['video']['poster']['desktop'] instanceof UploadedFile) {
+            $videoPosters[] = [
+                'file' => $data['video']['poster']['desktop'],
+                'device' => 'desktop',
+                'collection_name' => 'video_poster_desktop',
+                'order' => 0,
+            ];
+        }
+
+        if (isset($data['video']['poster']['mobile']) && $data['video']['poster']['mobile'] instanceof UploadedFile) {
+            $videoPosters[] = [
+                'file' => $data['video']['poster']['mobile'],
+                'device' => 'mobile',
+                'collection_name' => 'video_poster_mobile',
+                'order' => 1,
+            ];
+        }
+
+        // Merge with existing arrays
+        if (!empty($videos)) {
+            $data['videos'] = array_merge($data['videos'] ?? [], $videos);
+        }
+
+        if (!empty($videoPosters)) {
+            $data['images'] = array_merge($data['images'] ?? [], $videoPosters);
+        }
+
         return $data;
     }
     private function prepareSectionContent(array $data)
