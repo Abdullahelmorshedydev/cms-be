@@ -11,6 +11,7 @@ use App\Models\Page;
 use App\Models\Project;
 use App\Models\SectionType;
 use App\Models\Service;
+use App\Models\Tag;
 use App\Repositories\PageRepository;
 use App\Repositories\SectionModelRepository;
 use App\Repositories\SectionRepository;
@@ -259,6 +260,7 @@ class SectionService
         return match ($section) {
             (new Service())->getTable() => Service::class,
             (new Project())->getTable() => Project::class,
+            (new Tag())->getTable() => Tag::class,
             default => null,
         };
     }
@@ -269,6 +271,7 @@ class SectionService
                 'model_type' => match ($deletedModel['model_type']) {
                     (new Service())->getTable() => Service::class,
                     (new Project())->getTable() => Project::class,
+                    (new Tag())->getTable() => Tag::class,
                     default => $deletedModel['model_type'],
                 },
                 'model_id' => $deletedModel['model_id'],
