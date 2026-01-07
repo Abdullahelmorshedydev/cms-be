@@ -216,6 +216,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // General Exception Handler (500)
         $exceptions->render(function (\Exception $e, Request $request) {
+            dd($e->getMessage(), $e);
             // Log the exception
             \Log::error('Exception occurred', [
                 'message' => $e->getMessage(),
