@@ -20,8 +20,7 @@ class TagController extends Controller
             $this->service->index(
                 $request->all(),
                 [
-                    'image',
-                    'tags'
+                    'image'
                 ]
             )
         );
