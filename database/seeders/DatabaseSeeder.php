@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PageSeeder::class,
             PageSectionsStaticSeeder::class,
+            TagSeeder::class,
+            ServiceSeeder::class,
+            PartnerSeeder::class,
+            ProjectSeeder::class,
         ]);
     }
 }
