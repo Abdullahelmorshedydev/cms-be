@@ -3,7 +3,7 @@
     $sectionType = null;
     $sectionTypeSlug = null;
     $sectionTypeFields = [];
-    
+
     if ($section) {
         if ($section->sectionTypes && method_exists($section->sectionTypes, 'count') && $section->sectionTypes->count() > 0) {
             $sectionType = $section->sectionTypes->first();
@@ -16,7 +16,7 @@
             $sectionTypeSlug = $section->type;
         }
     }
-    
+
     // For subsections: if type is missing, inherit from parent section
     if ($isSubsection && empty($sectionTypeFields) && isset($parentSection) && $parentSection) {
         if ($parentSection->sectionTypes && method_exists($parentSection->sectionTypes, 'count') && $parentSection->sectionTypes->count() > 0) {
@@ -29,10 +29,10 @@
             $sectionTypeSlug = $parentSection->type;
         }
     }
-    
+
     // Check if this section type supports models (has 'model' in fields array)
     $supportsModels = isset($sectionTypeFields) && is_array($sectionTypeFields) && in_array('model', $sectionTypeFields);
-    
+
     // Get existing models for this section if available
     $existingModels = [];
     $modelType = 'pages'; // Default model type
@@ -49,8 +49,10 @@
                     $modelType = 'tags';
                 } elseif (str_contains($modelClass, 'Page')) {
                     $modelType = 'pages';
+                } elseif (str_contains($modelClass, 'Partner')) {
+                    $modelType = 'partners';
                 }
-                
+
                 // Extract model name properly (handle translatable fields)
                 $modelName = $sectionModel->model->name ?? $sectionModel->model->title ?? null;
                 if (is_array($modelName)) {
@@ -61,7 +63,7 @@
                 } elseif (!$modelName) {
                     $modelName = $sectionModel->model->slug ?? 'N/A';
                 }
-                
+
                 $existingModels[] = [
                     'id' => $sectionModel->model->id,
                     'name' => $modelName,
@@ -75,11 +77,11 @@
         // Sort by order
         usort($existingModels, fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
     }
-    
-    $inputPrefix = $isSubsection 
+
+    $inputPrefix = $isSubsection
         ? "sections[{$sectionIndex}][sub_sections][{$subIndex}]"
         : "sections[{$sectionIndex}]";
-    
+
     $uniqueId = $sectionIndex . ($isSubsection ? '-sub-' . $subIndex : '');
 @endphp
 
@@ -94,14 +96,14 @@
             <span class="badge bg-primary ms-2" id="models-count-{{ $uniqueId }}">{{ count($existingModels) }}</span>
         </h6>
         <div>
-            <button type="button" class="btn btn-sm btn-primary add-models-btn" 
+            <button type="button" class="btn btn-sm btn-primary add-models-btn"
                 data-section-index="{{ $sectionIndex }}"
                 data-is-subsection="{{ $isSubsection ? '1' : '0' }}"
                 data-sub-index="{{ $subIndex ?? '' }}">
                 <i class="mdi mdi-plus me-1"></i>
                 {{ __('custom.words.add_models') }}
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger clear-models-btn" 
+            <button type="button" class="btn btn-sm btn-outline-danger clear-models-btn"
                 data-section-index="{{ $sectionIndex }}"
                 data-is-subsection="{{ $isSubsection ? '1' : '0' }}"
                 data-sub-index="{{ $subIndex ?? '' }}">
@@ -115,9 +117,9 @@
         <input type="hidden" name="{{ $inputPrefix }}[has_relation]" value="{{ count($existingModels) > 0 ? '1' : '0' }}" id="has_relation-{{ $uniqueId }}">
         <input type="hidden" name="{{ $inputPrefix }}[model]" value="{{ $modelType }}" id="model-type-{{ $uniqueId }}">
         <input type="hidden" name="{{ $inputPrefix }}[type]" value="{{ $sectionTypeSlug }}" id="section-type-{{ $uniqueId }}" data-section-type="{{ $sectionTypeSlug }}">
-        
+
         {{-- Selected Models List (Sortable) --}}
-        <div class="selected-models-list" 
+        <div class="selected-models-list"
              id="selected-models-{{ $uniqueId }}"
              data-section-index="{{ $sectionIndex }}"
              data-is-subsection="{{ $isSubsection ? '1' : '0' }}"
@@ -129,15 +131,15 @@
                         // Get model media for preview
                         $modelInstance = null;
                         $modelMedia = null;
-                        
+
                         if ($section && $section->models) {
                             $modelInstance = $section->models->where('model_id', $model['id'])->first();
                         }
-                        
+
                         if ($modelInstance && $modelInstance->model) {
                             // Safely access relationships with null checks
                             $modelObj = $modelInstance->model;
-                            
+
                             // Check for single media first
                             if ($modelObj->image) {
                                 $modelMedia = $modelObj->image;
@@ -158,7 +160,7 @@
                             }
                         }
                     @endphp
-                    <div class="selected-model-item mb-2 p-2 border rounded d-flex align-items-center justify-content-between" 
+                    <div class="selected-model-item mb-2 p-2 border rounded d-flex align-items-center justify-content-between"
                          data-model-id="{{ $model['id'] }}"
                          data-model-type="{{ $model['type'] }}">
                         <div class="d-flex align-items-center flex-grow-1">
@@ -172,16 +174,16 @@
                                 @endphp
                                 <div class="model-media-preview me-3 position-relative" style="width: 60px; height: 60px; flex-shrink: 0;">
                                     @if($mediaType === 'image' || $mediaType === 'icon')
-                                        <img src="{{ $mediaUrl }}" 
-                                             alt="{{ $modelNameForAlt }}" 
-                                             class="img-thumbnail rounded" 
+                                        <img src="{{ $mediaUrl }}"
+                                             alt="{{ $modelNameForAlt }}"
+                                             class="img-thumbnail rounded"
                                              style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.2s;"
                                              onclick="if(window.showMediaPreview) window.showMediaPreview('{{ $mediaUrl }}', '{{ $mediaType }}', '{{ addslashes($modelNameForAlt) }}')"
                                              onmouseover="this.style.transform='scale(1.1)'"
                                              onmouseout="this.style.transform='scale(1)'"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                              loading="lazy">
-                                        <div class="d-none align-items-center justify-content-center bg-light rounded position-absolute top-0 start-0" 
+                                        <div class="d-none align-items-center justify-content-center bg-light rounded position-absolute top-0 start-0"
                                              style="width: 100%; height: 100%;">
                                             <i class="mdi mdi-{{ $mediaIcon }} mdi-24px text-muted"></i>
                                         </div>
@@ -193,16 +195,16 @@
                                             }
                                             $videoThumbnailUrl = $posterUrl ?? $mediaUrl;
                                         @endphp
-                                        <img src="{{ $videoThumbnailUrl }}" 
-                                             alt="{{ $modelNameForAlt }}" 
-                                             class="img-thumbnail rounded" 
+                                        <img src="{{ $videoThumbnailUrl }}"
+                                             alt="{{ $modelNameForAlt }}"
+                                             class="img-thumbnail rounded"
                                              style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.2s;"
                                              onclick="if(window.showMediaPreview) window.showMediaPreview('{{ $mediaUrl }}', 'video', '{{ addslashes($modelNameForAlt) }}')"
                                              onmouseover="this.style.transform='scale(1.1)'"
                                              onmouseout="this.style.transform='scale(1)'"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                              loading="lazy">
-                                        <div class="d-none align-items-center justify-content-center bg-light rounded position-absolute top-0 start-0" 
+                                        <div class="d-none align-items-center justify-content-center bg-light rounded position-absolute top-0 start-0"
                                              style="width: 100%; height: 100%;">
                                             <i class="mdi mdi-video mdi-24px text-muted"></i>
                                         </div>
@@ -210,7 +212,7 @@
                                             <i class="mdi mdi-play mdi-12px text-white"></i>
                                         </div>
                                     @else
-                                        <div class="d-flex align-items-center justify-content-center bg-light rounded h-100" 
+                                        <div class="d-flex align-items-center justify-content-center bg-light rounded h-100"
                                              style="cursor: pointer;"
                                              onclick="if(window.showMediaPreview) window.showMediaPreview('{{ $mediaUrl }}', 'file', '{{ addslashes($modelNameForAlt) }}')"
                                              title="{{ __('custom.words.click_to_preview') ?? 'Click to preview' }}">
@@ -219,13 +221,13 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="model-media-preview me-3 d-flex align-items-center justify-content-center bg-light rounded" 
+                                <div class="model-media-preview me-3 d-flex align-items-center justify-content-center bg-light rounded"
                                      style="width: 60px; height: 60px; flex-shrink: 0;"
                                      title="{{ __('custom.words.no_media') ?? 'No media available' }}">
                                     <i class="mdi mdi-image mdi-24px text-muted"></i>
                                 </div>
                                     @endif
-                            <div class="order-badge me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded" 
+                            <div class="order-badge me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded"
                                  style="width: 30px; height: 30px; font-weight: bold; font-size: 0.875rem; flex-shrink: 0;">
                                 {{ $model['order'] ?? ($index + 1) }}
                             </div>
@@ -244,19 +246,19 @@
                                 <small class="text-muted ms-2">({{ $model['type'] ?? 'Model' }})</small>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-model-btn" 
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-model-btn"
                                 data-model-id="{{ $model['id'] }}"
                                 title="{{ __('custom.words.remove') }}">
                             <i class="mdi mdi-close"></i>
                         </button>
                         {{-- Hidden inputs for model_data --}}
-                        <input type="hidden" 
-                               name="{{ $inputPrefix }}[model_data][{{ $index }}][model_id]" 
+                        <input type="hidden"
+                               name="{{ $inputPrefix }}[model_data][{{ $index }}][model_id]"
                                value="{{ $model['id'] }}"
                                data-model-id="{{ $model['id'] }}"
                                class="model-id-input">
-                        <input type="hidden" 
-                               name="{{ $inputPrefix }}[model_data][{{ $index }}][order]" 
+                        <input type="hidden"
+                               name="{{ $inputPrefix }}[model_data][{{ $index }}][order]"
                                value="{{ $model['order'] ?? ($index + 1) }}"
                                data-model-id="{{ $model['id'] }}"
                                class="order-hidden-input">
@@ -289,19 +291,20 @@
                         <option value="services">{{ __('custom.words.services') }}</option>
                         <option value="projects">{{ __('custom.words.projects') }}</option>
                         <option value="tags">{{ __('custom.words.tags') }}</option>
+                        <option value="partners">{{ __('custom.words.partners') }}</option>
                     </select>
                 </div>
-                
+
                 {{-- Search --}}
                 <div class="mb-3">
-                    <input type="text" 
-                           class="form-control models-search" 
+                    <input type="text"
+                           class="form-control models-search"
                            placeholder="{{ __('custom.words.search') }}"
                            id="modelsSearch-{{ $uniqueId }}">
                 </div>
-                
+
                 {{-- Available Models List --}}
-                <div class="available-models-list" 
+                <div class="available-models-list"
                      id="availableModels-{{ $uniqueId }}"
                      style="max-height: 400px; overflow-y: auto;">
                     <div class="text-center text-muted py-4">
@@ -313,7 +316,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('custom.words.cancel') }}</button>
-                <button type="button" class="btn btn-primary confirm-selection-btn" 
+                <button type="button" class="btn btn-primary confirm-selection-btn"
                         data-section-index="{{ $sectionIndex }}"
                         data-is-subsection="{{ $isSubsection ? '1' : '0' }}"
                         data-sub-index="{{ $subIndex ?? '' }}">
