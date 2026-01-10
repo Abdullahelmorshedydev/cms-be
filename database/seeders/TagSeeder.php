@@ -14,7 +14,7 @@ class TagSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Unique key: slug (deterministic from English name)
      * Idempotent: Uses updateOrCreate with slug to prevent duplicates
      */
@@ -86,7 +86,7 @@ class TagSeeder extends Seeder
 
             foreach ($tags as $tagData) {
                 $slug = Str::slug($tagData['name_en']);
-                
+
                 Tag::updateOrCreate(
                     ['slug' => $slug],
                     [
@@ -102,4 +102,3 @@ class TagSeeder extends Seeder
         });
     }
 }
-

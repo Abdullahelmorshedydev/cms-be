@@ -15,7 +15,7 @@ class ServiceSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Unique key: slug (deterministic from English name)
      * Idempotent: Uses updateOrCreate with slug to prevent duplicates
      * Relationships: Attaches tags after upsert using syncWithoutDetaching
@@ -108,7 +108,7 @@ class ServiceSeeder extends Seeder
 
             foreach ($services as $serviceData) {
                 $slug = Str::slug($serviceData['name_en']);
-                
+
                 $service = Service::updateOrCreate(
                     ['slug' => $slug],
                     [
@@ -138,4 +138,3 @@ class ServiceSeeder extends Seeder
         });
     }
 }
-

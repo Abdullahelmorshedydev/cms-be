@@ -14,7 +14,7 @@ class ProjectSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Unique key: slug (deterministic from English name)
      * Idempotent: Uses updateOrCreate with slug to prevent duplicates
      * Note: Project model has no relationships defined, only standalone entity
@@ -107,7 +107,7 @@ class ProjectSeeder extends Seeder
 
             foreach ($projects as $projectData) {
                 $slug = Str::slug($projectData['name_en']);
-                
+
                 Project::updateOrCreate(
                     ['slug' => $slug],
                     [
@@ -132,4 +132,3 @@ class ProjectSeeder extends Seeder
         });
     }
 }
-
