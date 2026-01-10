@@ -124,7 +124,7 @@
                         <button type="button" 
                                 class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
                                 style="width: 28px; height: 28px; padding: 0; border-radius: 50%; opacity: 0.9; z-index: 10;"
-                                onclick="removeExistingMedia(this, {{ $media->id }})"
+                                onclick="removeExistingMedia(this, {{ $media->id }}, '{{ $name }}')"
                                 title="{{ __('custom.words.delete') }}">
                             <i class="fa fa-times"></i>
                         </button>

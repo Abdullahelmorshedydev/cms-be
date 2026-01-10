@@ -23,4 +23,9 @@
     </div>
 @endsection
 
+@section('js')
+{{-- Media Service for FormData handling in API calls --}}
+<script src="{{ asset('dashboard/assets/js/services/mediaService.js') }}"></script>
+@endsection
+
 

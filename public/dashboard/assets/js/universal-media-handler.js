@@ -3,8 +3,50 @@
  * Works across entire project for all media inputs
  */
 
-// Global state for deleted media
+// Global state for deleted media (for simple forms)
 window.deletedMediaIds = window.deletedMediaIds || [];
+
+// Per-section/subsection removed media IDs structure
+// Format: { 'sections[0]': [id1, id2], 'sections[0][sub_sections][1]': [id3] }
+window.sectionRemovedMediaIds = window.sectionRemovedMediaIds || {};
+
+/**
+ * Extract section context from input name
+ * Examples:
+ * - "sections[0][image][desktop]" -> { sectionIndex: 0, subIndex: null, path: "sections[0]" }
+ * - "sections[0][sub_sections][1][image][desktop]" -> { sectionIndex: 0, subIndex: 1, path: "sections[0][sub_sections][1]" }
+ */
+function extractSectionContext(inputName) {
+    if (!inputName || typeof inputName !== 'string') {
+        return null;
+    }
+
+    // Check if this is a section/subsection input
+    const sectionMatch = inputName.match(/sections\[(\d+)\]/);
+    if (!sectionMatch) {
+        return null;
+    }
+
+    const sectionIndex = parseInt(sectionMatch[1]);
+    const subsectionMatch = inputName.match(/sub_sections\[(\d+)\]/);
+    
+    if (subsectionMatch) {
+        const subIndex = parseInt(subsectionMatch[1]);
+        return {
+            sectionIndex: sectionIndex,
+            subIndex: subIndex,
+            path: `sections[${sectionIndex}][sub_sections][${subIndex}]`,
+            isSubsection: true
+        };
+    } else {
+        return {
+            sectionIndex: sectionIndex,
+            subIndex: null,
+            path: `sections[${sectionIndex}]`,
+            isSubsection: false
+        };
+    }
+}
 
 /**
  * Preview media files when selected
@@ -12,6 +54,41 @@ window.deletedMediaIds = window.deletedMediaIds || [];
 function previewMediaFiles(input, previewContainerId) {
     const previewContainer = document.getElementById(previewContainerId);
     if (!previewContainer) return;
+
+    // When a new file is uploaded, automatically remove existing media for this specific input field
+    // This handles the "replace" scenario (only for single-file inputs, not multiple/gallery)
+    if (input.name && input.files && input.files.length > 0 && !input.multiple) {
+        const context = extractSectionContext(input.name);
+        // Find existing media items for this specific input field
+        const existingItems = previewContainer.querySelectorAll('.media-existing-item');
+        existingItems.forEach(item => {
+            const removeBtn = item.querySelector('button[onclick*="removeExistingMedia"]');
+            if (removeBtn) {
+                // Extract media ID and input name from onclick handler
+                // Format: removeExistingMedia(this, 123, 'sections[0][image][desktop]')
+                const onclickAttr = removeBtn.getAttribute('onclick') || '';
+                const fullMatch = onclickAttr.match(/removeExistingMedia\([^,]+,\s*(\d+)(?:,\s*['"]([^'"]+)['"])?\)/);
+                if (fullMatch) {
+                    const mediaId = parseInt(fullMatch[1]);
+                    const existingInputName = fullMatch[2] || input.name;
+                    
+                    // Only auto-remove if this existing media belongs to the same input field
+                    // For desktop/mobile images, they're different fields, so don't auto-remove
+                    // Only auto-remove if it's the exact same field (like icon, single image, etc.)
+                    if (existingInputName === input.name || 
+                        (context && extractSectionContext(existingInputName)?.path === context.path)) {
+                        // For single-image fields (not desktop/mobile pair), auto-remove when replacing
+                        // Check if this is a single field (not part of desktop/mobile pair)
+                        const isImagePair = input.name.includes('[desktop]') || input.name.includes('[mobile]');
+                        if (!isImagePair) {
+                            // Automatically remove the existing media when new file is uploaded
+                            removeExistingMedia(removeBtn, mediaId, input.name);
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     // Remove only new upload previews, keep existing media
     const newPreviews = previewContainer.querySelectorAll('.media-new-preview');
@@ -194,11 +271,51 @@ function formatFileSize(bytes) {
 
 /**
  * Remove existing media from database
+ * @param {HTMLElement} button - The remove button element
+ * @param {number} mediaId - The media ID to remove
+ * @param {string} inputName - Optional: The input name for context detection
  */
-function removeExistingMedia(button, mediaId) {
-    if (mediaId && !window.deletedMediaIds.includes(mediaId)) {
-        window.deletedMediaIds.push(mediaId);
-        updateDeletedMediaInputs();
+function removeExistingMedia(button, mediaId, inputName) {
+    if (!mediaId) return;
+
+    // Try to detect context from input name or from button's closest media input
+    let context = null;
+    if (inputName) {
+        context = extractSectionContext(inputName);
+    } else {
+        // Try to find the associated input field
+        const mediaItem = button.closest('.media-existing-item');
+        if (mediaItem) {
+            const previewContainer = mediaItem.closest('[id$="_preview"]');
+            if (previewContainer) {
+                const previewId = previewContainer.id;
+                // Extract input ID from preview ID (format: media_inputname_preview -> media_inputname)
+                const inputId = previewId.replace('_preview', '');
+                const input = document.getElementById(inputId);
+                if (input && input.name) {
+                    context = extractSectionContext(input.name);
+                }
+            }
+        }
+    }
+
+    if (context && context.path) {
+        // Handle section/subsection context (group edit form)
+        if (!window.sectionRemovedMediaIds[context.path]) {
+            window.sectionRemovedMediaIds[context.path] = [];
+        }
+        if (!window.sectionRemovedMediaIds[context.path].includes(mediaId)) {
+            window.sectionRemovedMediaIds[context.path].push(mediaId);
+        }
+        updateSectionDeletedMediaInputs(context);
+    } else {
+        // Fallback to global removed media IDs (for standalone section edit and simple forms)
+        // For standalone section edit, backend expects: removed_ids[]
+        // For other simple forms: deleted_media_ids[]
+        if (!window.deletedMediaIds.includes(mediaId)) {
+            window.deletedMediaIds.push(mediaId);
+            updateDeletedMediaInputs();
+        }
     }
 
     // Remove from UI
@@ -209,7 +326,97 @@ function removeExistingMedia(button, mediaId) {
 }
 
 /**
- * Update hidden inputs for deleted media
+ * Update hidden inputs for deleted media in section/subsection context
+ */
+function updateSectionDeletedMediaInputs(context) {
+    if (!context || !window.sectionRemovedMediaIds[context.path]) {
+        return;
+    }
+
+    const removedIds = window.sectionRemovedMediaIds[context.path];
+    
+    // Create or get container for this section/subsection
+    const containerId = `removedMediaContainer_${context.path.replace(/[\[\]]/g, '_')}`;
+    let container = document.getElementById(containerId);
+
+    if (!container) {
+        container = document.createElement('div');
+        container.id = containerId;
+        container.className = 'section-removed-media-container';
+        container.style.display = 'none'; // Hide visually
+
+        // Find the appropriate parent element
+        let parentElement = null;
+        if (context.isSubsection) {
+            // Find subsection container - try multiple selectors
+            // Look for subsection accordion body
+            const subsectionAccordion = document.querySelector(`#subsectionsAccordion-${context.sectionIndex}`);
+            if (subsectionAccordion) {
+                const subsectionItems = subsectionAccordion.querySelectorAll('.subsection-card, .accordion-item');
+                if (subsectionItems[context.subIndex]) {
+                    parentElement = subsectionItems[context.subIndex].querySelector('.accordion-body');
+                }
+            }
+            // Fallback: find by data attribute
+            if (!parentElement) {
+                const subsectionCard = document.querySelector(`.subsection-card[data-subsection-id]`);
+                if (subsectionCard) {
+                    parentElement = subsectionCard.querySelector('.accordion-body') || subsectionCard;
+                }
+            }
+        } else {
+            // Find section container - try multiple selectors
+            // Look for section accordion body by index
+            const sectionAccordion = document.querySelector('#sectionsAccordion');
+            if (sectionAccordion) {
+                const sectionItems = sectionAccordion.querySelectorAll('.section-card, .accordion-item');
+                if (sectionItems[context.sectionIndex]) {
+                    parentElement = sectionItems[context.sectionIndex].querySelector('.accordion-body');
+                }
+            }
+            // Fallback: find by data attribute
+            if (!parentElement) {
+                const sectionCard = document.querySelector(`.section-card[data-section-id]`);
+                if (sectionCard) {
+                    parentElement = sectionCard.querySelector('.accordion-body') || sectionCard;
+                }
+            }
+        }
+
+        // Final fallback: find form and append at top level (as hidden container)
+        if (!parentElement) {
+            parentElement = document.querySelector('form') || document.body;
+        }
+
+        if (parentElement) {
+            parentElement.appendChild(container);
+        } else {
+            console.warn('Could not find parent element for removed media container', context);
+            return;
+        }
+    }
+
+    if (removedIds.length === 0) {
+        // Clear the container if no removed IDs
+        container.innerHTML = '';
+        return;
+    }
+
+    // Generate hidden inputs with correct structure
+    container.innerHTML = removedIds
+        .map(id => {
+            const inputName = context.isSubsection
+                ? `sections[${context.sectionIndex}][sub_sections][${context.subIndex}][removed_ids][]`
+                : `sections[${context.sectionIndex}][removed_ids][]`;
+            return `<input type="hidden" name="${inputName}" value="${id}">`;
+        })
+        .join('');
+}
+
+/**
+ * Update hidden inputs for deleted media (global/legacy support)
+ * For standalone section edit: uses removed_ids[]
+ * For other simple forms: uses deleted_media_ids[]
  */
 function updateDeletedMediaInputs() {
     let container = document.getElementById('removedMediaContainer');
@@ -223,14 +430,93 @@ function updateDeletedMediaInputs() {
         }
     }
 
+    if (window.deletedMediaIds.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    // Check if this is a standalone section edit form (has route to section update)
+    const form = container.closest('form');
+    const isStandaloneSectionEdit = form && (
+        form.action.includes('/sections/') && form.action.includes('/update') ||
+        form.querySelector('input[name="_method"][value="PUT"]')
+    );
+
+    // For standalone section edit, use removed_ids[] (matches backend SectionService::update)
+    // For other forms, use deleted_media_ids[]
+    const inputName = isStandaloneSectionEdit ? 'removed_ids[]' : 'deleted_media_ids[]';
+
     container.innerHTML = window.deletedMediaIds
-        .map(id => `<input type="hidden" name="deleted_media_ids[]" value="${id}">`)
+        .map(id => `<input type="hidden" name="${inputName}" value="${id}">`)
         .join('');
+}
+
+/**
+ * Initialize removed media containers for all existing sections/subsections on page load
+ */
+function initializeSectionRemovedMediaContainers() {
+    // Find all file inputs that are part of sections/subsections
+    document.querySelectorAll('input[type="file"][name*="sections["]').forEach(input => {
+        if (input.name) {
+            const context = extractSectionContext(input.name);
+            if (context) {
+                // Initialize the context path if needed
+                if (!window.sectionRemovedMediaIds[context.path]) {
+                    window.sectionRemovedMediaIds[context.path] = [];
+                }
+                // Ensure container exists (will be created on first removal)
+            }
+        }
+    });
+
+    // Also check existing media items for their context
+    document.querySelectorAll('.media-existing-item').forEach(item => {
+        const removeBtn = item.querySelector('button[onclick*="removeExistingMedia"]');
+        if (removeBtn) {
+            // Extract input name from onclick if available (third parameter)
+            const onclickAttr = removeBtn.getAttribute('onclick') || '';
+            const nameMatch = onclickAttr.match(/removeExistingMedia\([^,]+,\s*\d+,\s*['"]([^'"]+)['"]\)/);
+            if (nameMatch) {
+                const inputName = nameMatch[1];
+                const context = extractSectionContext(inputName);
+                if (context) {
+                    // Initialize the context path if needed
+                    if (!window.sectionRemovedMediaIds[context.path]) {
+                        window.sectionRemovedMediaIds[context.path] = [];
+                    }
+                }
+            } else {
+                // Fallback: try to find associated input
+                const previewContainer = item.closest('[id$="_preview"]');
+                if (previewContainer) {
+                    const previewId = previewContainer.id;
+                    const inputId = previewId.replace('_preview', '');
+                    const input = document.getElementById(inputId);
+                    if (input && input.name) {
+                        const context = extractSectionContext(input.name);
+                        if (context) {
+                            // Initialize the context path if needed
+                            if (!window.sectionRemovedMediaIds[context.path]) {
+                                window.sectionRemovedMediaIds[context.path] = [];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 // Make functions globally available
 window.previewMediaFiles = previewMediaFiles;
 window.removeExistingMedia = removeExistingMedia;
 window.updateDeletedMediaInputs = updateDeletedMediaInputs;
+window.updateSectionDeletedMediaInputs = updateSectionDeletedMediaInputs;
+window.extractSectionContext = extractSectionContext;
 window.formatFileSize = formatFileSize;
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSectionRemovedMediaContainers();
+});
 
