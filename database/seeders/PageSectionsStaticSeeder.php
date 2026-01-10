@@ -130,6 +130,19 @@ class PageSectionsStaticSeeder extends Seeder
             ]
         );
 
+        $this->createSectionType(
+            'seo',
+            [
+                'en' => 'SEO',
+                'ar' => 'SEO'
+            ],
+            [
+                SectionFieldEnum::TITLE->value,
+                SectionFieldEnum::SUBTITLE->value,
+                SectionFieldEnum::DESCRIPTION->value
+            ]
+        );
+
         $sections = [
             [
                 'name' => 'hero',
@@ -206,6 +219,26 @@ class PageSectionsStaticSeeder extends Seeder
                 ]
             ],
             [
+                'name' => 'seo',
+                'page_slug' => 'home',
+                'type' => 'seo',
+                'order' => '6',
+                'content' => [
+                    'title' => [
+                        'en' => 'home seo',
+                        'ar' => 'hoe seo'
+                    ],
+                    'subtitle' => [
+                        'en' => 'home seo',
+                        'ar' => 'hoe seo'
+                    ],
+                    'description' => [
+                        'en' => 'home seo',
+                        'ar' => 'hoe seo'
+                    ],
+                ]
+            ],
+            [
                 'name' => 'hero',
                 'page_slug' => 'about-us',
                 'type' => 'title',
@@ -256,6 +289,26 @@ class PageSectionsStaticSeeder extends Seeder
                 'order' => '4'
             ],
             [
+                'name' => 'seo',
+                'page_slug' => 'about-us',
+                'type' => 'seo',
+                'order' => '5',
+                'content' => [
+                    'title' => [
+                        'en' => 'about-us seo',
+                        'ar' => 'about-us seo'
+                    ],
+                    'subtitle' => [
+                        'en' => 'about-us seo',
+                        'ar' => 'about-us seo'
+                    ],
+                    'description' => [
+                        'en' => 'about-us seo',
+                        'ar' => 'about-us seo'
+                    ],
+                ]
+            ],
+            [
                 'name' => 'form',
                 'page_slug' => 'contact-us',
                 'type' => 'title',
@@ -265,6 +318,26 @@ class PageSectionsStaticSeeder extends Seeder
                         'en' => 'Good Things happen when you say hey',
                         'ar' => 'كل شيء يحدث عندما يقولون لك حي'
                     ]
+                ]
+            ],
+            [
+                'name' => 'seo',
+                'page_slug' => 'contact-us',
+                'type' => 'seo',
+                'order' => '2',
+                'content' => [
+                    'title' => [
+                        'en' => 'contact-us seo',
+                        'ar' => 'contact-us seo'
+                    ],
+                    'subtitle' => [
+                        'en' => 'contact-us seo',
+                        'ar' => 'contact-us seo'
+                    ],
+                    'description' => [
+                        'en' => 'contact-us seo',
+                        'ar' => 'contact-us seo'
+                    ],
                 ]
             ],
             [
@@ -359,6 +432,26 @@ class PageSectionsStaticSeeder extends Seeder
                 ]
             ],
             [
+                'name' => 'seo',
+                'page_slug' => 'services',
+                'type' => 'seo',
+                'order' => '4',
+                'content' => [
+                    'title' => [
+                        'en' => 'services seo',
+                        'ar' => 'services seo'
+                    ],
+                    'subtitle' => [
+                        'en' => 'services seo',
+                        'ar' => 'services seo'
+                    ],
+                    'description' => [
+                        'en' => 'services seo',
+                        'ar' => 'services seo'
+                    ],
+                ]
+            ],
+            [
                 'name' => 'hero',
                 'page_slug' => 'projects',
                 'type' => 'title-image',
@@ -368,6 +461,26 @@ class PageSectionsStaticSeeder extends Seeder
                         'en' => 'Check out some of our work',
                         'ar' => 'تحقق من بعض عملاتنا'
                     ]
+                ]
+            ],
+            [
+                'name' => 'seo',
+                'page_slug' => 'projects',
+                'type' => 'seo',
+                'order' => '2',
+                'content' => [
+                    'title' => [
+                        'en' => 'projects seo',
+                        'ar' => 'projects seo'
+                    ],
+                    'subtitle' => [
+                        'en' => 'projects seo',
+                        'ar' => 'projects seo'
+                    ],
+                    'description' => [
+                        'en' => 'projects seo',
+                        'ar' => 'projects seo'
+                    ],
                 ]
             ]
         ];
@@ -394,7 +507,8 @@ class PageSectionsStaticSeeder extends Seeder
             ];
 
             $type = SectionType::where('slug', $sectionData['type'])->first();
-            if (!$type) continue;
+            if (!$type)
+                continue;
 
             if ($existingSection) {
                 $sectionDataToSave['created_at'] = $existingSection->created_at;
