@@ -534,12 +534,12 @@ class PageSectionsStaticSeeder extends Seeder
                         ],
                         $subSectionDataToSave
                     );
-                    $subSection->sectionTypes()->attach($type->id);
+                    $subSection->sectionTypes()->sync($type->id);
                 }
             } else {
                 $sectionDataToSave['created_at'] = now();
                 $createdSection = CmsSection::create($sectionDataToSave);
-                $createdSection->sectionTypes()->attach($type->id);
+                $createdSection->sectionTypes()->sync($type->id);
                 foreach ($sectionData['sub_sections'] ?? [] as $subSectionData) {
                     $subSectionDataToSave = [
                         'name' => $subSectionData['name'],
@@ -560,7 +560,7 @@ class PageSectionsStaticSeeder extends Seeder
                         ],
                         $subSectionDataToSave
                     );
-                    $subSection->sectionTypes()->attach($type->id);
+                    $subSection->sectionTypes()->sync($type->id);
                 }
             }
         }
