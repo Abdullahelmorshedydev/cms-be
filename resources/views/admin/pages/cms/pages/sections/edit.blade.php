@@ -36,7 +36,7 @@
         max-width: 100%;
         height: auto;
     }
-    
+
     /* CKEditor Transparent Theme */
     .ck-editor__editable {
         background: transparent !important;
@@ -480,13 +480,14 @@
 
     // API Base URL
     const API_BASE_URL = '{{ url("/api") }}';
-    
+
     // Model type to API endpoint mapping
     const MODEL_API_ENDPOINTS = {
         'pages': '/cms/pages',
         'services': '/services',
         'projects': '/projects',
-        'tags': '/tags'
+        'tags': '/tags',
+        'partners': '/partners'
     };
 
     // Store fetched models cache
@@ -630,7 +631,7 @@
                 const mediaRelations = ['image', 'images', 'video', 'videos', 'file', 'files', 'icon', 'icons'];
                 const queryParams = new URLSearchParams();
                 // Note: The API already loads 'image' by default, but we'll ensure all media is available
-                
+
                 const response = await fetch(`${API_BASE_URL}${endpoint}`);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch ${modelType}`);
@@ -691,12 +692,12 @@
     // Get media preview HTML for a model
     function getModelMediaPreview(model) {
         if (!model || typeof model !== 'object') return '';
-        
+
         // Try to get image (single or first from array)
         let imageUrl = null;
         let mediaType = 'image';
         let mediaIcon = 'mdi-image';
-        
+
         // Check for single image
         if (model.image && model.image.url) {
             imageUrl = model.image.url;
@@ -704,7 +705,7 @@
         // Check for images array
         else if (model.images && Array.isArray(model.images) && model.images.length > 0) {
             const firstImage = model.images.find(img => img.url) || model.images[0];
-            imageUrl = firstImage.url || (firstImage.media_path && firstImage.name ? 
+            imageUrl = firstImage.url || (firstImage.media_path && firstImage.name ?
                 `{{ url('storage') }}/${firstImage.media_path}/${firstImage.name}` : null);
         }
         // Check for video
@@ -715,8 +716,8 @@
         }
         else if (model.videos && Array.isArray(model.videos) && model.videos.length > 0) {
             const firstVideo = model.videos[0];
-            imageUrl = firstVideo.poster?.url || firstVideo.url || 
-                (firstVideo.media_path && firstVideo.name ? 
+            imageUrl = firstVideo.poster?.url || firstVideo.url ||
+                (firstVideo.media_path && firstVideo.name ?
                     `{{ url('storage') }}/${firstVideo.media_path}/${firstVideo.name}` : null);
             mediaType = 'video';
             mediaIcon = 'mdi-video';
@@ -729,7 +730,7 @@
         }
         else if (model.files && Array.isArray(model.files) && model.files.length > 0) {
             const firstFile = model.files[0];
-            imageUrl = firstFile.url || (firstFile.media_path && firstFile.name ? 
+            imageUrl = firstFile.url || (firstFile.media_path && firstFile.name ?
                 `{{ url('storage') }}/${firstFile.media_path}/${firstFile.name}` : null);
             mediaType = 'file';
             mediaIcon = 'mdi-file-document';
@@ -742,33 +743,33 @@
         }
         else if (model.icons && Array.isArray(model.icons) && model.icons.length > 0) {
             const firstIcon = model.icons[0];
-            imageUrl = firstIcon.url || (firstIcon.media_path && firstIcon.name ? 
+            imageUrl = firstIcon.url || (firstIcon.media_path && firstIcon.name ?
                 `{{ url('storage') }}/${firstIcon.media_path}/${firstIcon.name}` : null);
             mediaType = 'icon';
             mediaIcon = 'mdi-star';
         }
-        
+
         // Get model name for alt text
         const modelName = extractModelName(model);
         const altText = modelName || 'Preview';
-        
+
         if (imageUrl) {
             // Escape URL for use in HTML
             const safeUrl = imageUrl.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             const safeAlt = altText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            
+
             return `
                 <div class="model-media-preview me-3 position-relative" style="width: 60px; height: 60px; flex-shrink: 0;">
-                    <img src="${safeUrl}" 
-                         alt="${safeAlt}" 
-                         class="img-thumbnail rounded" 
+                    <img src="${safeUrl}"
+                         alt="${safeAlt}"
+                         class="img-thumbnail rounded"
                          style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.2s;"
                          onclick="showMediaPreview('${safeUrl}', '${mediaType}', '${safeAlt}')"
                          onmouseover="this.style.transform='scale(1.1)'"
                          onmouseout="this.style.transform='scale(1)'"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                          loading="lazy">
-                    <div class="d-none align-items-center justify-content-center bg-light rounded position-absolute top-0 start-0" 
+                    <div class="d-none align-items-center justify-content-center bg-light rounded position-absolute top-0 start-0"
                          style="width: 100%; height: 100%;">
                         <i class="mdi ${mediaIcon} mdi-24px text-muted"></i>
                     </div>
@@ -778,7 +779,7 @@
         } else if (mediaType === 'file') {
             // For files without preview, show file icon with click to download
             return `
-                <div class="model-media-preview me-3 d-flex align-items-center justify-content-center bg-light rounded position-relative" 
+                <div class="model-media-preview me-3 d-flex align-items-center justify-content-center bg-light rounded position-relative"
                      style="width: 60px; height: 60px; flex-shrink: 0; cursor: pointer;"
                      onclick="if(window.showMediaPreview) { const fileUrl = '${model.file?.url || model.files?.[0]?.url || '#'}'; if(fileUrl !== '#') window.showMediaPreview(fileUrl, 'file', '${altText}'); }"
                      title="{{ __('custom.words.click_to_preview') ?? 'Click to preview' }}">
@@ -787,7 +788,7 @@
             `;
         } else {
             return `
-                <div class="model-media-preview me-3 d-flex align-items-center justify-content-center bg-light rounded" 
+                <div class="model-media-preview me-3 d-flex align-items-center justify-content-center bg-light rounded"
                      style="width: 60px; height: 60px; flex-shrink: 0;"
                      title="{{ __('custom.words.no_media') ?? 'No media available' }}">
                     <i class="mdi ${mediaIcon} mdi-24px text-muted"></i>
@@ -803,15 +804,15 @@
             console.error('Modal not found:', `modelsModal-${uniqueId}`);
             return;
         }
-        
+
         const availableList = modal.querySelector('.available-models-list');
         if (!availableList) {
             console.error('Available models list not found in modal');
             return;
         }
-        
+
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
-        
+
         // Get currently selected model IDs (handle null case)
         const selectedIds = selectedList ? Array.from(selectedList.querySelectorAll('[data-model-id]'))
             .map(item => parseInt(item.dataset.modelId))
@@ -830,40 +831,40 @@
             // Get current locale for displaying names
             const currentLocale = '{{ app()->getLocale() }}' || 'en';
             const fallbackLocale = currentLocale === 'ar' ? 'en' : 'ar';
-            
+
             let html = '<div class="list-group">';
             models.forEach(model => {
                 const isSelected = selectedIds.includes(model.id);
                 // Extract model name properly - handle translatable fields
                 let modelName = '';
-                
+
                 if (typeof model === 'object' && model !== null) {
                     // Handle translatable name field (object with locale keys)
                     if (model.name) {
                         if (typeof model.name === 'object' && model.name !== null) {
                             // Translatable field: {en: "English", ar: "Arabic"}
-                            modelName = model.name[currentLocale] || 
-                                       model.name[fallbackLocale] || 
-                                       Object.values(model.name)[0] || 
+                            modelName = model.name[currentLocale] ||
+                                       model.name[fallbackLocale] ||
+                                       Object.values(model.name)[0] ||
                                        '';
                         } else {
                             // Simple string field
                             modelName = model.name;
                         }
                     }
-                    
+
                     // Fallback to title if name not found
                     if (!modelName && model.title) {
                         if (typeof model.title === 'object' && model.title !== null) {
-                            modelName = model.title[currentLocale] || 
-                                       model.title[fallbackLocale] || 
-                                       Object.values(model.title)[0] || 
+                            modelName = model.title[currentLocale] ||
+                                       model.title[fallbackLocale] ||
+                                       Object.values(model.title)[0] ||
                                        '';
                         } else {
                             modelName = model.title;
                         }
                     }
-                    
+
                     // Final fallbacks
                     if (!modelName) {
                         modelName = model.slug || `Model #${model.id}`;
@@ -871,17 +872,17 @@
                 } else {
                     modelName = String(model) || `Model #${model.id}`;
                 }
-                
+
                 const modelId = model.id;
                 const displayName = String(modelName).trim() || `Model #${modelId}`;
-                
+
                 // Extract media preview
                 const mediaPreview = getModelMediaPreview(model);
-                
+
                 html += `
                 <label class="list-group-item d-flex align-items-start model-selection-item">
-                    <input type="checkbox" 
-                           class="form-check-input me-3 mt-2 model-checkbox" 
+                    <input type="checkbox"
+                           class="form-check-input me-3 mt-2 model-checkbox"
                            value="${modelId}"
                            data-model-id="${modelId}"
                            data-model-name="${displayName.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}"
@@ -907,10 +908,10 @@
     function filterAvailableModels(uniqueId) {
         const modal = document.getElementById(`modelsModal-${uniqueId}`);
         if (!modal) return;
-        
+
         const searchInput = modal.querySelector('.models-search');
         if (!searchInput) return;
-        
+
         const searchTerm = searchInput.value.toLowerCase() || '';
         const checkboxes = modal.querySelectorAll('.model-checkbox');
 
@@ -925,9 +926,9 @@
     function confirmModelSelection(uniqueId, sectionIndex, isSubsection, subIndex) {
         const modal = document.getElementById(`modelsModal-${uniqueId}`);
         if (!modal) return;
-        
+
         const checkboxes = modal.querySelectorAll('.model-checkbox:checked:not(:disabled)');
-        
+
         if (checkboxes.length === 0) {
             alert('{{ __('custom.words.select') }} {{ __('custom.words.models') }}');
             return;
@@ -935,7 +936,7 @@
 
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
         if (!selectedList) return;
-        
+
         const existingIds = Array.from(selectedList.querySelectorAll('[data-model-id]'))
             .map(item => parseInt(item.dataset.modelId))
             .filter(id => !isNaN(id));
@@ -943,7 +944,7 @@
         // Get the model type to fetch full model data
         const modelTypeSelect = modal.querySelector('.model-type-selector');
         const modelType = modelTypeSelect ? modelTypeSelect.value : 'pages';
-        
+
         // Get all models from cache to find full data
         const cacheKey = `${modelType}_all`;
         const allModels = modelsCache[cacheKey] || [];
@@ -954,7 +955,7 @@
             if (!existingIds.includes(modelId)) {
                 // Try to find full model data from cache
                 const fullModel = allModels.find(m => m && m.id === modelId);
-                
+
                 if (fullModel) {
                     // Use full model data with all properties including media
                     newModels.push(fullModel);
@@ -991,7 +992,7 @@
     // Add models to selected list
     function addModelsToList(uniqueId, models, sectionIndex, isSubsection, subIndex) {
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
-        const inputPrefix = isSubsection 
+        const inputPrefix = isSubsection
             ? `sections[${sectionIndex}][sub_sections][${subIndex}]`
             : `sections[${sectionIndex}]`;
 
@@ -1020,43 +1021,43 @@
     // Extract model name from model object (handles translatable fields)
     function extractModelName(model) {
         if (!model || typeof model !== 'object') return 'Unknown Model';
-        
+
         const currentLocale = '{{ app()->getLocale() }}' || 'en';
         const fallbackLocale = currentLocale === 'ar' ? 'en' : 'ar';
-        
+
         let modelName = '';
-        
+
         // Handle translatable name field (object with locale keys)
         if (model.name) {
             if (typeof model.name === 'object' && model.name !== null) {
                 // Translatable field: {en: "English", ar: "Arabic"}
-                modelName = model.name[currentLocale] || 
-                           model.name[fallbackLocale] || 
-                           Object.values(model.name)[0] || 
+                modelName = model.name[currentLocale] ||
+                           model.name[fallbackLocale] ||
+                           Object.values(model.name)[0] ||
                            '';
             } else {
                 // Simple string field
                 modelName = model.name;
             }
         }
-        
+
         // Fallback to title if name not found
         if (!modelName && model.title) {
             if (typeof model.title === 'object' && model.title !== null) {
-                modelName = model.title[currentLocale] || 
-                           model.title[fallbackLocale] || 
-                           Object.values(model.title)[0] || 
+                modelName = model.title[currentLocale] ||
+                           model.title[fallbackLocale] ||
+                           Object.values(model.title)[0] ||
                            '';
             } else {
                 modelName = model.title;
             }
         }
-        
+
         // Final fallbacks
         if (!modelName) {
             modelName = model.slug || `Model #${model.id || 'Unknown'}`;
         }
-        
+
         return String(modelName).trim() || 'Unknown Model';
     }
 
@@ -1065,16 +1066,16 @@
         const item = document.createElement('div');
         item.className = 'selected-model-item mb-2 p-2 border rounded d-flex align-items-center justify-content-between';
         item.dataset.modelId = model.id;
-        
+
         // Extract model type name (for display)
         const modelTypeName = model.type || (model.model_type || 'Model');
         item.dataset.modelType = modelTypeName;
 
         const index = document.querySelectorAll(`#selected-models-${uniqueId} .selected-model-item`).length;
-        
+
         // Extract model name properly
         const displayName = extractModelName(model);
-        
+
         // Get media preview
         const mediaPreview = getModelMediaPreview(model);
 
@@ -1082,7 +1083,7 @@
             <div class="d-flex align-items-center flex-grow-1">
                 <i class="mdi mdi-drag-vertical me-2 text-muted" style="cursor: move;" title="{{ __('custom.words.drag_to_reorder') ?? 'Drag to reorder' }}"></i>
                 ${mediaPreview}
-                <div class="order-badge me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded" 
+                <div class="order-badge me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded"
                      style="width: 30px; height: 30px; font-weight: bold; font-size: 0.875rem; flex-shrink: 0;">
                     ${order}
                 </div>
@@ -1092,18 +1093,18 @@
                     ${model.slug ? `<small class="text-muted d-block">${String(model.slug)}</small>` : ''}
                 </div>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-model-btn" 
+            <button type="button" class="btn btn-sm btn-outline-danger remove-model-btn"
                     data-model-id="${model.id}"
                     title="{{ __('custom.words.remove') }}">
                 <i class="mdi mdi-close"></i>
             </button>
-            <input type="hidden" 
-                   name="${inputPrefix}[model_data][${index}][model_id]" 
+            <input type="hidden"
+                   name="${inputPrefix}[model_data][${index}][model_id]"
                    value="${model.id}"
                    data-model-id="${model.id}"
                    class="model-id-input">
-            <input type="hidden" 
-                   name="${inputPrefix}[model_data][${index}][order]" 
+            <input type="hidden"
+                   name="${inputPrefix}[model_data][${index}][order]"
                    value="${order}"
                    data-model-id="${model.id}"
                    class="order-hidden-input">
@@ -1129,7 +1130,7 @@
                 document.getElementById(`selected-models-${uniqueIdForEvent}`).dataset.isSubsection === '1',
                 document.getElementById(`selected-models-${uniqueIdForEvent}`).dataset.subIndex);
         });
-        
+
         // Store update function for later use
         item._updateOrderBadge = updateOrderBadge;
 
@@ -1140,7 +1141,7 @@
     function removeModel(uniqueId, modelId, sectionIndex, isSubsection, subIndex) {
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
         const item = selectedList.querySelector(`[data-model-id="${modelId}"]`);
-        
+
         if (item) {
             item.remove();
             normalizeOrders(uniqueId, sectionIndex, isSubsection, subIndex);
@@ -1171,20 +1172,20 @@
     function normalizeOrders(uniqueId, sectionIndex, isSubsection, subIndex) {
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
         if (!selectedList) return;
-        
+
         const items = Array.from(selectedList.querySelectorAll('.selected-model-item'));
-        
+
         // Items are already in the correct order after drag/drop, just renumber them
         items.forEach((item, index) => {
             const newOrder = index + 1;
             const orderHiddenInput = item.querySelector('.order-hidden-input');
             const orderBadge = item.querySelector('.order-badge');
-            
+
             // Update hidden input (this is what gets submitted)
             if (orderHiddenInput) {
                 orderHiddenInput.value = newOrder;
             }
-            
+
             // Update visual badge
             if (orderBadge) {
                 orderBadge.textContent = newOrder;
@@ -1192,7 +1193,7 @@
         });
 
         // Re-render hidden inputs with correct indices
-        const inputPrefix = isSubsection 
+        const inputPrefix = isSubsection
             ? `sections[${sectionIndex}][sub_sections][${subIndex}]`
             : `sections[${sectionIndex}]`;
 
@@ -1200,21 +1201,21 @@
         items.forEach((item, index) => {
             const modelId = item.dataset.modelId;
             const order = index + 1;
-            
+
             // Update model_id hidden input
             const modelIdInput = item.querySelector('.model-id-input');
             if (modelIdInput) {
                 modelIdInput.name = `${inputPrefix}[model_data][${index}][model_id]`;
                 modelIdInput.value = modelId;
             }
-            
+
             // Update order hidden input
             const orderHiddenInput = item.querySelector('.order-hidden-input');
             if (orderHiddenInput) {
                 orderHiddenInput.name = `${inputPrefix}[model_data][${index}][order]`;
                 orderHiddenInput.value = order;
             }
-            
+
             // Update visual order badge
             const orderBadge = item.querySelector('.order-badge');
             if (orderBadge) {
@@ -1268,7 +1269,7 @@
             console.warn('No URL provided for media preview');
             return;
         }
-        
+
         // Create or get preview modal
         let previewModal = document.getElementById('mediaPreviewModal');
         if (!previewModal) {
@@ -1297,25 +1298,25 @@
             `;
             document.body.appendChild(previewModal);
         }
-        
+
         const content = previewModal.querySelector('#mediaPreviewContent');
         const downloadBtn = previewModal.querySelector('#mediaPreviewDownload');
-        
+
         if (!content) {
             console.error('Preview content container not found');
             return;
         }
-        
+
         // Clear previous content
         content.innerHTML = '';
         downloadBtn.style.display = 'none';
-        
+
         // Handle different media types
         if (type === 'video' || url.match(/\.(mp4|webm|ogg|mov|avi)$/i)) {
             content.innerHTML = `
-                <video src="${url}" 
-                       controls 
-                       class="img-fluid rounded" 
+                <video src="${url}"
+                       controls
+                       class="img-fluid rounded"
                        style="max-width: 100%; max-height: 70vh;"
                        preload="metadata">
                     {{ __('custom.words.video') }} {{ __('custom.words.not_supported') }}
@@ -1336,9 +1337,9 @@
             downloadBtn.style.display = 'inline-block';
         } else if (type === 'icon') {
             content.innerHTML = `
-                <img src="${url}" 
-                     alt="${altText || 'Icon'}" 
-                     class="img-fluid rounded" 
+                <img src="${url}"
+                     alt="${altText || 'Icon'}"
+                     class="img-fluid rounded"
                      style="max-width: 100%; max-height: 70vh; object-fit: contain;">
             `;
             downloadBtn.href = url;
@@ -1346,15 +1347,15 @@
         } else {
             // Default: image
             content.innerHTML = `
-                <img src="${url}" 
-                     alt="${altText || 'Preview'}" 
-                     class="img-fluid rounded shadow" 
+                <img src="${url}"
+                     alt="${altText || 'Preview'}"
+                     class="img-fluid rounded shadow"
                      style="max-width: 100%; max-height: 70vh; object-fit: contain; cursor: zoom-in;"
                      onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'alert alert-warning\\'><i class=\\'mdi mdi-alert-circle me-2\\'></i>{{ __('custom.messages.retrieved_failed') }}</div>';">
             `;
             downloadBtn.href = url;
             downloadBtn.style.display = 'inline-block';
-            
+
             // Add click to zoom functionality
             const img = content.querySelector('img');
             if (img) {
@@ -1372,7 +1373,7 @@
                 });
             }
         }
-        
+
         // Show modal
         if (typeof bootstrap !== 'undefined') {
             const bsModal = new bootstrap.Modal(previewModal);
@@ -1391,7 +1392,7 @@
         if (modelsCache[cacheKey]) {
             return modelsCache[cacheKey];
         }
-        
+
         // Try to find in already loaded models
         const allModelsKey = `${modelType}_all`;
         if (modelsCache[allModelsKey]) {
@@ -1401,7 +1402,7 @@
                 return found;
             }
         }
-        
+
         // If not found, return null (will use basic model data)
         return null;
     }
@@ -1426,19 +1427,19 @@
         // Since we can't change backend/DB, we need to intercept and prevent the problematic data
         // However, since the transformation happens server-side, we'll add a workaround:
         // Use form submit interception to add hidden field that backend can check
-        
+
         // Note: This is a workaround. The real fix would be backend/DB change, but user requested frontend-only.
         // Since prepareImageData() is server-side PHP, we can't directly prevent it.
         // However, we can ensure the form structure doesn't trigger the problematic code path.
-        
+
         // Form inputs are already updated via updateFormInputs
         // This is just a safety check and localStorage fallback
-        
+
         document.querySelectorAll('.models-manager-block').forEach(manager => {
             const uniqueId = manager.id.replace('models-manager-', '');
             const selectedList = document.getElementById(`selected-models-${uniqueId}`);
             const items = selectedList.querySelectorAll('.selected-model-item');
-            
+
             if (items.length > 0) {
                 const modelData = [];
                 items.forEach((item, index) => {
@@ -1464,7 +1465,7 @@
             const uniqueId = manager.id.replace('models-manager-', '');
             const selectedList = document.getElementById(`selected-models-${uniqueId}`);
             const items = selectedList.querySelectorAll('.selected-model-item');
-            
+
             // If no items from backend, try localStorage
             if (items.length === 0) {
                 const storageKey = `section_models_${uniqueId}`;

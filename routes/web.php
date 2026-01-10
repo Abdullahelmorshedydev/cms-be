@@ -17,10 +17,6 @@ use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\Dashboard\UserController;
 use Illuminate\Support\Facades\Route;
 
-
-
-
-
 // Dashboard Routes
 Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(function () {
     // Guest routes (login, password reset) - must be accessible without auth
@@ -250,4 +246,3 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
         });
     });
 });
-
