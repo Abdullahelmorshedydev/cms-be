@@ -30,10 +30,12 @@ class Project extends Model
         'short_description',
         'description',
         'url',
-        'status'
+        'status',
+        'date'
     ];
 
     protected $casts = [
-        'status' => StatusEnum::class
+        'status' => StatusEnum::class,
+        'date' => 'date'
     ];
 }

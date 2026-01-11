@@ -45,6 +45,16 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="col-md-12 mt-3">
+                            <div class="form-floating form-floating-outline">
+                                <input id="dateInput" class="form-control" type="date" name="date"
+                                    value="{{ old('date') }}">
+                                <label for="dateInput">{{ __('custom.inputs.date') }}</label>
+                                @error('date')
+                                    <div class="text-danger"> {{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
                                 <input id="short_descriptionEnInput" class="form-control" type="text" name="short_description[en]"

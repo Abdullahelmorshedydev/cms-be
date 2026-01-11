@@ -357,6 +357,7 @@ return [
     ],
     'inputs' => [
         'name' => 'الاسم',
+        'date' => 'تاريخ',
         'display_name' => 'اسم العرض',
         'display_name_en' => 'اسم العرص [EN]',
         'display_name_ar' => 'اسم العرص [AR]',

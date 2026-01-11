@@ -356,6 +356,7 @@ return [
     ],
     'inputs' => [
         'name' => 'Name',
+        'date' => 'Date',
         'display_name' => 'Display Name',
         'student_id' => 'Student ID',
         'grade' => 'Grade',

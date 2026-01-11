@@ -34,6 +34,7 @@ class UpdateProjectRequest extends FormRequest
             'description.en' => ['nullable', 'string'],
             'description.ar' => ['nullable', 'string'],
             'url' => ['nullable', 'string'],
+            'date' => ['nullable', 'date'],
             'status' => ['required', Rule::in(StatusEnum::values())],
             'image' => ['nullable', 'image', 'mimetypes:image/png,image/jpg,image/jpeg,image/webp', 'mimes:png,jpg,jpeg,webp', 'max:2048']
         ];
