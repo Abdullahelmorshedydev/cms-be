@@ -36,6 +36,7 @@ class StoreServiceRequest extends FormRequest
             'description.ar' => ['nullable', 'string'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['nullable', 'exists:tags,id'],
+            'category_id' => ['nullable', 'exists:service_categories,id'],
             'image' => ['nullable', 'image', 'mimetypes:image/png,image/jpg,image/jpeg,image/webp', 'mimes:png,jpg,jpeg,webp', 'max:2048']
         ];
     }

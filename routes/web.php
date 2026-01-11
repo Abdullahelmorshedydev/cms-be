@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\FormEmailController;
 use App\Http\Controllers\Dashboard\PartnerController;
 use App\Http\Controllers\Dashboard\ProjectController;
 use App\Http\Controllers\Dashboard\RoleController;
+use App\Http\Controllers\Dashboard\ServiceCategoryController;
 use App\Http\Controllers\Dashboard\ServiceController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\TagController;
@@ -142,6 +143,23 @@ Route::prefix('/dashboard')->name('dashboard.')->middleware(['web'])->group(func
             });
             Route::post('/import', 'import')->middleware('check.permission:tag.import')->name('import');
             Route::get('/export', 'export')->middleware('check.permission:tag.export')->name('export');
+        });
+
+        // Service Categories
+        Route::controller(ServiceCategoryController::class)->prefix('/service-categories')->as('service-categories.')->group(function () {
+            Route::get('/', 'index')->middleware('check.permission:service-category.show')->name('index');
+            Route::middleware('check.permission:service-category.create')->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+            });
+            Route::middleware('check.permission:service-category.edit')->group(function () {
+                Route::get('/{service_category}/edit', 'edit')->name('edit');
+                Route::put('/{service_category}', 'update')->name('update');
+            });
+            Route::middleware('check.permission:service-category.delete')->group(function () {
+                Route::delete('/delete', 'destroyAll')->name('delete');
+                Route::delete('/{service_category}', 'destroy')->name('destroy');
+            });
         });
 
         // Services

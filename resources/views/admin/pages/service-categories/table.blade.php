@@ -6,21 +6,19 @@
             </th>
             <th>{{ __('custom.columns.name') }}</th>
             <th>{{ __('custom.columns.slug') }}</th>
-            <th>{{ __('custom.columns.category') }}</th>
-            <th>{{ __('custom.columns.status') }}</th>
+            <th>{{ __('custom.columns.services_count') }}</th>
             <th>{{ __('custom.words.actions') }}</th>
         </tr>
     </thead>
     <tbody>
-        @foreach ($data['data']['data'] as $service)
+        @foreach ($data['data']['data'] as $category)
             <tr>
                 <td>
-                    <input type="checkbox" class="form-check-input checkboxInput" value="{{ $service->id }}">
+                    <input type="checkbox" class="form-check-input checkboxInput" value="{{ $category->id }}">
                 </td>
-                <td>{{ $service->name }}</td>
-                <td>{{ $service->slug }}</td>
-                <td>{{ $service->category ? getTranslatedValue($service->category->name) : '-' }}</td>
-                <td>{{ $service->status->lang() }}</td>
+                <td>{{ $category->name }}</td>
+                <td>{{ $category->slug }}</td>
+                <td>{{ $category->services_count ?? ($category->services ? $category->services->count() : 0) }}</td>
                 <td>
                     <div class="dropdown">
                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"
@@ -28,17 +26,16 @@
                             <i class="mdi mdi-dots-vertical"></i>
                         </button>
                         <div class="dropdown-menu" style="">
-                            @can('service.edit')
-                                <a class="dropdown-item waves-effect"
-                                    href="{{ route('dashboard.services.edit', $service->slug) }}">
+                            @can('service-category.edit')
+                                <a class="dropdown-item waves-effect" href="{{ route('dashboard.service-categories.edit', $category->slug) }}">
                                     <i class="mdi mdi-pen me-1"></i>
                                     {{ __('custom.words.edit') }}
                                 </a>
                             @endcan
-                            @can('service.delete')
+                            @can('service-category.delete')
                                 <a class="dropdown-item waves-effect delete-btn" href="#" data-bs-toggle="modal"
                                     data-bs-target="#deleteModal"
-                                    data-url="{{ route('dashboard.services.destroy', $service->slug) }}"><i
+                                    data-url="{{ route('dashboard.service-categories.destroy', $category->slug) }}"><i
                                         class="mdi mdi-trash-can-outline me-1"></i>
                                     {{ __('custom.words.delete') }}
                                 </a>

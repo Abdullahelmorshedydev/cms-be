@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Enums\StatusEnum;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class ServiceSeeder extends Seeder
      *
      * Unique key: slug (deterministic from English name)
      * Idempotent: Uses updateOrCreate with slug to prevent duplicates
-     * Relationships: Attaches tags after upsert using syncWithoutDetaching
+     * Relationships: Attaches tags and assigns category after upsert
      */
     public function run(): void
     {
@@ -32,6 +33,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'We provide comprehensive web development services including frontend, backend, and full-stack solutions. Our team uses the latest frameworks and technologies to deliver scalable and maintainable web applications.',
                     'description_ar' => 'نقدم خدمات تطوير الويب الشاملة بما في ذلك الواجهة الأمامية والخلفية والحلول الكاملة. يستخدم فريقنا أحدث الأطر والتقنيات لتقديم تطبيقات ويب قابلة للتوسع والصيانة.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'development-services',
                     'tags' => ['web-development', 'ui-ux-design', 'devops'],
                 ],
                 [
@@ -42,6 +44,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'We develop high-performance mobile applications for iOS and Android platforms. Our solutions include native apps, hybrid apps, and progressive web apps tailored to your business needs.',
                     'description_ar' => 'نطور تطبيقات موبايل عالية الأداء لمنصات iOS و Android. تشمل حلولنا التطبيقات الأصلية والهجينة وتطبيقات الويب التقدمية المصممة خصيصًا لاحتياجات عملك.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'development-services',
                     'tags' => ['mobile-app', 'ui-ux-design', 'cloud-services'],
                 ],
                 [
@@ -52,6 +55,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'Build powerful e-commerce platforms with secure payment gateways, inventory management, and customer relationship tools. We create seamless shopping experiences for your customers.',
                     'description_ar' => 'بناء منصات تجارة إلكترونية قوية مع بوابات دفع آمنة وإدارة المخزون وأدوات علاقات العملاء. نخلق تجارب تسوق سلسة لعملائك.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'e-commerce-solutions',
                     'tags' => ['e-commerce', 'web-development', 'digital-marketing'],
                 ],
                 [
@@ -62,6 +66,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'Our design team creates intuitive and beautiful user interfaces that enhance user engagement and satisfaction. We follow best practices in user experience design and accessibility.',
                     'description_ar' => 'ينشئ فريق التصميم لدينا واجهات مستخدم بديهية وجميلة تعزز مشاركة المستخدم ورضاه. نتبع أفضل الممارسات في تصميم تجربة المستخدم وإمكانية الوصول.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'design-services',
                     'tags' => ['ui-ux-design', 'web-development', 'mobile-app'],
                 ],
                 [
@@ -72,6 +77,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'We help businesses migrate to the cloud and optimize their infrastructure. Our services include cloud architecture design, deployment, monitoring, and maintenance.',
                     'description_ar' => 'نساعد الشركات على الانتقال إلى السحابة وتحسين بنيتها التحتية. تشمل خدماتنا تصميم البنية السحابية والنشر والمراقبة والصيانة.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'cloud-infrastructure',
                     'tags' => ['cloud-services', 'devops', 'consulting'],
                 ],
                 [
@@ -82,6 +88,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'Boost your online presence with our digital marketing services. We offer SEO, social media marketing, content marketing, PPC campaigns, and analytics to drive growth.',
                     'description_ar' => 'عزز وجودك على الإنترنت من خلال خدمات التسويق الرقمي لدينا. نقدم تحسين محركات البحث والتسويق عبر وسائل التواصل الاجتماعي والتسويق بالمحتوى وحملات الدفع لكل نقرة والتحليلات لدفع النمو.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'marketing-services',
                     'tags' => ['digital-marketing', 'data-analytics', 'consulting'],
                 ],
                 [
@@ -92,6 +99,7 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'Unlock the power of your data with advanced analytics and business intelligence solutions. We help you make data-driven decisions with custom dashboards and reports.',
                     'description_ar' => 'اطلق العنان لقوة بياناتك من خلال حلول التحليلات المتقدمة والذكاء التجاري. نساعدك على اتخاذ قرارات مدعومة بالبيانات باستخدام لوحات المعلومات والتقارير المخصصة.',
                     'status' => StatusEnum::ACTIVE,
+                    'category' => 'analytics-intelligence',
                     'tags' => ['data-analytics', 'cloud-services', 'consulting'],
                 ],
                 [
@@ -102,12 +110,20 @@ class ServiceSeeder extends Seeder
                     'description_en' => 'Get expert guidance on technology strategy, digital transformation, and IT infrastructure. Our consultants help you align technology with your business goals.',
                     'description_ar' => 'احصل على إرشادات خبيرة حول استراتيجية التكنولوجيا والتحول الرقمي والبنية التحتية لتقنية المعلومات. يساعدك مستشارونا على محاذاة التكنولوجيا مع أهداف عملك.',
                     'status' => StatusEnum::INACTIVE,
+                    'category' => 'consulting-strategy',
                     'tags' => ['consulting', 'cloud-services', 'cybersecurity'],
                 ],
             ];
 
             foreach ($services as $serviceData) {
                 $slug = Str::slug($serviceData['name_en']);
+
+                // Find category if provided
+                $categoryId = null;
+                if (isset($serviceData['category'])) {
+                    $category = ServiceCategory::where('slug', $serviceData['category'])->first();
+                    $categoryId = $category?->id;
+                }
 
                 $service = Service::updateOrCreate(
                     ['slug' => $slug],
@@ -126,6 +142,7 @@ class ServiceSeeder extends Seeder
                             'ar' => $serviceData['description_ar'],
                         ],
                         'status' => $serviceData['status'],
+                        'category_id' => $categoryId,
                     ]
                 );
 

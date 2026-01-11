@@ -7,6 +7,7 @@ use App\Builders\BaseBuilder;
 class ServiceBuilder extends BaseBuilder
 {
     protected $tags = null;
+    protected $categories = null;
 
     public function setTags($tags)
     {
@@ -14,17 +15,25 @@ class ServiceBuilder extends BaseBuilder
         return $this;
     }
 
+    public function setCategories($categories)
+    {
+        $this->categories = $categories;
+        return $this;
+    }
+
     public function create(): array
     {
         return array_merge(parent::create(), [
-            'tags' => $this->tags
+            'tags' => $this->tags,
+            'categories' => $this->categories
         ]);
     }
 
     public function edit(mixed $model): array
     {
         return array_merge(parent::edit($model), [
-            'tags' => $this->tags
+            'tags' => $this->tags,
+            'categories' => $this->categories
         ]);
     }
 }

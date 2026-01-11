@@ -107,9 +107,9 @@
         <!-- ============================================
             MANAGEMENT
         ============================================ -->
-        @canany(['tag.show', 'project.show', 'service.show', 'partner.show'])
+        @canany(['tag.show', 'project.show', 'service.show', 'service-category.show', 'partner.show'])
             <li
-                class="menu-item {{ isActiveRoute(['dashboard.tags.*', 'dashboard.services.*', 'dashboard.projects.*', 'dashboard.partners.*']) ? 'open' : '' }}">
+                class="menu-item {{ isActiveRoute(['dashboard.tags.*', 'dashboard.services.*', 'dashboard.service-categories.*', 'dashboard.projects.*', 'dashboard.partners.*']) ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons mdi mdi-account-cog-outline"></i>
                     <div>{{ __('custom.sidebar.management') }}</div>
@@ -129,6 +129,15 @@
                             <a href="{{ route('dashboard.services.index') }}" class="menu-link">
                                 <i class="menu-icon tf-icons mdi mdi-briefcase-outline"></i>
                                 <div>{{ __('custom.sidebar.services') }}</div>
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('service-category.show')
+                        <li class="menu-item {{ isActiveRoute('dashboard.service-categories.*') }}">
+                            <a href="{{ route('dashboard.service-categories.index') }}" class="menu-link">
+                                <i class="menu-icon tf-icons mdi mdi-folder-multiple-outline"></i>
+                                <div>{{ __('custom.sidebar.service_categories') }}</div>
                             </a>
                         </li>
                     @endcan

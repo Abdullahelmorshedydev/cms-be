@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             PageSeeder::class,
             PageSectionsStaticSeeder::class,
             TagSeeder::class,
+            ServiceCategorySeeder::class,
             ServiceSeeder::class,
             PartnerSeeder::class,
             ProjectSeeder::class,

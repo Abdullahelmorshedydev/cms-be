@@ -108,6 +108,9 @@ return [
     'service' => [
         'service' => 'خدمة',
     ],
+    'service_category' => [
+        'service_category' => 'فئة الخدمة',
+    ],
     'partner' => [
         'partner' => 'شريك',
     ],
@@ -343,7 +346,6 @@ return [
         'model_type' => 'نوع النموذج',
         'add_models' => 'إضافة نماذج',
         'clear_all' => 'مسح الكل',
-        'select' => 'اختر',
         'add_selected' => 'إضافة المحدد',
         'no_models_selected' => 'لم يتم اختيار أي نماذج. انقر على "إضافة نماذج" لاختيار العناصر.',
         'no_models_available' => 'لا توجد نماذج متاحة لهذا النوع.',
@@ -456,6 +458,8 @@ return [
         'subject' => 'الموضوع',
         'message' => 'الرسالة',
         'tags' => 'الوسوم',
+        'category' => 'الفئة',
+        'slug' => 'الرابط',
         'short_description' => 'وصف قصير',
         'short_description_en' => 'وصف قصير [EN]',
         'short_description_ar' => 'وصف قصير [AR]',
@@ -495,7 +499,8 @@ return [
         'payment_status' => 'حالة الدفع',
         'total_amount' => 'المبلغ الإجمالي',
         'payment_method' => 'طريقة الدفع',
-        'slug' => 'Slug',
+        'slug' => 'الرابط',
+        'services_count' => 'عدد الخدمات',
         'type' => 'النوع',
         'code' => 'الكود',
         'fields' => 'الحقول',
@@ -836,6 +841,10 @@ return [
         ],
         'slug' => [
             'required' => 'الرابط مطلوب',
+            'string' => 'الرابط يجب أن يكون نصاً',
+            'max' => 'الرابط يجب الا يزيد عن :max حرف',
+            'alpha_dash' => 'الرابط يمكن أن يحتوي فقط على أحرف وأرقام وشرطات وشرطات سفلية',
+            'unique' => 'الرابط مستخدم بالفعل',
         ],
         'is_active' => [
             'required' => 'النشط مطلوب',
@@ -1042,6 +1051,7 @@ return [
         'tags' => 'الوسوم',
         'projects' => 'المشاريع',
         'services' => 'الخدمات',
+        'service_categories' => 'فئات الخدمات',
         'partners' => 'الشركاء'
     ],
     'sidebar' => [
@@ -1115,6 +1125,7 @@ return [
         'automation' => 'الأتمتة',
         'tags' => 'الوسوم',
         'services' => 'الخدمات',
+        'service_categories' => 'فئات الخدمات',
         'projects' => 'المشاريع',
         'partners' => 'الشركاء',
     ],
@@ -1550,6 +1561,10 @@ return [
         'amount' => 'المبلغ',
         'payment_method' => 'طريقة الدفع',
         'date' => 'التاريخ',
+    ],
+
+    'hints' => [
+        'slug_format' => 'أحرف صغيرة، المسافات تصبح "-"، فقط أحرف/أرقام/شرطات',
     ],
 
 ];

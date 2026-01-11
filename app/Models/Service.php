@@ -29,7 +29,8 @@ class Service extends Model
         'slug',
         'short_description',
         'description',
-        'status'
+        'status',
+        'category_id'
     ];
 
     protected $casts = [
@@ -39,5 +40,10 @@ class Service extends Model
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ServiceCategory::class, 'category_id');
     }
 }

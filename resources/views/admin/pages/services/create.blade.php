@@ -75,6 +75,22 @@
                         </div>
                         <div class="col-md-6 mt-3">
                             <div class="form-floating form-floating-outline">
+                                <select id="categorySelect" class="form-control" name="category_id">
+                                    <option value="">{{ __('custom.words.choose') }}</option>
+                                    @foreach ($data['categories'] ?? [] as $category)
+                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ getTranslatedValue($category->name) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <label for="categorySelect">{{ __('custom.inputs.category') }}</label>
+                                @error('category_id')
+                                    <div class="text-danger"> {{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <div class="form-floating form-floating-outline">
                                 <select id="tagsSelect" class="form-control select2" name="tags[]">
                                     <option value="">{{ __('custom.words.choose') }}</option>
                                     @foreach ($data['tags'] as $tag)

@@ -105,6 +105,9 @@ return [
     'service' => [
         'service' => 'Service',
     ],
+    'service_category' => [
+        'service_category' => 'Service Category',
+    ],
     'partner' => [
         'partner' => 'Partner',
     ],
@@ -454,6 +457,8 @@ return [
         'subject' => 'Subject',
         'message' => 'Message',
         'tags' => 'Tags',
+        'category' => 'Category',
+        'slug' => 'Slug',
         'short_description' => 'Short description',
         'short_description_en' => 'Short description [EN]',
         'short_description_ar' => 'Short description [AR]',
@@ -494,6 +499,7 @@ return [
         'total_amount' => 'Total Amount',
         'payment_method' => 'Payment Method',
         'slug' => 'Slug',
+        'services_count' => 'Services Count',
         'type' => 'Type',
         'code' => 'Code',
         'fields' => 'Fields',
@@ -834,6 +840,10 @@ return [
         ],
         'slug' => [
             'required' => 'Slug is required',
+            'string' => 'Slug must be a string',
+            'max' => 'Slug must not exceed :max characters',
+            'alpha_dash' => 'Slug may only contain letters, numbers, dashes and underscores',
+            'unique' => 'Slug has already been taken',
         ],
         'is_active' => [
             'required' => 'Is active is required',
@@ -1081,6 +1091,7 @@ return [
         'tags' => 'Tags',
         'projects' => 'Projects',
         'services' => 'Services',
+        'service_categories' => 'Service Categories',
         'partners' => 'Partners',
     ],
     'sidebar' => [
@@ -1156,6 +1167,7 @@ return [
         'settings' => 'Settings',
         'tags' => 'Tags',
         'services' => 'Services',
+        'service_categories' => 'Service Categories',
         'projects' => 'Projects',
         'partners' => 'Partners',
     ],
@@ -1591,6 +1603,10 @@ return [
         'amount' => 'Amount',
         'payment_method' => 'Payment Method',
         'date' => 'Date',
+    ],
+
+    'hints' => [
+        'slug_format' => 'Lowercase, spaces become "-", only letters/numbers/dashes',
     ],
 
 ];

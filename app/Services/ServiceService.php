@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Builders\ServiceBuilder;
 use App\Enums\StatusEnum;
+use App\Repositories\ServiceCategoryRepository;
 use App\Repositories\ServiceRepository;
 use App\Repositories\TagRepository;
 use App\Services\MediaService;
@@ -15,14 +16,15 @@ class ServiceService extends BaseService
         ServiceRepository $repository,
         protected ServiceBuilder $builder,
         protected MediaService $mediaService,
-        protected TagRepository $tagRepository
+        protected TagRepository $tagRepository,
+        protected ServiceCategoryRepository $serviceCategoryRepository
     ) {
         parent::__construct($repository);
     }
 
     public function index($data, $with = [], $columns = ['*'], $order = ['id' => 'DESC'], $limit = 10)
     {
-        $result = parent::index($data, $with, $columns, $order, $limit);
+        $result = parent::index($data, ['category'], $columns, $order, $limit);
         $result['data']['status'] = StatusEnum::getAll();
         $result['data']['tags'] = $this->tagRepository->findAllWith(
             ['*'],
@@ -40,6 +42,13 @@ class ServiceService extends BaseService
             Response::HTTP_OK,
             $this->builder->setTags(
                 $this->tagRepository->findAllWith(
+                    ['*'],
+                    [],
+                    ['id' => 'DESC'],
+                    null
+                )
+            )->setCategories(
+                $this->serviceCategoryRepository->findAllWith(
                     ['*'],
                     [],
                     ['id' => 'DESC'],
@@ -77,12 +86,20 @@ class ServiceService extends BaseService
                     ['id' => 'DESC'],
                     null
                 )
+            )->setCategories(
+                $this->serviceCategoryRepository->findAllWith(
+                    ['*'],
+                    [],
+                    ['id' => 'DESC'],
+                    null
+                )
             )->edit($this->repository->findOneByWith(
                         ['slug' => $slug],
                         ['*'],
                         [
                             'image',
-                            'tags'
+                            'tags',
+                            'category'
                         ]
                     )),
             __('custom.messages.retrieved_success')
