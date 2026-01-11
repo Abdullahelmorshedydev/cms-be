@@ -8,6 +8,7 @@ use App\Http\Controllers\API\PageController;
 use App\Http\Controllers\API\PartnerController;
 use App\Http\Controllers\API\ProjectController;
 use App\Http\Controllers\API\SectionController as SectionController;
+use App\Http\Controllers\API\ServiceCategoryController;
 use App\Http\Controllers\API\ServiceController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Middleware\APILocaleMiddleware;
@@ -43,6 +44,9 @@ Route::prefix("/cms")->middleware(APILocaleMiddleware::class)->group(
 
 // Services
 Route::get('/services', ServiceController::class)->name('services');
+
+// Service Categories
+Route::get('/service-categories', ServiceCategoryController::class)->name('service-categories');
 
 // Projects
 Route::get('/projects', ProjectController::class)->name('projects');

@@ -20,6 +20,11 @@ class ServiceCategoryService extends BaseService
         // Build query with services count
         $query = $this->repository->query()->withCount('services');
         
+        // Eager load relationships if provided
+        if (!empty($with)) {
+            $query->with($with);
+        }
+        
         // Apply filters using repository's handleCriteria method
         $builder = $this->repository->handleCriteria($data, $query);
         
