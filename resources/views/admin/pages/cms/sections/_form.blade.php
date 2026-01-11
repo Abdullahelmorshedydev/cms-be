@@ -60,6 +60,12 @@
         </div>
     </div>
 
+    {{-- Models Manager (only for section types that support models) --}}
+    @include('admin.pages.cms.sections.partials._standalone_models_manager', [
+        'section' => $section ?? null,
+        'sectionTypes' => $sectionTypes ?? collect(),
+    ])
+
     <div class="col-md-12 mt-3">
         <button type="submit" class="btn btn-primary">
             {{ $submitLabel ?? __('custom.words.save') }}
@@ -69,4 +75,3 @@
         </a>
     </div>
 </div>
-

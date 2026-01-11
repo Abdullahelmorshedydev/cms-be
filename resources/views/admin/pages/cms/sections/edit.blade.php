@@ -15,10 +15,10 @@
                 <form action="{{ route('dashboard.cms.sections.update', $section->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    
+
                     {{-- Container for removed media IDs (global for standalone section edit) --}}
                     <div id="removedMediaContainer"></div>
-                    
+
                     @php($submitLabel = __('custom.words.update'))
                     @include('admin.pages.cms.sections._form', [
                         'section' => $section,
@@ -38,6 +38,6 @@
 <script src="{{ asset('dashboard/assets/js/universal-media-handler.js') }}"></script>
 {{-- Media Service for FormData handling in API calls --}}
 <script src="{{ asset('dashboard/assets/js/services/mediaService.js') }}"></script>
+{{-- Standalone Models Manager --}}
+@include('admin.pages.cms.sections.js.standalone-models-manager', ['sectionTypes' => $sectionTypes])
 @endsection
-
-

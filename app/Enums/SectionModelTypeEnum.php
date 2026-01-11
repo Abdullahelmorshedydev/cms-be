@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Models\Page;
+use App\Models\Partner;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\Tag;
@@ -23,6 +24,10 @@ enum SectionModelTypeEnum: string
     {
         return [
             (new Page())->getTable(),
+            (new Service())->getTable(),
+            (new Project())->getTable(),
+            (new Tag())->getTable(),
+            (new Partner())->getTable(),
         ];
     }
 }

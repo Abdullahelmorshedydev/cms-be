@@ -541,8 +541,13 @@
                     confirmBtn.addEventListener('click', () => confirmModelSelection(uniqueId, sectionIndex, isSubsection, subIndex));
                 }
 
-                // Load models when modal opens
+                // Load models when modal opens - set default model type from existing models
                 modal.addEventListener('show.bs.modal', () => {
+                    // Set model type selector to match existing models if any
+                    const modelTypeInput = document.getElementById(`model-type-${uniqueId}`);
+                    if (modelTypeInput && modelTypeInput.value) {
+                        modelTypeSelect.value = modelTypeInput.value;
+                    }
                     loadAvailableModels(uniqueId);
                 });
             }
@@ -638,30 +643,49 @@
                 }
 
                 const data = await response.json();
+
                 // Handle different response formats
-                // formatResponse returns: { data: { data: [...] }, meta: {...} }
-                // successResponse returns: { data: { pages/services/projects/tags: [...] }, ... }
-                if (data.data) {
-                    if (Array.isArray(data.data)) {
-                        models = data.data;
-                    } else if (data.data.data && Array.isArray(data.data.data)) {
+                // formatResponse wraps service response: { data: { data: [...] }, meta: {...}, code, message }
+                // BaseService.index returns: { data: { data: [...] }, meta: {...}, code, message }
+                // formatResponse then wraps it again, so final structure is: { data: { data: [...] }, meta: {...}, code, message }
+                if (data && data.data) {
+                    // Primary: data.data.data (the actual models array from BaseService)
+                    if (data.data.data && Array.isArray(data.data.data)) {
                         models = data.data.data;
-                    } else if (data.data[modelType] && Array.isArray(data.data[modelType])) {
+                    }
+                    // Fallback: data.data is direct array (shouldn't happen with formatResponse, but just in case)
+                    else if (Array.isArray(data.data)) {
+                        models = data.data;
+                    }
+                    // Last resort: try keyed by model type
+                    else if (data.data[modelType] && Array.isArray(data.data[modelType])) {
                         models = data.data[modelType];
-                    } else if (data.data.pages && Array.isArray(data.data.pages)) {
-                        models = data.data.pages;
-                    } else if (data.data.services && Array.isArray(data.data.services)) {
+                    }
+                    // Additional fallbacks for different response structures
+                    else if (data.data.services && Array.isArray(data.data.services)) {
                         models = data.data.services;
                     } else if (data.data.projects && Array.isArray(data.data.projects)) {
                         models = data.data.projects;
                     } else if (data.data.tags && Array.isArray(data.data.tags)) {
                         models = data.data.tags;
+                    } else if (data.data.pages && Array.isArray(data.data.pages)) {
+                        models = data.data.pages;
+                    } else if (data.data.partners && Array.isArray(data.data.partners)) {
+                        models = data.data.partners;
                     } else {
+                        // No models found in response
+                        console.warn(`[Models Manager] Could not parse models from API response for ${modelType}. Response structure:`, data);
                         models = [];
                     }
                 } else {
+                    console.warn(`[Models Manager] Invalid API response structure for ${modelType}:`, data);
                     models = [];
                 }
+
+                if (models.length === 0) {
+                    console.warn(`[Models Manager] No models found for ${modelType}. API response:`, data);
+                }
+
                 modelsCache[cacheKey] = models;
             }
 
@@ -937,16 +961,38 @@
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
         if (!selectedList) return;
 
+        // Get the model type from selector (table name: pages, services, projects, tags, partners)
+        const modelTypeSelect = modal.querySelector('.model-type-selector');
+        const newModelType = modelTypeSelect ? modelTypeSelect.value : 'pages';
+
+        // Check existing models type
+        const existingItems = selectedList.querySelectorAll('.selected-model-item');
+        if (existingItems.length > 0) {
+            const existingModelTypeInput = document.getElementById(`model-type-${uniqueId}`);
+            const existingModelType = existingModelTypeInput ? existingModelTypeInput.value : '';
+
+            // Backend requires all models to be of the same type
+            if (existingModelType && existingModelType !== newModelType) {
+                const confirmMessage = 'Existing models are of type "' + existingModelType +
+                    '". Changing to "' + newModelType +
+                    '" will replace existing models. Continue?';
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                // Clear existing models
+                selectedList.innerHTML = `<div class="empty-state text-center text-muted py-4">
+                    <i class="mdi mdi-information-outline mdi-48px mb-2"></i>
+                    <p class="mb-0">{{ __('custom.words.no_models_selected') }}</p>
+                </div>`;
+            }
+        }
+
         const existingIds = Array.from(selectedList.querySelectorAll('[data-model-id]'))
             .map(item => parseInt(item.dataset.modelId))
             .filter(id => !isNaN(id));
 
-        // Get the model type to fetch full model data
-        const modelTypeSelect = modal.querySelector('.model-type-selector');
-        const modelType = modelTypeSelect ? modelTypeSelect.value : 'pages';
-
         // Get all models from cache to find full data
-        const cacheKey = `${modelType}_all`;
+        const cacheKey = `${newModelType}_all`;
         const allModels = modelsCache[cacheKey] || [];
 
         const newModels = [];
@@ -957,16 +1003,17 @@
                 const fullModel = allModels.find(m => m && m.id === modelId);
 
                 if (fullModel) {
-                    // Use full model data with all properties including media
+                    // Add model type table name to the model object
+                    fullModel.modelTypeTable = newModelType;
                     newModels.push(fullModel);
                 } else {
                     // Fallback to basic data from checkbox attributes
                     const modelName = checkbox.dataset.modelName || 'Unknown Model';
-                    const modelTypeName = checkbox.dataset.modelType || modelType;
                     newModels.push({
                         id: modelId,
                         name: modelName,
-                        type: modelTypeName,
+                        type: newModelType,
+                        modelTypeTable: newModelType,
                         slug: null
                     });
                 }
@@ -974,7 +1021,7 @@
         });
 
         if (newModels.length > 0) {
-            addModelsToList(uniqueId, newModels, sectionIndex, isSubsection, subIndex);
+            addModelsToList(uniqueId, newModels, sectionIndex, isSubsection, subIndex, newModelType);
         }
 
         // Close modal
@@ -990,7 +1037,7 @@
     }
 
     // Add models to selected list
-    function addModelsToList(uniqueId, models, sectionIndex, isSubsection, subIndex) {
+    function addModelsToList(uniqueId, models, sectionIndex, isSubsection, subIndex, modelTypeTable) {
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
         const inputPrefix = isSubsection
             ? `sections[${sectionIndex}][sub_sections][${subIndex}]`
@@ -1000,12 +1047,14 @@
         const existingItems = selectedList.querySelectorAll('.selected-model-item');
         let maxOrder = existingItems.length;
 
-        // Fetch full model data with media for each selected model
-        models.forEach(async (model) => {
+        // Add models to list (data already loaded from cache in confirmModelSelection)
+        models.forEach((model) => {
             maxOrder++;
-            // Try to get full model data from cache or fetch it
-            const fullModel = await getFullModelData(model.id, model.type);
-            const item = createModelItem(fullModel || model, maxOrder, inputPrefix, uniqueId);
+            // Ensure model has modelTypeTable
+            if (!model.modelTypeTable) {
+                model.modelTypeTable = modelTypeTable || 'pages';
+            }
+            const item = createModelItem(model, maxOrder, inputPrefix, uniqueId, model.modelTypeTable || modelTypeTable || 'pages');
             selectedList.appendChild(item);
         });
 
@@ -1015,7 +1064,7 @@
 
         normalizeOrders(uniqueId, sectionIndex, isSubsection, subIndex);
         updateModelsCount(uniqueId);
-        updateFormInputs(uniqueId, sectionIndex, isSubsection, subIndex);
+        updateFormInputs(uniqueId, sectionIndex, isSubsection, subIndex, modelTypeTable);
     }
 
     // Extract model name from model object (handles translatable fields)
@@ -1062,12 +1111,13 @@
     }
 
     // Create model item HTML
-    function createModelItem(model, order, inputPrefix, uniqueId) {
+    function createModelItem(model, order, inputPrefix, uniqueId, modelTypeTable) {
         const item = document.createElement('div');
         item.className = 'selected-model-item mb-2 p-2 border rounded d-flex align-items-center justify-content-between';
         item.dataset.modelId = model.id;
+        item.dataset.modelTypeTable = modelTypeTable || model.modelTypeTable || 'pages';
 
-        // Extract model type name (for display)
+        // Extract model type name (for display - class name like "Project", "Service")
         const modelTypeName = model.type || (model.model_type || 'Model');
         item.dataset.modelType = modelTypeName;
 
@@ -1227,8 +1277,10 @@
     }
 
     // Update form hidden inputs
-    function updateFormInputs(uniqueId, sectionIndex, isSubsection, subIndex) {
+    function updateFormInputs(uniqueId, sectionIndex, isSubsection, subIndex, modelTypeTable) {
         const selectedList = document.getElementById(`selected-models-${uniqueId}`);
+        if (!selectedList) return;
+
         const items = selectedList.querySelectorAll('.selected-model-item');
         const hasModels = items.length > 0;
 
@@ -1238,18 +1290,18 @@
             hasRelationInput.value = hasModels ? '1' : '0';
         }
 
-        // Update model type (use first item's type or default)
+        // Update model type (table name: pages, services, projects, tags, partners)
         const modelTypeInput = document.getElementById(`model-type-${uniqueId}`);
-        if (modelTypeInput && items.length > 0) {
-            const firstItem = items[0];
-            const modelType = firstItem.dataset.modelType?.toLowerCase() || 'pages';
-            // Map class name to table name
-            let tableName = 'pages';
-            if (modelType.includes('service')) tableName = 'services';
-            else if (modelType.includes('project')) tableName = 'projects';
-            else if (modelType.includes('tag')) tableName = 'tags';
-            else if (modelType.includes('page')) tableName = 'pages';
-            modelTypeInput.value = tableName;
+        if (modelTypeInput) {
+            if (hasModels && items.length > 0) {
+                // Use the modelTypeTable from data attribute (table name)
+                const firstItem = items[0];
+                const tableName = firstItem.dataset.modelTypeTable || modelTypeTable || 'pages';
+                modelTypeInput.value = tableName;
+            } else if (!hasModels) {
+                // Clear if no models
+                modelTypeInput.value = '';
+            }
         }
     }
 
