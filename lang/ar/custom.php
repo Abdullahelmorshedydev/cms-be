@@ -331,6 +331,7 @@ return [
         'attendance_this_month' => 'الحضور هذا الشهر',
         'page' => 'صفحة',
         'section' => 'قسم',
+        'content' => 'المحتوى',
         'partners' => 'الشريكون',
         'type' => 'نوع',
         'read_only' => 'للقراءة فقط',

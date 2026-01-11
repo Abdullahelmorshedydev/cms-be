@@ -331,6 +331,7 @@ return [
         'attendance_this_month' => 'Attendance This Month',
         'page' => 'Page',
         'section' => 'Section',
+        'content' => 'Content',
         'partners' => 'Partners',
         'type' => 'Type',
         'read_only' => 'Read-Only',
