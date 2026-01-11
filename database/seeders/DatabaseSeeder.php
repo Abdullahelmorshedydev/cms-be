@@ -9,17 +9,17 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SettingSeeder::class,
+                // SettingSeeder::class,
             PermissionSeeder::class,
-            UserSeeder::class,
+                // UserSeeder::class,
             RoleSeeder::class,
-            PageSeeder::class,
-            PageSectionsStaticSeeder::class,
-            TagSeeder::class,
+                // PageSeeder::class,
+                // PageSectionsStaticSeeder::class,
+                // TagSeeder::class,
             ServiceCategorySeeder::class,
             ServiceSeeder::class,
-            PartnerSeeder::class,
-            ProjectSeeder::class,
+            // PartnerSeeder::class,
+            // ProjectSeeder::class,
         ]);
     }
 }
