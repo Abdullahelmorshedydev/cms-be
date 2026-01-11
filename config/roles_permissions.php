@@ -18,6 +18,7 @@ return [
             'permissions' => [
                 'tag' => ['show', 'edit', 'create', 'delete'],
                 'service' => ['show', 'edit', 'create', 'delete'],
+                'service-category' => ['show', 'edit', 'create', 'delete'],
                 'project' => ['show', 'edit', 'create', 'delete'],
                 'partner' => ['show', 'edit', 'create', 'delete'],
                 'form' => ['show', 'edit', 'create', 'delete', 'export'],
