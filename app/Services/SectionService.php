@@ -186,7 +186,28 @@ class SectionService
 
         // Handle video poster images separately
         if (!empty($images) || !empty($removeImagesIds)) {
-            $this->addMultipleImagesToSection($section, $images ?? [], $removeImagesIds ?? []);
+            // Auto-remove old poster images with the same collection_name when new ones are uploaded
+            $posterCollectionNames = ['video_poster_desktop', 'video_poster_mobile'];
+            $autoRemoveIds = [];
+
+            if (!empty($images)) {
+                foreach ($images as $image) {
+                    if (isset($image['collection_name']) && in_array($image['collection_name'], $posterCollectionNames)) {
+                        // Find and collect IDs of old poster images with the same collection_name
+                        $oldPosters = $section->images()
+                            ->where('collection_name', $image['collection_name'])
+                            ->where('device', $image['device'] ?? 'desktop')
+                            ->pluck('id')
+                            ->toArray();
+                        $autoRemoveIds = array_merge($autoRemoveIds, $oldPosters);
+                    }
+                }
+            }
+
+            // Merge auto-removed IDs with explicitly provided remove IDs
+            $allRemoveIds = array_unique(array_merge($removeImagesIds ?? [], $autoRemoveIds));
+
+            $this->addMultipleImagesToSection($section, $images ?? [], $allRemoveIds);
         }
     }
     protected function addMultipleChildSection($sections, $parent_id)

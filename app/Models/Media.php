@@ -25,7 +25,7 @@ class Media extends Model
         'type',
         'is_active',
         'device',
-        // 'collection_name' - Removed: column doesn't exist in database table
+        'collection_name',
     ];
 
     protected $casts = [

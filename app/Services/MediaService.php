@@ -156,7 +156,7 @@ class MediaService
                     'alt_text' => trim($altText . ' ' . $index),
                     'device' => $file['device'] ?? 'desktop',
                     'order' => $file['order'] ?? $index,
-                    // 'collection_name' => $file['collection_name'] ?? null,
+                    'collection_name' => $file['collection_name'] ?? null,
                 ]);
 
                 $ids[] = (int) $media->id;
