@@ -1,23 +1,31 @@
-@if($sectionContent && is_array($sectionContent))
+@php
+    // Get locales if not passed
+    if (!isset($locales)) {
+        $locales = \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getSupportedLanguagesKeys();
+    }
+@endphp
+
+@if($sectionContent && is_array($sectionContent) && count($sectionContent) > 0)
     @foreach($sectionContent as $key => $value)
-        @if(is_array($value) && (isset($value['en']) || isset($value['ar'])))
+        @if(is_array($value) && !empty(array_intersect(array_keys($value), $locales)))
             {{-- Translation fields --}}
-            @foreach(['en', 'ar'] as $locale)
+            @foreach($locales as $locale)
                 <div class="mb-3">
                     <label class="form-label">{{ ucfirst($key) }} ({{ strtoupper($locale) }})</label>
                     @php
                         $isDescription = strtolower($key) === 'description';
+                        $isContent = strtolower($key) === 'content';
                         $isSubtitle = strtolower($key) === 'subtitle';
-                        $editorClass = $isDescription ? 'section-description-editor' : '';
+                        $editorClass = ($isDescription || $isContent) ? 'section-description-editor' : '';
                         $editorId = '';
-                        if ($isDescription) {
-                            $editorId = 'unsupported-description-' . (isset($sectionIndex) ? $sectionIndex : '0') . '-' . $key . '-' . $locale;
+                        if ($isDescription || $isContent) {
+                            $editorId = 'unsupported-' . $key . '-' . (isset($sectionIndex) ? $sectionIndex : '0') . '-' . $locale;
                             if (isset($isSubsection) && $isSubsection && isset($subIndex)) {
                                 $editorId .= '-sub-' . $subIndex;
                             }
                         }
                     @endphp
-                    @if(!$isSubtitle && (is_string($value[$locale] ?? '') && strlen($value[$locale] ?? '') > 100 || $isDescription))
+                    @if(!$isSubtitle && (is_string($value[$locale] ?? '') && strlen($value[$locale] ?? '') > 100 || $isDescription || $isContent))
                         <textarea 
                             class="form-control {{ $editorClass }}"
                             @if($editorId) id="{{ $editorId }}" @endif
@@ -56,12 +64,33 @@
         @endif
     @endforeach
 @else
-    <div class="mb-3">
-        <label class="form-label">{{ __('custom.words.content') }}</label>
-        <textarea 
-            class="form-control"
-            name="{{ $namePrefix }}"
-            rows="5"
-            placeholder="{{ __('custom.words.content') }}">{{ is_string($sectionContent) ? $sectionContent : json_encode($sectionContent, JSON_PRETTY_PRINT) }}</textarea>
+    {{-- Default: Render content as multi-language fields --}}
+    <div class="row">
+        @foreach($locales as $locale)
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ __('custom.words.content') }} ({{ strtoupper($locale) }})</label>
+                @php
+                    $editorId = 'unsupported-content-' . (isset($sectionIndex) ? $sectionIndex : '0') . '-' . $locale;
+                    if (isset($isSubsection) && $isSubsection && isset($subIndex)) {
+                        $editorId .= '-sub-' . $subIndex;
+                    }
+                    // Get existing content value
+                    $contentValue = '';
+                    if ($sectionContent && is_array($sectionContent)) {
+                        if (isset($sectionContent['content'][$locale])) {
+                            $contentValue = $sectionContent['content'][$locale];
+                        } elseif (isset($sectionContent[$locale])) {
+                            $contentValue = $sectionContent[$locale];
+                        }
+                    }
+                @endphp
+                <textarea 
+                    class="form-control section-description-editor"
+                    id="{{ $editorId }}"
+                    name="{{ $namePrefix }}[content][{{ $locale }}]"
+                    rows="5"
+                    placeholder="{{ __('custom.words.content') }} ({{ strtoupper($locale) }})">{{ $contentValue }}</textarea>
+            </div>
+        @endforeach
     </div>
 @endif

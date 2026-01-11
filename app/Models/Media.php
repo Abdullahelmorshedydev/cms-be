@@ -56,4 +56,47 @@ class Media extends Model
             get: fn() => $this->type->hasPoster() ? $this->mediaable->images()->where('device', $this->device)->first() : null,
         );
     }
+
+    /**
+     * Get media response format for API
+     * Returns standardized media data structure
+     */
+    public function getMediaResponse(): array
+    {
+        $response = [
+            'id' => $this->id,
+            'name' => $this->name,
+            'url' => $this->url,
+            'media_path' => $this->media_path,
+            'alt_text' => $this->alt_text ?? null,
+            'type' => $this->type instanceof \App\Enums\MediaTypeEnum ? $this->type->value : $this->type,
+            'device' => $this->device ?? null,
+            'is_active' => $this->is_active instanceof \App\Enums\StatusEnum ? $this->is_active->value : $this->is_active,
+        ];
+
+        // Add poster if it exists and is not null
+        // Poster is already an Attribute that returns a Media model or null
+        $poster = $this->poster;
+        if ($poster instanceof Media) {
+            // Return basic poster info to prevent infinite recursion
+            $response['poster'] = [
+                'id' => $poster->id,
+                'name' => $poster->name,
+                'url' => $poster->url,
+                'media_path' => $poster->media_path,
+            ];
+        } elseif ($poster !== null) {
+            $response['poster'] = $poster;
+        }
+
+        // Add timestamps
+        if ($this->created_at) {
+            $response['created_at'] = $this->created_at->toIso8601String();
+        }
+        if ($this->updated_at) {
+            $response['updated_at'] = $this->updated_at->toIso8601String();
+        }
+
+        return $response;
+    }
 }

@@ -91,7 +91,8 @@ abstract class BaseRepository
                 $operator = $value['operator'] ?? $operator;
                 $value = $value['value'];
             }
-            $builder->where($key, $operator, $value);
+
+            // Check if key contains a dot (relation.field format)
             if (strpos($key, '.') !== false) {
                 list($relation, $relationKey) = explode('.', $key);
                 $builder->whereHas($relation, function ($query) use ($relationKey, $operator, $value) {

@@ -58,7 +58,7 @@
  <link rel="stylesheet" href="{{ asset('dashboard/assets/vendor/libs/@form-validation/umd/styles/index.min.css') }}" />
 
  {{-- Global Loading Overlay Styles --}}
- <link rel="stylesheet" href="{{ asset('css/loading-overlay.css') }}" />
+ <link rel="stylesheet" href="{{ asset('css/dashboard-overrides.css') }}" />
 
  {{-- Custom Dashboard Styles - Sidebar Icon & Text Spacing --}}
  <link rel="stylesheet" href="{{ asset('css/sidebar-spacing.css') }}" />

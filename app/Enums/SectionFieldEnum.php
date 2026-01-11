@@ -15,6 +15,7 @@ enum SectionFieldEnum: string
     case BUTTON = 'button';
     case BUTTONS = 'buttons';
     case MODEL = 'model';
+    case CONTENT = 'content';
 
     public static function values(): array
     {

@@ -114,11 +114,44 @@ class PageController extends Controller
     public function editSections(Page $page)
     {
         try {
+            // Get sections WITHOUT any automatic eager loading
             $sections = $this->sectionService->getPageSections($page->id);
-            
-            // Ensure sectionTypes are loaded for all sections and subsections
-            $sections->load('sectionTypes', 'images', 'videos', 'icon', 'sections.sectionTypes', 'sections.images', 'sections.videos', 'sections.icon');
-            
+
+            // Now explicitly load ONLY what we need, with strict depth control
+            // Load only ONE level deep to prevent infinite recursion
+            $sections->load([
+                'sectionTypes',
+                'images' => function ($query) {
+                    $query->orderBy('order');
+                },
+                'videos' => function ($query) {
+                    $query->orderBy('order');
+                },
+                'icon',
+                'sections' => function ($query) {
+                    // Only load direct children, no deeper
+                    $query->orderBy('order');
+                },
+            ]);
+
+            // Load relationships for subsections (one level only)
+            // DO NOT load sections.sections - this would cause infinite recursion
+            foreach ($sections as $section) {
+                if ($section->relationLoaded('sections') && $section->sections->isNotEmpty()) {
+                    $section->sections->load([
+                        'sectionTypes',
+                        'images' => function ($query) {
+                            $query->orderBy('order');
+                        },
+                        'videos' => function ($query) {
+                            $query->orderBy('order');
+                        },
+                        'icon',
+                        // DO NOT load sections here - would cause infinite recursion
+                    ]);
+                }
+            }
+
             // Get all available section types
             $sectionTypes = $this->sectionTypeService->getAll();
 
@@ -128,7 +161,11 @@ class PageController extends Controller
                 'sectionTypes' => $sectionTypes,
             ]);
         } catch (\Exception $e) {
-            Log::error('Error loading page sections for edit', ['error' => $e->getMessage()]);
+            Log::error('Error loading page sections for edit', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'page_id' => $page->id
+            ]);
             return back()->withErrors(['error' => __('custom.messages.retrieved_failed')]);
         }
     }

@@ -19,8 +19,8 @@
 
     // For subsections: if type is missing, inherit from parent section
     if ($isSubsection && empty($sectionTypeFields) && isset($parentSection) && $parentSection) {
-        if ($parentSection->sectionTypes && method_exists($parentSection->sectionTypes, 'count') && $parentSection->sectionTypes->count() > 0) {
-            $parentSectionType = $parentSection->sectionTypes->first();
+        if ($parentSection->sectionTypes && method_exists($parentSection->sectionTypes, 'count') && $parentSection->sectionTypes()->count() > 0) {
+            $parentSectionType = $parentSection->sectionTypes()->first();
             if ($parentSectionType) {
                 $sectionTypeSlug = $parentSectionType->slug ?? null;
                 $sectionTypeFields = $parentSectionType->fields ?? [];

@@ -35,17 +35,15 @@ class SectionService
     }
     public function getPageSections($page_id)
     {
-        return $this->repository->findBy(
-            [
-                'parent_type' => Page::class,
-                'parent_id' => $page_id,
-            ],
-            ['*'],
-            [],
-            false,
-            'order',
-            'ASC'
-        );
+        // Get sections WITHOUT any automatic eager loading
+        // Query directly to bypass any $with relationships
+        $sections = $this->repository->getModel()
+            ->where('parent_type', Page::class)
+            ->where('parent_id', $page_id)
+            ->orderBy('order', 'ASC')
+            ->get();
+
+        return $sections;
     }
 
     public function create($data)
@@ -447,7 +445,7 @@ class SectionService
     }
     private function prepareSectionContent(array $data)
     {
-        $content = null;
+        $content = [];
         $sectionType = SectionType::where('slug', $data['type'])->first();
 
         if ($this->hasField($sectionType, SectionFieldEnum::TITLE->value)) {
@@ -461,6 +459,9 @@ class SectionService
         }
         if ($this->hasField($sectionType, SectionFieldEnum::SHORT_DESCRIPTION->value)) {
             $content['short_description'] = $this->prepareContentTranslator($data, 'short_description');
+        }
+        if ($this->hasField($sectionType, SectionFieldEnum::CONTENT->value)) {
+            $content['content'] = $this->prepareContentTranslator($data, 'content');
         }
 
         if ($this->hasField($sectionType, SectionFieldEnum::BUTTONS->value)) {

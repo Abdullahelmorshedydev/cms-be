@@ -637,9 +637,38 @@
                 const queryParams = new URLSearchParams();
                 // Note: The API already loads 'image' by default, but we'll ensure all media is available
 
-                const response = await fetch(`${API_BASE_URL}${endpoint}`);
+                // Add timeout and proper error handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+                let response;
+                try {
+                    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                        signal: controller.signal,
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    clearTimeout(timeoutId);
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    if (fetchError.name === 'AbortError') {
+                        throw new Error(`Request timeout while fetching ${modelType}`);
+                    }
+                    throw new Error(`Network error while fetching ${modelType}: ${fetchError.message}`);
+                }
+
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch ${modelType}`);
+                    // If it's a 500 error, don't retry - just show empty list
+                    if (response.status >= 500) {
+                        console.error(`Server error (${response.status}) while fetching ${modelType}. Showing empty list.`);
+                        models = [];
+                        modelsCache[cacheKey] = models; // Cache empty result to prevent repeated calls
+                        renderAvailableModels(uniqueId, [], modelType);
+                        return;
+                    }
+                    throw new Error(`Failed to fetch ${modelType}: ${response.status} ${response.statusText}`);
                 }
 
                 const data = await response.json();
@@ -697,12 +726,21 @@
             renderAvailableModels(uniqueId, filteredModels, modelType);
                 } catch (error) {
                     console.error('Error loading models:', error);
-                    availableList.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="mdi mdi-alert-circle me-2"></i>
-                            {{ __('custom.messages.retrieved_failed') }}
-                        </div>
-                    `;
+                    // Cache empty result to prevent repeated failed calls
+                    const cacheKey = `${modelType}_all`;
+                    if (!modelsCache[cacheKey]) {
+                        modelsCache[cacheKey] = [];
+                    }
+                    const availableList = document.getElementById(`available-models-${uniqueId}`);
+                    if (availableList) {
+                        availableList.innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="mdi mdi-alert-circle me-2"></i>
+                                {{ __('custom.messages.retrieved_failed') }}
+                                <br><small>${error.message || ''}</small>
+                            </div>
+                        `;
+                    }
                 }
     }
 

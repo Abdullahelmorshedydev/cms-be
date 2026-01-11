@@ -1,16 +1,16 @@
 @php
     $isSubsection = $isSubsection ?? false;
     $subIndex = $subIndex ?? null;
-    $namePrefix = $isSubsection 
+    $namePrefix = $isSubsection
         ? "sections[{$sectionIndex}][sub_sections][{$subIndex}][content]"
         : "sections[{$sectionIndex}][content]";
     $buttonPrefix = $isSubsection
         ? "sections[{$sectionIndex}][sub_sections][{$subIndex}]"
         : "sections[{$sectionIndex}]";
-    
+
     // Check section type fields to determine what media inputs are needed
     $sectionTypeFields = [];
-    if ($section && $section->sectionTypes && $section->sectionTypes->count() > 0) {
+    if ($section && $section->sectionTypes && $section->sectionTypes()->count() > 0) {
         foreach ($section->sectionTypes as $sectionType) {
             if ($sectionType->fields && is_array($sectionType->fields)) {
                 $sectionTypeFields = array_merge($sectionTypeFields, $sectionType->fields);
@@ -18,15 +18,15 @@
         }
     }
     $sectionTypeFields = array_unique($sectionTypeFields);
-    
+
     // Default section types that typically need images
     $imageSectionTypes = ['hero', 'cta_banner', 'cards_grid'];
-    
+
     $needsImage = in_array('image', $sectionTypeFields) || (empty($sectionTypeFields) && in_array($section->type ?? '', $imageSectionTypes));
     $needsVideo = in_array('video', $sectionTypeFields);
     $needsIcon = in_array('icon', $sectionTypeFields);
     $needsGallery = in_array('gallery', $sectionTypeFields);
-    
+
     // Get existing media
     // Try to find by collection_name first, then fallback to device only
     $desktopImage = null;
@@ -36,23 +36,23 @@
         $desktopImage = $section->images->where('device', 'desktop')
             ->where('collection_name', 'image_desktop')
             ->first();
-        
+
         // If not found, get first desktop image (fallback)
         if (!$desktopImage) {
             $desktopImage = $section->images->where('device', 'desktop')->first();
         }
-        
+
         // Try to find by collection_name first
         $mobileImage = $section->images->where('device', 'mobile')
             ->where('collection_name', 'image_mobile')
             ->first();
-        
+
         // If not found, get first mobile image (fallback)
         if (!$mobileImage) {
             $mobileImage = $section->images->where('device', 'mobile')->first();
         }
     }
-    
+
     $desktopVideo = null;
     $mobileVideo = null;
     if ($section && $section->videos) {
@@ -60,13 +60,13 @@
             ->filter(function($vid) {
                 return !$vid->collection_name || $vid->collection_name === 'video_desktop';
             })->first();
-        
+
         $mobileVideo = $section->videos->where('device', 'mobile')
             ->filter(function($vid) {
                 return !$vid->collection_name || $vid->collection_name === 'video_mobile';
             })->first();
     }
-    
+
     $desktopPoster = null;
     $mobilePoster = null;
     if ($section && $section->images) {
@@ -74,13 +74,13 @@
             ->filter(function($img) {
                 return $img->collection_name === 'video_poster_desktop';
             })->first();
-        
+
         $mobilePoster = $section->images->where('device', 'mobile')
             ->filter(function($img) {
                 return $img->collection_name === 'video_poster_mobile';
             })->first();
     }
-    
+
     $icon = $section?->icon;
     $galleryItems = collect();
     if ($section && $section->images) {
@@ -161,6 +161,7 @@
             'sectionIndex' => $sectionIndex,
             'isSubsection' => $isSubsection ?? false,
             'subIndex' => $subIndex ?? null,
+            'locales' => $locales,
         ])
 @endswitch
 

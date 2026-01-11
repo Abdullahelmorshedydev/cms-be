@@ -83,7 +83,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 }, $errorMessages);
             }
 
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_UNPROCESSABLE_ENTITY,
                     errors: $translatedErrors,
@@ -100,24 +100,31 @@ return Application::configure(basePath: dirname(__DIR__))
         // Access Denied (403)
         $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
             $message = $e->getMessage() ?: __('custom.exceptions.forbidden');
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_FORBIDDEN,
                     message: $message
                 );
             } else {
-                // Check if it's a site route or dashboard route
-                if ($request->is('*dashboard*')) {
-                    return response()->view('admin.errors.403', ['message' => $message], 403);
+                try {
+                    // Check if it's a site route or dashboard route
+                    if ($request->is('*dashboard*')) {
+                        return response()->view('admin.errors.403', ['message' => $message], 403);
+                    }
+                    return response()->view('site.errors.403', ['message' => $message], 403);
+                } catch (\Exception $viewException) {
+                    return apiResponse(
+                        code: Response::HTTP_FORBIDDEN,
+                        message: $message
+                    );
                 }
-                return response()->view('site.errors.403', ['message' => $message], 403);
             }
         });
 
         // Authentication Exception (401)
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             $message = __('custom.exceptions.unauthorized');
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_UNAUTHORIZED,
                     message: $message
@@ -140,16 +147,23 @@ return Application::configure(basePath: dirname(__DIR__))
         // Model Not Found (404)
         $exceptions->render(function (ModelNotFoundException $e, Request $request) {
             $message = __('custom.exceptions.model_not_found');
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_NOT_FOUND,
                     message: $message
                 );
             } else {
-                if ($request->is('*dashboard*')) {
-                    return response()->view('admin.errors.404', ['message' => $message], 404);
+                try {
+                    if ($request->is('*dashboard*')) {
+                        return response()->view('admin.errors.404', ['message' => $message], 404);
+                    }
+                    return response()->view('site.errors.404', ['message' => $message], 404);
+                } catch (\Exception $viewException) {
+                    return apiResponse(
+                        code: Response::HTTP_NOT_FOUND,
+                        message: $message
+                    );
                 }
-                return response()->view('site.errors.404', ['message' => $message], 404);
             }
         });
 
@@ -165,16 +179,23 @@ return Application::configure(basePath: dirname(__DIR__))
             ]);
 
             $message = __('custom.exceptions.not_found');
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_NOT_FOUND,
                     message: $message
                 );
             } else {
-                if ($request->is('*dashboard*')) {
-                    return response()->view('admin.errors.404', ['message' => $message], 404);
+                try {
+                    if ($request->is('*dashboard*')) {
+                        return response()->view('admin.errors.404', ['message' => $message], 404);
+                    }
+                    return response()->view('site.errors.404', ['message' => $message], 404);
+                } catch (\Exception $viewException) {
+                    return apiResponse(
+                        code: Response::HTTP_NOT_FOUND,
+                        message: $message
+                    );
                 }
-                return response()->view('site.errors.404', ['message' => $message], 404);
             }
         });
 
@@ -183,7 +204,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $retryAfter = $e->getHeaders()['Retry-After'] ?? 60;
             $message = __('custom.exceptions.throttle_message', ['seconds' => $retryAfter]);
 
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_TOO_MANY_REQUESTS,
                     message: $message
@@ -191,31 +212,57 @@ return Application::configure(basePath: dirname(__DIR__))
                             'Retry-After' => $retryAfter
                         ]);
             } else {
-                if ($request->is('*dashboard*')) {
-                    return response()->view('admin.errors.429', ['message' => $message], 429);
+                try {
+                    if ($request->is('*dashboard*')) {
+                        return response()->view('admin.errors.429', ['message' => $message], 429);
+                    }
+                    return response()->view('site.errors.429', ['message' => $message], 429);
+                } catch (\Exception $viewException) {
+                    return apiResponse(
+                        code: Response::HTTP_TOO_MANY_REQUESTS,
+                        message: $message
+                    )->withHeaders(['Retry-After' => $retryAfter]);
                 }
-                return response()->view('site.errors.429', ['message' => $message], 429);
             }
         });
 
         // Method Not Allowed (405)
         $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
             $message = __('custom.exceptions.method_not_allowed');
-            if ($request->ajax() || $request->expectsJson()) {
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_METHOD_NOT_ALLOWED,
                     message: $message
                 );
             } else {
-                if ($request->is('*dashboard*')) {
-                    return response()->view('admin.errors.405', ['message' => $message], 405);
+                try {
+                    if ($request->is('*dashboard*')) {
+                        return response()->view('admin.errors.405', ['message' => $message], 405);
+                    }
+                    return response()->view('site.errors.405', ['message' => $message], 405);
+                } catch (\Exception $viewException) {
+                    return apiResponse(
+                        code: Response::HTTP_METHOD_NOT_ALLOWED,
+                        message: $message
+                    );
                 }
-                return response()->view('site.errors.405', ['message' => $message], 405);
             }
         });
 
         // General Exception Handler (500)
         $exceptions->render(function (\Exception $e, Request $request) {
+            // Prevent infinite loops - if this is a view exception, return JSON immediately
+            if ($e instanceof \InvalidArgumentException && str_contains($e->getMessage(), 'View') && str_contains($e->getMessage(), 'not found')) {
+                \Log::error('View not found in error handler - preventing infinite loop', [
+                    'view_error' => $e->getMessage(),
+                    'original_request' => $request->fullUrl()
+                ]);
+                return apiResponse(
+                    code: Response::HTTP_INTERNAL_SERVER_ERROR,
+                    message: __('custom.exceptions.internal_server_error')
+                );
+            }
+
             // Log the exception
             \Log::error('Exception occurred', [
                 'message' => $e->getMessage(),
@@ -229,16 +276,28 @@ return Application::configure(basePath: dirname(__DIR__))
                 ? __('custom.exceptions.internal_server_error')
                 : $e->getMessage();
 
-            if ($request->ajax() || $request->expectsJson()) {
+            // Always return JSON for API routes to prevent view rendering issues
+            if ($request->ajax() || $request->expectsJson() || $request->is('api/*') || $request->is('*/api/*')) {
                 return apiResponse(
                     code: Response::HTTP_INTERNAL_SERVER_ERROR,
                     message: $message
                 );
             } else {
-                if ($request->is('*dashboard*')) {
-                    return response()->view('admin.errors.500', ['message' => $message], 500);
+                try {
+                    if ($request->is('*dashboard*')) {
+                        return response()->view('admin.errors.500', ['message' => $message], 500);
+                    }
+                    return response()->view('site.errors.500', ['message' => $message], 500);
+                } catch (\Exception $viewException) {
+                    // If view doesn't exist, return JSON to prevent infinite loop
+                    \Log::error('Error view not found, falling back to JSON response', [
+                        'view_exception' => $viewException->getMessage()
+                    ]);
+                    return apiResponse(
+                        code: Response::HTTP_INTERNAL_SERVER_ERROR,
+                        message: $message
+                    );
                 }
-                return response()->view('site.errors.500', ['message' => $message], 500);
             }
         });
     })->create();

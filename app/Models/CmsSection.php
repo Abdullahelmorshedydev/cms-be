@@ -37,20 +37,9 @@ class CmsSection extends Model
         'disabled' => 'boolean',
     ];
 
-    protected $with = [
-        'sections',
-        'models',
-        'media',
-        'image',
-        'images',
-        'video',
-        'videos',
-        'file',
-        'files',
-        'icon',
-        'icons',
-        'sectionTypes'
-    ];
+    // REMOVED ALL automatic eager loading to prevent infinite loops and memory exhaustion
+    // All relationships should be loaded explicitly when needed using ->with() or ->load()
+    protected $with = [];
 
     public function sections()
     {
@@ -71,9 +60,20 @@ class CmsSection extends Model
     {
         $models = [];
         $this->models->sortBy('order')->each(function ($model) use (&$models) {
-            $model->model?->load('images');
-            if ($model->model)
+            if ($model->model) {
+                // Only load images if the model uses HasMedia trait
+                // Page model doesn't have images relationship, so check trait usage first
+                $traits = class_uses_recursive(get_class($model->model));
+                if (isset($traits[\App\Traits\HasMedia::class])) {
+                    try {
+                        $model->model->load('images');
+                    } catch (\Exception $e) {
+                        // If loading images fails, just continue without it
+                        // This prevents errors for models that don't have images relationship
+                    }
+                }
                 $models[] = $model->model;
+            }
         })->values();
         return $models;
     }
