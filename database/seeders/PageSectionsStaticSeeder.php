@@ -33,6 +33,20 @@ class PageSectionsStaticSeeder extends Seeder
         );
 
         $this->createSectionType(
+            'title-subtitle-video-button',
+            [
+                'en' => 'Title, Subtitle, Video & Button',
+                'ar' => 'عنوان و تصنيف و فيديو و زر'
+            ],
+            [
+                SectionFieldEnum::TITLE->value,
+                SectionFieldEnum::SUBTITLE->value,
+                SectionFieldEnum::VIDEO->value,
+                SectionFieldEnum::BUTTON->value
+            ]
+        );
+
+        $this->createSectionType(
             'title-description',
             [
                 'en' => 'Title & Description',

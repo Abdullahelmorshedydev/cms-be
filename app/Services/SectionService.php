@@ -8,6 +8,7 @@ use App\Enums\SectionModelTypeEnum;
 use App\Enums\SectionParentTypeEnum;
 use App\HelperClasses\CmsHelpers;
 use App\Models\Page;
+use App\Models\Partner;
 use App\Models\Project;
 use App\Models\SectionType;
 use App\Models\Service;
@@ -299,6 +300,7 @@ class SectionService
             (new Service())->getTable() => Service::class,
             (new Project())->getTable() => Project::class,
             (new Tag())->getTable() => Tag::class,
+            (new Partner())->getTable() => Partner::class,
             default => null,
         };
     }
@@ -310,6 +312,7 @@ class SectionService
                     (new Service())->getTable() => Service::class,
                     (new Project())->getTable() => Project::class,
                     (new Tag())->getTable() => Tag::class,
+                    (new Partner())->getTable() => Partner::class,
                     default => $deletedModel['model_type'],
                 },
                 'model_id' => $deletedModel['model_id'],
