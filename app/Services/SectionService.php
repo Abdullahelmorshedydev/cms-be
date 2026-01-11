@@ -116,6 +116,11 @@ class SectionService
             $data['parent_id'] = $oldSectionData->parent_id;
         elseif ($type === 'child')
             $data['section_id'] = $oldSectionData->section_id;
+        
+        // Preserve existing name if not provided
+        if (!isset($data['name']) || empty($data['name'])) {
+            $data['name'] = $oldSectionData->name;
+        }
 
         $data = $this->prepareSectionData($data);
         $this->validateSection($data, true)->validate();
@@ -344,9 +349,21 @@ class SectionService
     }
     private function prepareSectionData(array $data): array
     {
-        $data['parent_id'] = $data['parent_id'] ?? request('page_id');
-        $data['parent_type'] = CmsHelpers::convertToClassName($data['parent_type'] ?? 'page');
-        $data['name'] = Str::slug($data['name']);
+        // Only set parent_id and parent_type if this is NOT a subsection (i.e., section_id is not set)
+        // Subsections use section_id to link to their parent section, not parent_id/parent_type
+        if (!isset($data['section_id'])) {
+            $data['parent_id'] = $data['parent_id'] ?? request('page_id');
+            $data['parent_type'] = CmsHelpers::convertToClassName($data['parent_type'] ?? 'page');
+        }
+        
+        // Handle name field - convert to slug if provided, or generate from type if not
+        if (isset($data['name']) && !empty($data['name'])) {
+            $data['name'] = Str::slug($data['name']);
+        } elseif (!isset($data['id'])) {
+            // For new sections/subsections, generate name from type
+            $data['name'] = isset($data['type']) ? Str::slug($data['type'] . '-' . time()) : 'section-' . time();
+        }
+        // For updates without name, it should be preserved in update() method before calling prepareSectionData
         if ($this->hasButton($data)) {
             foreach (LaravelLocalization::getSupportedLanguagesKeys() as $locale) {
                 $data['button_text'][$locale] = $data["button_text"][$locale] ?? null;

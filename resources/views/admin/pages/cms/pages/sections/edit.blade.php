@@ -1525,6 +1525,20 @@
         // Form inputs are already updated via updateFormInputs
         // This is just a safety check and localStorage fallback
 
+        // Verify subsection image inputs are present in form
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        // Debug: Check for subsection image inputs
+        let hasSubsectionImages = false;
+        for (let [key, value] of formData.entries()) {
+            if (key.includes('sub_sections') && key.includes('image') && value instanceof File) {
+                hasSubsectionImages = true;
+                console.log('Found subsection image:', key, value.name);
+                break;
+            }
+        }
+
         document.querySelectorAll('.models-manager-block').forEach(manager => {
             const uniqueId = manager.id.replace('models-manager-', '');
             const selectedList = document.getElementById(`selected-models-${uniqueId}`);
