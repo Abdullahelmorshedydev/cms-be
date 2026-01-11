@@ -33,6 +33,19 @@ class PageSectionsStaticSeeder extends Seeder
         );
 
         $this->createSectionType(
+            'title-subtitle-image',
+            [
+                'en' => 'Title, Subtitle & Image',
+                'ar' => 'عنوان و تصنيف و صورة'
+            ],
+            [
+                SectionFieldEnum::TITLE->value,
+                SectionFieldEnum::SUBTITLE->value,
+                SectionFieldEnum::IMAGE->value
+            ]
+        );
+
+        $this->createSectionType(
             'title-subtitle-video-button',
             [
                 'en' => 'Title, Subtitle, Video & Button',
@@ -442,6 +455,21 @@ class PageSectionsStaticSeeder extends Seeder
                                 'ar' => 'بالبحث عن انقطاعات طبيعية في المحتوى وترتيب الوظائف، سوف نضمن لك ان تتواصل مع الموقع بطبيعة في اي جهاز.'
                             ]
                         ]
+                    ],
+                    [
+                        'name' => 'service-details-4',
+                        'type' => 'title-subtitle-image',
+                        'order' => '4',
+                        'content' => [
+                            'title' => [
+                                'en' => 'Content & Functionality.',
+                                'ar' => 'المحتوى والوظائف.'
+                            ],
+                            'subtitle' => [
+                                'en' => 'By finding natural breakpoints within the content and prioritising functionality, we\'ll make sure your site responds seamlessly on any device.',
+                                'ar' => 'بالبحث عن انقطاعات طبيعية في المحتوى وترتيب الوظائف، سوف نضمن لك ان تتواصل مع الموقع بطبيعة في اي جهاز.'
+                            ]
+                        ]
                     ]
                 ]
             ],
@@ -529,11 +557,14 @@ class PageSectionsStaticSeeder extends Seeder
                 $existingSection->update($sectionDataToSave);
                 $existingSection->sectionTypes()->sync($type->id);
                 foreach ($sectionData['sub_sections'] ?? [] as $subSectionData) {
+                    $subSectionType = SectionType::where('slug', $subSectionData['type'])->first();
+                    if (!$subSectionType)
+                        continue;
+
                     $subSectionDataToSave = [
                         'name' => $subSectionData['name'],
                         'content' => $subSectionData['content'],
-                        'parent_id' => $existingSection->id,
-                        'parent_type' => CmsSection::class,
+                        'section_id' => $existingSection->id,
                         'order' => $subSectionData['order'],
                         'disabled' => false,
                         'button_text' => isset($subSectionData['button_text']) ? $subSectionData['button_text'] : null,
@@ -543,23 +574,25 @@ class PageSectionsStaticSeeder extends Seeder
                     $subSection = CmsSection::updateOrCreate(
                         [
                             'name' => $subSectionData['name'],
-                            'parent_type' => CmsSection::class,
-                            'parent_id' => $existingSection->id
+                            'section_id' => $existingSection->id
                         ],
                         $subSectionDataToSave
                     );
-                    $subSection->sectionTypes()->sync($type->id);
+                    $subSection->sectionTypes()->sync($subSectionType->id);
                 }
             } else {
                 $sectionDataToSave['created_at'] = now();
                 $createdSection = CmsSection::create($sectionDataToSave);
                 $createdSection->sectionTypes()->sync($type->id);
                 foreach ($sectionData['sub_sections'] ?? [] as $subSectionData) {
+                    $subSectionType = SectionType::where('slug', $subSectionData['type'])->first();
+                    if (!$subSectionType)
+                        continue;
+
                     $subSectionDataToSave = [
                         'name' => $subSectionData['name'],
                         'content' => $subSectionData['content'],
-                        'parent_id' => $createdSection->id,
-                        'parent_type' => CmsSection::class,
+                        'section_id' => $createdSection->id,
                         'order' => $subSectionData['order'],
                         'disabled' => false,
                         'button_text' => isset($subSectionData['button_text']) ? $subSectionData['button_text'] : null,
@@ -569,12 +602,11 @@ class PageSectionsStaticSeeder extends Seeder
                     $subSection = CmsSection::updateOrCreate(
                         [
                             'name' => $subSectionData['name'],
-                            'parent_type' => CmsSection::class,
-                            'parent_id' => $createdSection->id
+                            'section_id' => $createdSection->id
                         ],
                         $subSectionDataToSave
                     );
-                    $subSection->sectionTypes()->sync($type->id);
+                    $subSection->sectionTypes()->sync($subSectionType->id);
                 }
             }
         }
