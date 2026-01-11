@@ -23,6 +23,7 @@ class ServiceController extends Controller
             $data = $request->all();
             unset($data['_token']);
             unset($data['limit']);
+            unset($data['page']);
 
             $response = $this->service->index(
                 $data,

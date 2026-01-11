@@ -26,6 +26,7 @@ class FormController extends Controller
             $requestData = $request->all();
             unset($requestData['_token']);
             unset($requestData['limit']);
+            unset($requestData['page']);
             if ($type)
                 $requestData['type'] = $type;
 
