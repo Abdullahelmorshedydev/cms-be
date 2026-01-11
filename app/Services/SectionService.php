@@ -145,6 +145,12 @@ class SectionService
 
         if ($this->hasField($sectionType, SectionFieldEnum::VIDEO->value))
             $this->addMultipleVideosToSection($section, $data['videos'] ?? [], $data['images'] ?? [], $data['remove_videos_ids'] ?? [], $data['remove_images_ids'] ?? []);
+        
+        // Handle deleted subsections first
+        if (isset($data['deleted_subsection_ids']) && is_array($data['deleted_subsection_ids']) && count($data['deleted_subsection_ids']) > 0) {
+            $this->deleteSubsections($data['deleted_subsection_ids']);
+        }
+        
         if ($this->hasChildSection($data))
             $this->addMultipleChildSection($data['sub_sections'], $section->id);
         $section->refresh();
@@ -711,5 +717,32 @@ class SectionService
         $this->mediaService->removeFiles($section, null, true);
         $this->mediaService->removeVideos($section, null, true);
         $this->mediaService->removeIcons($section, null, true);
+    }
+    
+    /**
+     * Delete subsections by their IDs
+     * 
+     * @param array $subsectionIds Array of subsection IDs to delete
+     * @return void
+     */
+    protected function deleteSubsections(array $subsectionIds)
+    {
+        if (empty($subsectionIds)) {
+            return;
+        }
+        
+        // Get all subsections to delete using repository
+        $subsections = $this->repository->findManyByColumn('id', $subsectionIds);
+        
+        foreach ($subsections as $subsection) {
+            // Remove all media associated with the subsection
+            $this->removeAllMediaForSection($subsection);
+            
+            // Delete subsection models/relations
+            $subsection->models()->delete();
+            
+            // Delete the subsection itself
+            $subsection->delete();
+        }
     }
 }

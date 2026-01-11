@@ -1173,6 +1173,7 @@ return [
         'created_failed' => 'Created Failed',
         'subsection_add_rule' => 'You can add a subsection only if this section already has at least one subsection.',
         'no_sections_found' => 'No sections found for this page.',
+        'at_least_one_subsection_required' => 'At least one subsection is required.',
         'unsupported_section_type_description' => 'This section type is not fully supported. You can edit the raw content fields below.',
         'edit_as_json' => 'Edit as JSON array',
         'added_to_cart_success' => 'Added To Cart Successfully',

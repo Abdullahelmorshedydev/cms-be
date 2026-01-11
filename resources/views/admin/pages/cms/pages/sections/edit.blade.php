@@ -134,9 +134,15 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4>{{ __('custom.words.edit') }} {{ __('custom.words.sections') }} - {{ $page->name }}</h4>
-            <a href="{{ route('dashboard.cms.pages.index') }}" class="btn btn-secondary">
-                {{ __('custom.words.back') }}
-            </a>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary" id="addSectionBtn">
+                    <i class="mdi mdi-plus me-1"></i>
+                    {{ __('custom.words.add') }} {{ __('custom.words.section') }}
+                </button>
+                <a href="{{ route('dashboard.cms.pages.index') }}" class="btn btn-secondary">
+                    {{ __('custom.words.back') }}
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <form action="{{ route('dashboard.cms.sections.group.update') }}" method="POST" enctype="multipart/form-data" id="sectionsForm">
@@ -198,14 +204,20 @@
                                                         $subSectionContent = $subSection && $subSection->content ? (is_string($subSection->content) ? json_decode($subSection->content, true) : $subSection->content) : [];
                                     @endphp
                                                     <div class="accordion-item mb-2 subsection-card" data-subsection-id="{{ $subSection->id }}">
-                                                        <h2 class="accordion-header" id="subsection-heading-{{ $sectionIndex }}-{{ $subIndex }}">
-                                                            <button class="accordion-button collapsed" type="button"
+                                                        <h2 class="accordion-header d-flex align-items-center" id="subsection-heading-{{ $sectionIndex }}-{{ $subIndex }}">
+                                                            <button class="accordion-button collapsed flex-grow-1" type="button"
                                                                 data-bs-toggle="collapse"
                                                                 data-bs-target="#subsection-collapse-{{ $sectionIndex }}-{{ $subIndex }}"
                                                                 aria-expanded="false"
                                                                 aria-controls="subsection-collapse-{{ $sectionIndex }}-{{ $subIndex }}">
                                                                 <strong>{{ __('custom.words.subsection') }} {{ $subIndex + 1 }}</strong>
                                                                 <small class="text-muted ms-2">{{ $subSection->sectionTypes()->first()->slug }}</small>
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger remove-subsection-btn ms-2 me-2" 
+                                                                data-section-index="{{ $sectionIndex }}"
+                                                                data-subsection-id="{{ $subSection->id }}"
+                                                                title="{{ __('custom.words.remove') }} {{ __('custom.words.subsection') }}">
+                                                                <i class="mdi mdi-delete"></i>
                                                             </button>
                                                         </h2>
                                                         <div id="subsection-collapse-{{ $sectionIndex }}-{{ $subIndex }}"
@@ -271,16 +283,71 @@
     </div>
 </div>
 
+{{-- Template for new section (hidden) --}}
+<div id="section-template" style="display: none;">
+    <div class="accordion-item mb-3 section-card" data-section-id="" data-temp-section="true">
+        <h2 class="accordion-header" id="section-heading-template">
+            <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#section-collapse-template"
+                aria-expanded="false"
+                aria-controls="section-collapse-template">
+                <strong>New Section</strong>
+                <small class="text-muted ms-2 section-type-display">Select Type</small>
+            </button>
+        </h2>
+        <div id="section-collapse-template"
+            class="accordion-collapse collapse"
+            aria-labelledby="section-heading-template"
+            data-bs-parent="#sectionsAccordion">
+            <div class="accordion-body">
+                <div class="mb-3">
+                    <label class="form-label">{{ __('custom.words.section') }} {{ __('custom.words.type') }}</label>
+                    <select class="form-select section-type-select" name="" required>
+                        <option value="">{{ __('custom.words.select') }} {{ __('custom.words.type') }}</option>
+                        @php
+                            $sectionTypes = \App\Models\SectionType::all();
+                        @endphp
+                        @foreach($sectionTypes as $type)
+                            <option value="{{ $type->slug }}">{{ is_array($type->name) ? ($type->name[app()->getLocale()] ?? $type->name['en'] ?? $type->slug) : $type->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <input type="hidden" class="section-id-input" name="" value="">
+                <input type="hidden" class="section-name-input" name="" value="">
+                <input type="hidden" class="section-type-input" name="" value="">
+                <input type="hidden" class="section-order-input" name="" value="">
+                <input type="hidden" class="section-has-button-input" name="" value="0">
+                <input type="hidden" class="section-has-relation-input" name="" value="0">
+                <div class="section-content-editor">
+                    {{-- Content will be dynamically inserted based on type --}}
+                </div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-primary add-subsection-btn" style="display: none;">
+                        <i class="mdi mdi-plus me-1"></i>
+                        {{ __('custom.words.add') }} {{ __('custom.words.subsection') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Template for new subsection (hidden) --}}
 <div id="subsection-template" style="display: none;">
     <div class="accordion-item mb-2 subsection-card" data-temp-subsection="true">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button"
+        <h2 class="accordion-header d-flex align-items-center">
+            <button class="accordion-button collapsed flex-grow-1" type="button"
                 data-bs-toggle="collapse"
                 data-bs-target=""
                 aria-expanded="false">
                 <strong>{{ __('custom.words.subsection') }} <span class="subsection-number"></span></strong>
                 <small class="text-muted ms-2 subsection-type-display"></small>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-subsection-btn ms-2 me-2" 
+                data-section-index=""
+                title="{{ __('custom.words.remove') }} {{ __('custom.words.subsection') }}">
+                <i class="mdi mdi-delete"></i>
             </button>
         </h2>
         <div class="accordion-collapse collapse">
@@ -300,6 +367,86 @@
 
 @section('js')
 <script>
+    // Initialize deleted subsections tracking
+    window.deletedSubsectionIds = [];
+
+    // Update deleted subsections input helper function
+    function updateDeletedSubsectionsInput(sectionIndex) {
+        if (!window.deletedSubsectionIds || !window.deletedSubsectionIds[sectionIndex] || window.deletedSubsectionIds[sectionIndex].length === 0) {
+            // Remove container if no deleted IDs
+            const container = document.getElementById(`deleted-subsections-${sectionIndex}`);
+            if (container) {
+                container.remove();
+            }
+            return;
+        }
+
+        // Find or create container for deleted subsection IDs
+        let container = document.getElementById(`deleted-subsections-${sectionIndex}`);
+        if (!container) {
+            container = document.createElement('div');
+            container.id = `deleted-subsections-${sectionIndex}`;
+            container.style.display = 'none';
+            const form = document.getElementById('sectionsForm');
+            if (form) {
+                form.appendChild(container);
+            }
+        }
+
+        // Update hidden inputs
+        container.innerHTML = '';
+        window.deletedSubsectionIds[sectionIndex].forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `sections[${sectionIndex}][deleted_subsection_ids][]`;
+            input.value = id;
+            container.appendChild(input);
+        });
+    }
+
+    // Remove subsection function - must be defined globally for onclick handlers
+    window.removeSubsection = function(button) {
+        const sectionIndex = button.dataset.sectionIndex;
+        const subsectionCard = button.closest('.subsection-card');
+        if (!subsectionCard) return;
+        
+        const sectionCard = subsectionCard.closest('.section-card');
+        const subsectionsAccordion = subsectionCard.closest('.accordion');
+        
+        if (!subsectionsAccordion) return;
+
+        // Count existing subsections (excluding temp ones)
+        const existingSubsections = subsectionsAccordion.querySelectorAll('.subsection-card:not([data-temp-subsection="true"])');
+        
+        // Validate: must have at least one subsection
+        if (existingSubsections.length <= 1) {
+            alert('{{ __('custom.messages.at_least_one_subsection_required') ?? "At least one subsection is required" }}');
+            return;
+        }
+
+        // Get subsection ID if it exists (for existing subsections to be deleted)
+        const subsectionId = subsectionCard.dataset.subsectionId;
+        if (subsectionId && subsectionId !== 'null' && subsectionId !== '') {
+            // Add to deleted subsections list
+            if (!window.deletedSubsectionIds) {
+                window.deletedSubsectionIds = [];
+            }
+            if (!window.deletedSubsectionIds[sectionIndex]) {
+                window.deletedSubsectionIds[sectionIndex] = [];
+            }
+            if (!window.deletedSubsectionIds[sectionIndex].includes(subsectionId)) {
+                window.deletedSubsectionIds[sectionIndex].push(subsectionId);
+            }
+            updateDeletedSubsectionsInput(sectionIndex);
+        }
+
+        // Remove from DOM
+        subsectionCard.remove();
+
+        // Update subsection numbers
+        updateSubsectionNumbers(subsectionsAccordion);
+    };
+
     // Initialize CKEditor for description fields
     function initializeCKEditors() {
         document.querySelectorAll('.section-description-editor').forEach(textarea => {
@@ -343,10 +490,139 @@
         // Wait a bit for accordion animations to complete
         setTimeout(initializeCKEditors, 300);
     });
+    
+    // Event delegation for remove subsection buttons (set up once, works for all buttons)
+    document.addEventListener('click', function(e) {
+        // Check if the clicked element or its parent is a remove button
+        const removeBtn = e.target.closest('.remove-subsection-btn');
+        if (!removeBtn) return;
+
+        // Prevent accordion toggle and default behavior
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        // Call the remove function
+        if (typeof window.removeSubsection === 'function') {
+            window.removeSubsection(removeBtn);
+        } else {
+            console.error('removeSubsection function not found');
+        }
+        
+        return false;
+    }, true); // Use capture phase to handle before accordion button
 
     // Re-initialize when accordions are expanded (for lazy loading)
     document.addEventListener('shown.bs.collapse', function(e) {
         setTimeout(initializeCKEditors, 100);
+    });
+
+
+    // Add Section functionality
+    document.getElementById('addSectionBtn')?.addEventListener('click', function() {
+        const sectionsAccordion = document.getElementById('sectionsAccordion');
+        if (!sectionsAccordion) return;
+
+        // Get existing sections count
+        const existingSections = sectionsAccordion.querySelectorAll('.section-card:not([data-temp-section="true"])');
+        const newSectionIndex = existingSections.length;
+
+        // Clone template
+        const template = document.getElementById('section-template');
+        if (!template) {
+            alert('Section template not found');
+            return;
+        }
+        const newSection = template.cloneNode(true);
+        newSection.id = '';
+        newSection.style.display = 'block';
+        newSection.removeAttribute('data-temp-section');
+
+        // Generate unique IDs
+        const collapseId = `section-collapse-${newSectionIndex}`;
+        const headingId = `section-heading-${newSectionIndex}`;
+        const targetId = `#${collapseId}`;
+
+        // Update accordion attributes
+        const accordionHeader = newSection.querySelector('.accordion-header');
+        accordionHeader.id = headingId;
+
+        const accordionButton = newSection.querySelector('.accordion-button');
+        accordionButton.setAttribute('data-bs-target', targetId);
+        accordionButton.setAttribute('aria-controls', collapseId);
+
+        const accordionCollapse = newSection.querySelector('.accordion-collapse');
+        accordionCollapse.id = collapseId;
+        accordionCollapse.setAttribute('aria-labelledby', headingId);
+        accordionCollapse.setAttribute('data-bs-parent', '#sectionsAccordion');
+
+        // Update input names
+        const sectionOrderInput = newSection.querySelector('.section-order-input');
+        const sectionHasButtonInput = newSection.querySelector('.section-has-button-input');
+        const sectionHasRelationInput = newSection.querySelector('.section-has-relation-input');
+        const sectionTypeSelect = newSection.querySelector('.section-type-select');
+
+        if (sectionOrderInput) {
+            sectionOrderInput.name = `sections[${newSectionIndex}][order]`;
+            sectionOrderInput.value = newSectionIndex;
+        }
+        if (sectionHasButtonInput) {
+            sectionHasButtonInput.name = `sections[${newSectionIndex}][has_button]`;
+        }
+        if (sectionHasRelationInput) {
+            sectionHasRelationInput.name = `sections[${newSectionIndex}][has_relation]`;
+        }
+        if (sectionTypeSelect) {
+            sectionTypeSelect.name = `sections[${newSectionIndex}][type]`;
+            sectionTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                if (!selectedType) return;
+
+                // Update hidden inputs
+                const sectionTypeInput = newSection.querySelector('.section-type-input');
+                const sectionNameInput = newSection.querySelector('.section-name-input');
+                if (sectionTypeInput) {
+                    sectionTypeInput.name = `sections[${newSectionIndex}][type]`;
+                    sectionTypeInput.value = selectedType;
+                }
+                if (sectionNameInput) {
+                    sectionNameInput.name = `sections[${newSectionIndex}][name]`;
+                    sectionNameInput.value = selectedType;
+                }
+
+                // Update display
+                const typeDisplay = newSection.querySelector('.section-type-display');
+                if (typeDisplay) {
+                    typeDisplay.textContent = selectedType;
+                }
+
+                // Render content editor based on type
+                const contentEditor = newSection.querySelector('.section-content-editor');
+                if (contentEditor) {
+                    contentEditor.innerHTML = getSectionEditorHTML(selectedType, newSectionIndex, null, false);
+                }
+
+                // Show add subsection button
+                const addSubsectionBtn = newSection.querySelector('.add-subsection-btn');
+                if (addSubsectionBtn) {
+                    addSubsectionBtn.style.display = '';
+                    addSubsectionBtn.dataset.sectionIndex = newSectionIndex;
+                    addSubsectionBtn.dataset.sectionType = selectedType;
+                }
+
+                // Initialize CKEditor
+                setTimeout(() => {
+                    initializeCKEditors();
+                }, 200);
+            });
+        }
+
+        // Insert into accordion
+        sectionsAccordion.appendChild(newSection);
+
+        // Remove empty state if exists
+        const emptyState = sectionsAccordion.querySelector('.alert-info');
+        if (emptyState) emptyState.remove();
     });
 
     // Add Subsection functionality
@@ -419,12 +695,16 @@
                 initializeCKEditors();
             }, 200);
 
-            // Enable add button if it was disabled
-            if (!this.closest('.section-card').querySelector('.add-subsection-btn').disabled) {
-                // Button is now enabled since we have at least one subsection
+            // Add remove button event listener and update attributes
+            // Update remove button data attributes (event delegation handles clicks)
+            const removeBtn = newSubsection.querySelector('.remove-subsection-btn');
+            if (removeBtn) {
+                removeBtn.dataset.sectionIndex = sectionIndex;
             }
         });
     });
+
+
 
     function createSubsectionsContainer(sectionCard, sectionIndex) {
         const container = document.createElement('div');
@@ -452,11 +732,49 @@
     }
 
     function updateSubsectionNumbers(container) {
-        const subsections = container.querySelectorAll('.subsection-card');
+        const subsections = container.querySelectorAll('.subsection-card:not([data-temp-subsection="true"])');
         subsections.forEach((subsection, index) => {
             const numberSpan = subsection.querySelector('.subsection-number');
             if (numberSpan) {
                 numberSpan.textContent = index + 1;
+            }
+            
+            // Update button text
+            const accordionButton = subsection.querySelector('.accordion-button');
+            if (accordionButton) {
+                const strong = accordionButton.querySelector('strong');
+                if (strong && strong.querySelector('.subsection-number')) {
+                    // Already has number span, it's updated above
+                } else if (strong) {
+                    // Update text if no number span
+                    const typeDisplay = subsection.querySelector('.subsection-type-display');
+                    const typeText = typeDisplay ? typeDisplay.textContent : '';
+                    strong.textContent = '{{ __('custom.words.subsection') }} ' + (index + 1);
+                    if (typeDisplay) {
+                        strong.appendChild(document.createTextNode(' '));
+                        strong.parentNode.insertBefore(typeDisplay, strong.nextSibling);
+                    }
+                }
+            }
+            
+            // Update input names and order values
+            const orderInput = subsection.querySelector('.subsection-order-input');
+            if (orderInput) {
+                const sectionCard = subsection.closest('.section-card');
+                const sectionIndex = sectionCard ? Array.from(document.querySelectorAll('.section-card')).indexOf(sectionCard) : 0;
+                orderInput.name = `sections[${sectionIndex}][sub_sections][${index}][order]`;
+                orderInput.value = index;
+                
+                // Update other inputs
+                const typeInput = subsection.querySelector('.subsection-type-input');
+                if (typeInput) {
+                    typeInput.name = `sections[${sectionIndex}][sub_sections][${index}][type]`;
+                }
+                
+                const typeSlugInput = subsection.querySelector('.subsection-type-slug-input');
+                if (typeSlugInput) {
+                    typeSlugInput.name = `sections[${sectionIndex}][sub_sections][${index}][type_slug]`;
+                }
             }
         });
     }
