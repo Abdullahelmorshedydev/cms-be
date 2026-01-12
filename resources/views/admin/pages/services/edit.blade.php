@@ -138,7 +138,7 @@
                         @if ($data['record']->image)
                             <div class="col-md-12 mt-3">
                                 <div class="form-floating form-floating-outline">
-                                    <img src="{{ $data['record']->image->url }}" alt="">
+                                    <img src="{{ $data['record']->image->url }}" alt="" style="width: 200px; height: 200px">
                                 </div>
                             </div>
                         @endif
