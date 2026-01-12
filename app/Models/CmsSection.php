@@ -37,10 +37,6 @@ class CmsSection extends Model
         'disabled' => 'boolean',
     ];
 
-    // REMOVED ALL automatic eager loading to prevent infinite loops and memory exhaustion
-    // All relationships should be loaded explicitly when needed using ->with() or ->load()
-    protected $with = [];
-
     public function sections()
     {
         return $this->hasMany(CmsSection::class, 'section_id', 'id')->orderBy('order', 'ASC');
@@ -61,15 +57,12 @@ class CmsSection extends Model
         $models = [];
         $this->models->sortBy('order')->each(function ($model) use (&$models) {
             if ($model->model) {
-                // Only load images if the model uses HasMedia trait
-                // Page model doesn't have images relationship, so check trait usage first
                 $traits = class_uses_recursive(get_class($model->model));
-                if (isset($traits[\App\Traits\HasMedia::class])) {
+                if (isset($traits[HasMedia::class])) {
                     try {
-                        $model->model->load('images');
+                        $model->model->load(['image', 'video']);
                     } catch (\Exception $e) {
-                        // If loading images fails, just continue without it
-                        // This prevents errors for models that don't have images relationship
+                        logger()->error($e->getMessage());
                     }
                 }
                 $models[] = $model->model;
