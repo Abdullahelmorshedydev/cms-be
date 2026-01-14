@@ -34,4 +34,14 @@ class SettingService extends BaseService
     {
         return parent::update($data, $value, $key, $callback);
     }
+
+    public function getWithoutGrouped($data = [], $with = [], $columns = ['*'], $order = ['id' => 'DESC'], $limit = 10)
+    {
+        return returnData(
+            [],
+            Response::HTTP_OK,
+            $this->repository->findByWith($data, $columns, $with, $order, $limit),
+            __('custom.messages.retrieved_success')
+        );
+    }
 }

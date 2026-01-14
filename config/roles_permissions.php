@@ -25,7 +25,8 @@ return [
                 'form-email' => ['show', 'edit', 'create', 'delete'],
                 'form-contact' => ['show', 'edit', 'delete', 'export'],
                 'page' => ['show'],
-                'section' => ['show', 'edit']
+                'section' => ['show', 'edit'],
+                'settings' => ['show', 'edit'],
             ]
         ]
     ]

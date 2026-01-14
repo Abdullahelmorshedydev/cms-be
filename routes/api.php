@@ -10,12 +10,11 @@ use App\Http\Controllers\API\ProjectController;
 use App\Http\Controllers\API\SectionController as SectionController;
 use App\Http\Controllers\API\ServiceCategoryController;
 use App\Http\Controllers\API\ServiceController;
+use App\Http\Controllers\API\SettingController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Middleware\APILocaleMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -59,3 +58,7 @@ Route::get('/partners', PartnerController::class)->name('partners');
 
 // Form
 Route::post('/forms', FormController::class)->name('form');
+
+// Settings
+Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+Route::get('/settings/{key}', [SettingController::class, 'show'])->name('settings.show');
